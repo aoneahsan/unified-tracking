@@ -54,7 +54,7 @@ async function loadAnalyticsProviders(): Promise<void> {
 async function loadErrorTrackingProviders(): Promise<void> {
   const providers = [
     { folder: 'sentry', file: 'sentry' },
-    { folder: 'firebase-crashlytics', file: 'crashlytics' },
+    { folder: 'firebase-crashlytics', file: 'firebase-crashlytics' },
     { folder: 'datadog', file: 'datadog' },
     { folder: 'bugsnag', file: 'bugsnag' },
     { folder: 'rollbar', file: 'rollbar' },

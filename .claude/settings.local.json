@@ -133,7 +133,16 @@
       "Bash(npm info:*)",
       "Bash(npm ls:*)",
       "Bash(yarn init:*)",
-      "Bash(yarn husky:*)"
+      "Bash(yarn husky:*)",
+      "Bash(for provider in firebase-crashlytics raygun appcenter)",
+      "Bash(do if [ ! -d \"/Volumes/Personal/01-code-work/ai-projects/01-capacitor/02-unified-tracking/src/providers/error-handling/$provider\" ])",
+      "Bash(then echo \"- $provider\")",
+      "Bash(fi)",
+      "Bash(done)",
+      "Bash(for file in \"vitest.config.ts\" \"README.md\" \"UnifiedTracking.podspec\" \"Package.swift\" \"bin/setup.js\")",
+      "Bash(do if [ ! -f \"/Volumes/Personal/01-code-work/ai-projects/01-capacitor/02-unified-tracking/$file\" ])",
+      "Bash(then echo \"- $file\")",
+      "Bash(for file in \"android/build.gradle\" \"android/variables.gradle\" \"android/proguard-rules.pro\")"
     ],
     "deny": []
   }
