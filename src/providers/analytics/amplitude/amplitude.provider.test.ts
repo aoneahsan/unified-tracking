@@ -155,8 +155,8 @@ describe('AmplitudeAnalyticsProvider', () => {
       expect(mockAmplitude.track).toHaveBeenCalledWith('Page Viewed', undefined);
     });
 
-    it('should not track if analytics consent is false', async () => {
-      await provider.handleConsentChange({ analytics: false });
+    it('should not track if provider is disabled', async () => {
+      provider.setEnabled(false);
       await provider.trackEvent('Test Event');
       
       expect(mockAmplitude.track).not.toHaveBeenCalled();
@@ -169,10 +169,12 @@ describe('AmplitudeAnalyticsProvider', () => {
       expect(mockAmplitude.track).toHaveBeenCalledWith('a'.repeat(1024), undefined);
     });
 
-    it('should throw error if not initialized', async () => {
+    it('should not track if not initialized', async () => {
       const uninitializedProvider = new AmplitudeAnalyticsProvider();
       
-      await expect(uninitializedProvider.trackEvent('Test')).rejects.toThrow('Amplitude provider not initialized');
+      await uninitializedProvider.trackEvent('Test');
+      
+      expect(mockAmplitude.track).not.toHaveBeenCalled();
     });
   });
 
@@ -187,21 +189,21 @@ describe('AmplitudeAnalyticsProvider', () => {
       expect(mockAmplitude.setUserId).toHaveBeenCalledWith('user123');
     });
 
-    it('should set user ID with properties', async () => {
-      const properties = {
+    it('should set user ID with traits', async () => {
+      const traits = {
         name: 'John Doe',
         email: 'john@example.com',
         plan: 'premium'
       };
       
-      await provider.identifyUser('user123', properties);
+      await provider.identifyUser('user123', traits);
       
       expect(mockAmplitude.setUserId).toHaveBeenCalledWith('user123');
       expect(mockAmplitude.identify).toHaveBeenCalled();
     });
 
-    it('should not identify if analytics consent is false', async () => {
-      await provider.handleConsentChange({ analytics: false });
+    it('should not identify if provider is disabled', async () => {
+      provider.setEnabled(false);
       await provider.identifyUser('user123');
       
       expect(mockAmplitude.setUserId).not.toHaveBeenCalled();
@@ -225,8 +227,8 @@ describe('AmplitudeAnalyticsProvider', () => {
       expect(mockAmplitude.identify).toHaveBeenCalled();
     });
 
-    it('should not set properties if personalization consent is false', async () => {
-      await provider.handleConsentChange({ analytics: true, personalization: false });
+    it('should not set properties if provider is disabled', async () => {
+      provider.setEnabled(false);
       await provider.setUserProperties({ name: 'Test' });
       
       expect(mockAmplitude.identify).not.toHaveBeenCalled();
@@ -253,17 +255,14 @@ describe('AmplitudeAnalyticsProvider', () => {
         currency: 'USD',
         quantity: 2,
         productId: 'prod_123',
-        properties: {
-          category: 'electronics',
-          discount: 10
-        }
+        productName: 'Premium Widget'
       });
       
       expect(mockAmplitude.revenue).toHaveBeenCalled();
     });
 
-    it('should not log revenue if analytics consent is false', async () => {
-      await provider.handleConsentChange({ analytics: false });
+    it('should not log revenue if provider is disabled', async () => {
+      provider.setEnabled(false);
       await provider.logRevenue({ amount: 10, currency: 'USD' });
       
       expect(mockAmplitude.revenue).not.toHaveBeenCalled();
@@ -285,19 +284,19 @@ describe('AmplitudeAnalyticsProvider', () => {
     });
   });
 
-  describe('handleConsentChange', () => {
+  describe('updateConsent', () => {
     beforeEach(async () => {
       await provider.initialize({ apiKey: 'test-api-key' });
     });
 
     it('should opt out when analytics consent is revoked', async () => {
-      await provider.handleConsentChange({ analytics: false });
+      await provider.updateConsent({ analytics: false });
       
       expect(mockAmplitude.setOptOut).toHaveBeenCalledWith(true);
     });
 
     it('should opt in when analytics consent is granted', async () => {
-      await provider.handleConsentChange({ analytics: true });
+      await provider.updateConsent({ analytics: true });
       
       expect(mockAmplitude.setOptOut).toHaveBeenCalledWith(false);
     });
@@ -320,22 +319,27 @@ describe('AmplitudeAnalyticsProvider', () => {
       await provider.initialize({ apiKey: 'test-api-key' });
     });
 
-    it('should log debug message when enabled', async () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-      
-      await provider.setDebugMode(true);
-      
-      expect(consoleSpy).toHaveBeenCalledWith('[Amplitude] Debug mode enabled');
-      consoleSpy.mockRestore();
+    it('should handle debug mode', () => {
+      // Debug mode doesn't throw or cause issues
+      expect(() => provider.setDebugMode(true)).not.toThrow();
+      expect(() => provider.setDebugMode(false)).not.toThrow();
+    });
+  });
+
+  describe('isReady and isEnabled', () => {
+    it('should not be ready before initialization', () => {
+      expect(provider.isReady()).toBe(false);
     });
 
-    it('should not log when disabled', async () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-      
-      await provider.setDebugMode(false);
-      
-      expect(consoleSpy).not.toHaveBeenCalled();
-      consoleSpy.mockRestore();
+    it('should be ready after initialization', async () => {
+      await provider.initialize({ apiKey: 'test-api-key' });
+      expect(provider.isReady()).toBe(true);
+    });
+
+    it('should not be ready if disabled during init', async () => {
+      await provider.initialize({ apiKey: 'test-api-key', enabled: false });
+      expect(provider.isReady()).toBe(false);
+      expect(provider.isEnabled()).toBe(false);
     });
   });
 

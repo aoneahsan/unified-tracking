@@ -1,4 +1,5 @@
 import { defineConfig } from 'vitest/config';
+import { resolve } from 'path';
 
 export default defineConfig({
   test: {
@@ -15,6 +16,8 @@ export default defineConfig({
         '**/mockData.ts',
         'android/**',
         'ios/**',
+        'bin/**',
+        'docs/**',
       ],
       thresholds: {
         branches: 80,
@@ -26,10 +29,10 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': '/src',
-      '@providers': '/src/providers',
-      '@utils': '/src/utils',
-      '@types': '/src/types',
+      '@': resolve(__dirname, './src'),
+      '@providers': resolve(__dirname, './src/providers'),
+      '@utils': resolve(__dirname, './src/utils'),
+      '@types': resolve(__dirname, './src/types'),
     },
   },
 });

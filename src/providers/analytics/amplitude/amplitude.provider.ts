@@ -1,12 +1,8 @@
-import { 
-  AnalyticsProvider, 
-  TrackingEvent, 
-  UserProperties, 
-  RevenueData,
-  ConsentSettings 
-} from '../../../types/provider';
-import { RegisterProvider } from '../../../decorators/register-provider';
-import { ProviderType } from '../../../types/common';
+import type { AnalyticsProvider } from '../../base';
+import type { ProviderConfig, ProviderType, ConsentSettings } from '../../../types/provider';
+import type { RevenueData } from '../../../definitions';
+import { RegisterProvider } from '../../registry';
+import { Logger } from '../../../utils/logger';
 
 interface AmplitudeConfig {
   apiKey: string;
@@ -59,85 +55,184 @@ export class AmplitudeAnalyticsProvider implements AnalyticsProvider {
   readonly id = 'amplitude';
   readonly name = 'Amplitude Analytics';
   readonly type: ProviderType = 'analytics';
+  readonly version = '1.0.0';
   
+  private logger: Logger;
   private amplitude?: AmplitudeInstance;
-  private config?: AmplitudeConfig;
-  private isInitialized = false;
-  private consentSettings: ConsentSettings = {
-    analytics: true,
-    errorTracking: true,
-    marketing: true,
-    personalization: true
-  };
+  private config: ProviderConfig = {};
+  private ready = false;
+  private enabled = true;
+  private userId?: string;
 
-  async initialize(config: any): Promise<void> {
-    this.config = config as AmplitudeConfig;
+  constructor() {
+    this.logger = new Logger('AmplitudeAnalytics');
+  }
 
-    if (!this.config.apiKey) {
+  async initialize(config: ProviderConfig): Promise<void> {
+    this.config = config;
+    
+    if (config.enabled === false) {
+      this.enabled = false;
+      this.logger.info('Amplitude Analytics disabled by configuration');
+      return;
+    }
+
+    const amplitudeConfig = config as AmplitudeConfig;
+
+    if (!amplitudeConfig.apiKey) {
       throw new Error('Amplitude API key is required');
     }
 
-    // Load Amplitude SDK
-    await this.loadAmplitudeSDK();
+    try {
+      // Load Amplitude SDK
+      await this.loadAmplitudeSDK();
 
-    // Initialize Amplitude
-    if (window.amplitude) {
-      this.amplitude = window.amplitude;
+      // Initialize Amplitude
+      if (window.amplitude) {
+        this.amplitude = window.amplitude;
 
-      // Set server URL if provided
-      if (this.config.serverUrl) {
-        this.amplitude.setServerUrl(this.config.serverUrl);
+        // Set server URL if provided
+        if (amplitudeConfig.serverUrl) {
+          this.amplitude.setServerUrl(amplitudeConfig.serverUrl);
+        }
+
+        // Initialize with options
+        const options: any = {};
+        
+        if (amplitudeConfig.trackingOptions) {
+          Object.assign(options, amplitudeConfig.trackingOptions);
+        }
+
+        if (amplitudeConfig.defaultTracking) {
+          options.defaultTracking = amplitudeConfig.defaultTracking;
+        }
+
+        this.amplitude.init(
+          amplitudeConfig.apiKey,
+          amplitudeConfig.trackingOptions?.userId || undefined,
+          options
+        );
+
+        this.ready = true;
+        this.logger.info('Amplitude Analytics initialized successfully');
+      } else {
+        throw new Error('Failed to load Amplitude SDK');
       }
-
-      // Initialize with options
-      const options: any = {};
-      
-      if (this.config.trackingOptions) {
-        Object.assign(options, this.config.trackingOptions);
-      }
-
-      if (this.config.defaultTracking) {
-        options.defaultTracking = this.config.defaultTracking;
-      }
-
-      this.amplitude.init(
-        this.config.apiKey,
-        this.config.trackingOptions?.userId || undefined,
-        options
-      );
-
-      this.isInitialized = true;
-    } else {
-      throw new Error('Failed to load Amplitude SDK');
+    } catch (error) {
+      this.logger.error('Failed to initialize Amplitude Analytics', error);
+      throw error;
     }
+  }
+
+  async shutdown(): Promise<void> {
+    this.ready = false;
+    this.amplitude = undefined;
+    this.logger.info('Amplitude Analytics shut down');
+  }
+
+  async updateConsent(consent: ConsentSettings): Promise<void> {
+    if (!this.amplitude) return;
+
+    if (consent.analytics === false) {
+      this.amplitude.setOptOut(true);
+      this.logger.info('Amplitude Analytics collection disabled');
+    } else if (consent.analytics === true) {
+      this.amplitude.setOptOut(false);
+      this.logger.info('Amplitude Analytics collection enabled');
+    }
+  }
+
+  isReady(): boolean {
+    return this.ready && this.enabled;
+  }
+
+  getConfig(): ProviderConfig {
+    return this.config;
+  }
+
+  setEnabled(enabled: boolean): void {
+    this.enabled = enabled;
+    if (this.amplitude) {
+      this.amplitude.setOptOut(!enabled);
+    }
+  }
+
+  isEnabled(): boolean {
+    return this.enabled;
+  }
+
+  setDebugMode(enabled: boolean): void {
+    // Amplitude doesn't have a specific debug mode
+    // Debug logging is handled at initialization
+    if (enabled) {
+      this.logger.debug('Debug mode enabled');
+    }
+  }
+
+  async reset(): Promise<void> {
+    if (!this.isReady()) return;
+
+    try {
+      this.userId = undefined;
+      this.amplitude!.reset();
+      this.logger.info('Amplitude Analytics reset');
+    } catch (error) {
+      this.logger.error('Failed to reset Amplitude Analytics', error);
+    }
+  }
+
+  async track(eventName: string, properties?: Record<string, any>): Promise<void> {
+    await this.trackEvent(eventName, properties);
   }
 
   async trackEvent(eventName: string, properties?: Record<string, any>): Promise<void> {
-    this.ensureInitialized();
-    
-    if (!this.consentSettings.analytics) {
+    if (!this.isReady()) {
+      this.logger.warn('Amplitude Analytics not ready, event not tracked:', eventName);
       return;
     }
 
-    const sanitizedName = this.sanitizeEventName(eventName);
-    const sanitizedProperties = properties ? this.sanitizeProperties(properties) : undefined;
+    try {
+      const sanitizedName = this.sanitizeEventName(eventName);
+      const sanitizedProperties = properties ? this.sanitizeProperties(properties) : undefined;
 
-    this.amplitude!.track(sanitizedName, sanitizedProperties);
+      this.amplitude!.track(sanitizedName, sanitizedProperties);
+      this.logger.debug('Event tracked:', sanitizedName, sanitizedProperties);
+    } catch (error) {
+      this.logger.error('Failed to track event', error);
+      throw error;
+    }
   }
 
-  async identifyUser(userId: string, properties?: UserProperties): Promise<void> {
-    this.ensureInitialized();
-    
-    if (!this.consentSettings.analytics) {
+  async identifyUser(userId: string, traits?: Record<string, any>): Promise<void> {
+    if (!this.isReady()) {
+      this.logger.warn('Amplitude Analytics not ready, user not identified');
       return;
     }
 
-    this.amplitude!.setUserId(userId);
+    try {
+      this.userId = userId;
+      this.amplitude!.setUserId(userId);
 
-    if (properties) {
+      if (traits) {
+        await this.setUserProperties(traits);
+      }
+
+      this.logger.debug('User identified:', userId);
+    } catch (error) {
+      this.logger.error('Failed to identify user', error);
+      throw error;
+    }
+  }
+
+  async setUserProperties(properties: Record<string, any>): Promise<void> {
+    if (!this.isReady()) {
+      this.logger.warn('Amplitude Analytics not ready, user properties not set');
+      return;
+    }
+
+    try {
       const identify = new this.amplitude!.Identify();
       
-      // Set user properties
       Object.entries(properties).forEach(([key, value]) => {
         const sanitizedKey = this.sanitizePropertyKey(key);
         const sanitizedValue = this.sanitizePropertyValue(value);
@@ -148,61 +243,42 @@ export class AmplitudeAnalyticsProvider implements AnalyticsProvider {
       });
 
       this.amplitude!.identify(identify);
+      this.logger.debug('User properties set:', properties);
+    } catch (error) {
+      this.logger.error('Failed to set user properties', error);
+      throw error;
     }
   }
 
-  async setUserProperties(properties: UserProperties): Promise<void> {
-    this.ensureInitialized();
-    
-    if (!this.consentSettings.analytics || !this.consentSettings.personalization) {
+  async logRevenue(data: RevenueData): Promise<void> {
+    if (!this.isReady()) {
+      this.logger.warn('Amplitude Analytics not ready, revenue not logged');
       return;
     }
 
-    const identify = new this.amplitude!.Identify();
-    
-    Object.entries(properties).forEach(([key, value]) => {
-      const sanitizedKey = this.sanitizePropertyKey(key);
-      const sanitizedValue = this.sanitizePropertyValue(value);
-      
-      if (sanitizedValue !== undefined) {
-        identify.set(sanitizedKey, sanitizedValue);
+    try {
+      const revenueObj = new this.amplitude!.Revenue()
+        .setPrice(data.amount)
+        .setQuantity(data.quantity || 1);
+
+      if (data.currency) {
+        revenueObj.setRevenue(data.amount * (data.quantity || 1));
       }
-    });
 
-    this.amplitude!.identify(identify);
-  }
+      if (data.productId) {
+        revenueObj.setProductId(data.productId);
+      }
 
-  async logRevenue(revenue: RevenueData): Promise<void> {
-    this.ensureInitialized();
-    
-    if (!this.consentSettings.analytics) {
-      return;
+      if (data.productName) {
+        revenueObj.setEventProperties({ productName: data.productName });
+      }
+
+      this.amplitude!.revenue(revenueObj);
+      this.logger.debug('Revenue logged:', data);
+    } catch (error) {
+      this.logger.error('Failed to log revenue', error);
+      throw error;
     }
-
-    const revenueObj = new this.amplitude!.Revenue()
-      .setPrice(revenue.amount)
-      .setQuantity(revenue.quantity || 1);
-
-    if (revenue.currency) {
-      revenueObj.setRevenue(revenue.amount * (revenue.quantity || 1));
-    }
-
-    if (revenue.productId) {
-      revenueObj.setProductId(revenue.productId);
-    }
-
-    if (revenue.properties) {
-      Object.entries(revenue.properties).forEach(([key, value]) => {
-        const sanitizedKey = this.sanitizePropertyKey(key);
-        const sanitizedValue = this.sanitizePropertyValue(value);
-        
-        if (sanitizedValue !== undefined) {
-          revenueObj.setEventProperties({ [sanitizedKey]: sanitizedValue });
-        }
-      });
-    }
-
-    this.amplitude!.revenue(revenueObj);
   }
 
   async logScreenView(screenName: string, properties?: Record<string, any>): Promise<void> {
@@ -214,28 +290,6 @@ export class AmplitudeAnalyticsProvider implements AnalyticsProvider {
     await this.trackEvent('Screen View', eventProperties);
   }
 
-  async handleConsentChange(settings: ConsentSettings): Promise<void> {
-    this.consentSettings = { ...settings };
-    
-    if (this.isInitialized && this.amplitude) {
-      // If analytics consent is revoked, opt out
-      this.amplitude.setOptOut(!settings.analytics);
-    }
-  }
-
-  async reset(): Promise<void> {
-    this.ensureInitialized();
-    
-    this.amplitude!.reset();
-  }
-
-  async setDebugMode(enabled: boolean): Promise<void> {
-    // Amplitude doesn't have a specific debug mode
-    // Debug logging is handled at initialization
-    if (enabled) {
-      console.log('[Amplitude] Debug mode enabled');
-    }
-  }
 
   private async loadAmplitudeSDK(): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -266,11 +320,6 @@ export class AmplitudeAnalyticsProvider implements AnalyticsProvider {
     });
   }
 
-  private ensureInitialized(): void {
-    if (!this.isInitialized || !this.amplitude) {
-      throw new Error('Amplitude provider not initialized');
-    }
-  }
 
   private sanitizeEventName(name: string): string {
     // Amplitude has a 1024 character limit for event names

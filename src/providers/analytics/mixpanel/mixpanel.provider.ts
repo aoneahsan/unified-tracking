@@ -1,14 +1,9 @@
-import { 
-  AnalyticsProvider, 
-  TrackingEvent, 
-  UserProperties, 
-  RevenueData,
-  ConsentSettings 
-} from '../../../types/provider';
-import { RegisterProvider } from '../../../decorators/register-provider';
-import { ProviderType } from '../../../types/common';
+import { BaseAnalyticsProvider } from '../../base-analytics-provider';
+import { RegisterProvider } from '../../registry';
+import type { ProviderConfig, ProviderType, ConsentSettings } from '../../../types/provider';
+import type { RevenueData } from '../../../definitions';
 
-interface MixpanelConfig {
+interface MixpanelConfig extends ProviderConfig {
   token: string;
   apiHost?: string;
   debug?: boolean;
@@ -68,28 +63,29 @@ declare global {
   type: 'analytics' as ProviderType,
   version: '1.0.0',
   supportedPlatforms: ['web', 'ios', 'android'],
+  configSchema: {
+    token: { type: 'string', required: true },
+    debug: { type: 'boolean', default: false },
+    trackAutomaticEvents: { type: 'boolean', default: true },
+    persistence: { type: 'string', default: 'localStorage' },
+    ipTracking: { type: 'boolean', default: true },
+  },
 })
-export class MixpanelAnalyticsProvider implements AnalyticsProvider {
+export class MixpanelAnalyticsProvider extends BaseAnalyticsProvider {
   readonly id = 'mixpanel';
   readonly name = 'Mixpanel Analytics';
-  readonly type: ProviderType = 'analytics';
+  readonly version = '1.0.0';
   
   private mixpanel?: MixpanelInstance;
-  private config?: MixpanelConfig;
-  private isInitialized = false;
-  private consentSettings: ConsentSettings = {
-    analytics: true,
-    errorTracking: true,
-    marketing: true,
-    personalization: true
-  };
+  private mixpanelConfig?: MixpanelConfig;
+  private scriptLoaded = false;
 
-  async initialize(config: any): Promise<void> {
-    this.config = config as MixpanelConfig;
-
-    if (!this.config.token) {
+  protected async doInitialize(config: MixpanelConfig): Promise<void> {
+    if (!config.token) {
       throw new Error('Mixpanel token is required');
     }
+
+    this.mixpanelConfig = config;
 
     // Load Mixpanel SDK
     await this.loadMixpanelSDK();
@@ -99,65 +95,59 @@ export class MixpanelAnalyticsProvider implements AnalyticsProvider {
       this.mixpanel = window.mixpanel;
 
       const initConfig: any = {
-        debug: this.config.debug || false,
-        track_pageview: this.config.trackAutomaticEvents !== false,
-        persistence: this.config.persistence || 'localStorage',
-        persistence_name: this.config.persistencePrefix,
-        cookie_domain: this.config.cookieDomain,
-        cross_site_cookie: this.config.crossSiteCookie,
-        secure_cookie: this.config.secureCookie,
-        ip: this.config.ipTracking !== false,
-        property_blacklist: this.config.propertyBlocklist,
-        session_duration: this.config.sessionDuration
+        debug: config.debug || false,
+        track_pageview: config.trackAutomaticEvents !== false,
+        persistence: config.persistence || 'localStorage',
+        persistence_name: config.persistencePrefix,
+        cookie_domain: config.cookieDomain,
+        cross_site_cookie: config.crossSiteCookie,
+        secure_cookie: config.secureCookie,
+        ip: config.ipTracking !== false,
+        property_blacklist: config.propertyBlocklist,
+        session_duration: config.sessionDuration
       };
 
-      if (this.config.apiHost) {
-        initConfig.api_host = this.config.apiHost;
+      if (config.apiHost) {
+        initConfig.api_host = config.apiHost;
       }
 
-      this.mixpanel.init(this.config.token, initConfig);
-      this.isInitialized = true;
+      this.mixpanel.init(config.token, initConfig);
+      this.logger.info('Mixpanel initialized successfully', { token: config.token });
     } else {
       throw new Error('Failed to load Mixpanel SDK');
     }
   }
 
-  async trackEvent(eventName: string, properties?: Record<string, any>): Promise<void> {
-    this.ensureInitialized();
-    
-    if (!this.consentSettings.analytics) {
-      return;
+  protected async doTrack(eventName: string, properties: Record<string, any>): Promise<void> {
+    if (!this.mixpanel) {
+      throw new Error('Mixpanel not initialized');
     }
 
     const sanitizedName = this.sanitizeEventName(eventName);
-    const sanitizedProperties = properties ? this.sanitizeProperties(properties) : undefined;
+    const sanitizedProperties = this.sanitizeProperties(properties);
 
     return new Promise((resolve) => {
       this.mixpanel!.track(sanitizedName, sanitizedProperties, () => resolve());
     });
   }
 
-  async identifyUser(userId: string, properties?: UserProperties): Promise<void> {
-    this.ensureInitialized();
-    
-    if (!this.consentSettings.analytics) {
-      return;
+  protected async doIdentifyUser(userId: string, traits: Record<string, any>): Promise<void> {
+    if (!this.mixpanel) {
+      throw new Error('Mixpanel not initialized');
     }
 
     // Set the distinct ID
-    this.mixpanel!.identify(userId);
+    this.mixpanel.identify(userId);
 
     // Set user properties if provided
-    if (properties) {
-      await this.setUserProperties(properties);
+    if (Object.keys(traits).length > 0) {
+      await this.doSetUserProperties(traits);
     }
   }
 
-  async setUserProperties(properties: UserProperties): Promise<void> {
-    this.ensureInitialized();
-    
-    if (!this.consentSettings.analytics || !this.consentSettings.personalization) {
-      return;
+  protected async doSetUserProperties(properties: Record<string, any>): Promise<void> {
+    if (!this.mixpanel) {
+      throw new Error('Mixpanel not initialized');
     }
 
     const sanitizedProperties = this.sanitizeProperties(properties);
@@ -167,81 +157,84 @@ export class MixpanelAnalyticsProvider implements AnalyticsProvider {
     });
   }
 
-  async logRevenue(revenue: RevenueData): Promise<void> {
-    this.ensureInitialized();
-    
-    if (!this.consentSettings.analytics) {
-      return;
+  protected async doLogRevenue(data: RevenueData): Promise<void> {
+    if (!this.mixpanel) {
+      throw new Error('Mixpanel not initialized');
     }
 
     const properties: Record<string, any> = {
-      amount: revenue.amount,
-      currency: revenue.currency || 'USD'
+      amount: data.amount,
+      currency: data.currency || 'USD'
     };
 
-    if (revenue.quantity) {
-      properties.quantity = revenue.quantity;
+    if (data.quantity) {
+      properties.quantity = data.quantity;
     }
 
-    if (revenue.productId) {
-      properties.product_id = revenue.productId;
+    if (data.productId) {
+      properties.product_id = data.productId;
     }
 
-    if (revenue.properties) {
-      Object.assign(properties, this.sanitizeProperties(revenue.properties));
+    if (data.properties) {
+      Object.assign(properties, this.sanitizeProperties(data.properties));
     }
 
     // Track as a revenue event
-    await this.trackEvent('Revenue', properties);
+    await this.track('Revenue', properties);
 
     // Also track charge in people properties
     return new Promise((resolve) => {
-      this.mixpanel!.people.track_charge(revenue.amount, properties, () => resolve());
+      this.mixpanel!.people.track_charge(data.amount, properties, () => resolve());
     });
   }
 
-  async logScreenView(screenName: string, properties?: Record<string, any>): Promise<void> {
+  protected async doLogScreenView(screenName: string, properties: Record<string, any>): Promise<void> {
     const eventProperties = {
       screen_name: screenName,
       ...properties
     };
 
-    await this.trackEvent('Screen View', eventProperties);
+    await this.doTrack('Screen View', eventProperties);
   }
 
-  async handleConsentChange(settings: ConsentSettings): Promise<void> {
-    this.consentSettings = { ...settings };
+  protected async doUpdateConsent(consent: ConsentSettings): Promise<void> {
+    if (!this.mixpanel) return;
     
-    if (this.isInitialized && this.mixpanel) {
-      if (!settings.analytics) {
-        // Opt out of tracking
-        this.mixpanel.opt_out_tracking();
-      } else {
-        // Opt back in
-        this.mixpanel.opt_in_tracking();
-      }
+    if (consent.analytics === false) {
+      // Opt out of tracking
+      this.mixpanel.opt_out_tracking();
+      this.logger.info('Mixpanel tracking disabled by consent');
+    } else if (consent.analytics === true) {
+      // Opt back in
+      this.mixpanel.opt_in_tracking();
+      this.logger.info('Mixpanel tracking enabled by consent');
     }
   }
 
-  async reset(): Promise<void> {
-    this.ensureInitialized();
+  protected async doProviderReset(): Promise<void> {
+    if (!this.mixpanel) return;
     
-    this.mixpanel!.reset();
+    this.mixpanel.reset();
   }
 
-  async setDebugMode(enabled: boolean): Promise<void> {
-    this.ensureInitialized();
-    
-    this.mixpanel!.set_config({ debug: enabled });
+  protected doSetDebugMode(enabled: boolean): void {
+    if (this.mixpanel) {
+      this.mixpanel.set_config({ debug: enabled });
+    }
+  }
+
+  protected async doShutdown(): Promise<void> {
+    this.mixpanel = undefined;
+    this.mixpanelConfig = undefined;
+    this.scriptLoaded = false;
   }
 
   private async loadMixpanelSDK(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      if (window.mixpanel) {
-        resolve();
-        return;
-      }
+    if (this.scriptLoaded || window.mixpanel) {
+      return;
+    }
 
+    return new Promise((resolve, reject) => {
       // Mixpanel snippet
       (function(f: any, b: Document) {
         if (!b.__SV) {
@@ -262,6 +255,7 @@ export class MixpanelAnalyticsProvider implements AnalyticsProvider {
           
           a.onload = () => {
             if (window.mixpanel && typeof window.mixpanel === 'object') {
+              this.scriptLoaded = true;
               resolve();
             } else {
               reject(new Error('Mixpanel SDK loaded but not available'));
@@ -278,11 +272,6 @@ export class MixpanelAnalyticsProvider implements AnalyticsProvider {
     });
   }
 
-  private ensureInitialized(): void {
-    if (!this.isInitialized || !this.mixpanel) {
-      throw new Error('Mixpanel provider not initialized');
-    }
-  }
 
   private sanitizeEventName(name: string): string {
     // Mixpanel has a 255 character limit for event names
