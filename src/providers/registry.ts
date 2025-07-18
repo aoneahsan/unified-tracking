@@ -31,15 +31,42 @@ export class ProviderRegistry {
   /**
    * Register a provider
    */
-  register(registration: ProviderRegistration): void {
-    const { metadata } = registration;
-    
-    if (this.providers.has(metadata.id)) {
-      this.logger.warn(`Provider ${metadata.id} already registered, overwriting`);
-    }
+  register(registration: ProviderRegistration): void;
+  register(id: string, type: string, constructor: ProviderConstructor): void;
+  register(arg1: ProviderRegistration | string, arg2?: string, arg3?: ProviderConstructor): void {
+    if (typeof arg1 === 'object') {
+      const { metadata } = arg1;
+      
+      if (this.providers.has(metadata.id)) {
+        this.logger.warn(`Provider ${metadata.id} already registered, overwriting`);
+      }
 
-    this.providers.set(metadata.id, registration);
-    this.logger.info(`Registered provider: ${metadata.id} (${metadata.name})`);
+      this.providers.set(metadata.id, arg1);
+      this.logger.info(`Registered provider: ${metadata.id} (${metadata.name})`);
+    } else {
+      // Handle the decorator case where we don't have full metadata yet
+      const id = arg1;
+      const constructor = arg3!;
+      
+      if (this.providers.has(id)) {
+        this.logger.warn(`Provider ${id} already registered, overwriting`);
+      }
+
+      // Create minimal registration for now
+      const registration: ProviderRegistration = {
+        metadata: {
+          id,
+          name: id,
+          type: arg2 as any,
+          version: '1.0.0',
+          supportedPlatforms: ['web', 'ios', 'android']
+        },
+        constructor
+      };
+
+      this.providers.set(id, registration);
+      this.logger.info(`Registered provider: ${id}`);
+    }
   }
 
   /**
@@ -131,7 +158,7 @@ export class ProviderRegistry {
 export function RegisterProvider(metadata: ProviderMetadata) {
   return function <T extends ProviderConstructor>(constructor: T): T {
     const registry = ProviderRegistry.getInstance();
-    registry.register({ metadata, constructor });
+    registry.register({ metadata, constructor: constructor as ProviderConstructor });
     return constructor;
   };
 }
