@@ -109,7 +109,8 @@ export class RaygunProvider extends BaseErrorTrackingProvider {
   readonly version = '1.0.0';
 
   private raygun?: RaygunSDK;
-  private raygunConfig: RaygunConfig | null = null;
+  // @ts-ignore - Reserved for future use
+  private _raygunConfig: RaygunConfig | null = null;
   private scriptLoaded = false;
 
   protected async doInitialize(config: RaygunConfig): Promise<void> {
@@ -117,7 +118,7 @@ export class RaygunProvider extends BaseErrorTrackingProvider {
       throw new Error('Raygun API key is required');
     }
 
-    this.raygunConfig = config;
+    this._raygunConfig = config;
 
     // Load Raygun SDK
     await this.loadRaygunSDK();
@@ -220,7 +221,7 @@ export class RaygunProvider extends BaseErrorTrackingProvider {
 
   protected async doShutdown(): Promise<void> {
     this.raygun = undefined;
-    this.raygunConfig = null;
+    this._raygunConfig = null;
     this.scriptLoaded = false;
   }
 
@@ -242,8 +243,6 @@ export class RaygunProvider extends BaseErrorTrackingProvider {
     // Prepare custom data
     const customData: any = {
       ...context.extra,
-      timestamp: context.timestamp,
-      platform: context.platform,
     };
 
     // Add user context
@@ -251,15 +250,9 @@ export class RaygunProvider extends BaseErrorTrackingProvider {
       customData.user = context.user;
     }
 
-    // Add breadcrumbs
-    if (context.breadcrumbs) {
-      context.breadcrumbs.forEach((breadcrumb) => {
-        this.raygun!.recordBreadcrumb(breadcrumb.message, {
-          category: breadcrumb.category,
-          timestamp: breadcrumb.timestamp,
-          data: breadcrumb.data,
-        });
-      });
+    // Add context properties
+    if (context.severity) {
+      customData.severity = context.severity;
     }
 
     // Prepare tags

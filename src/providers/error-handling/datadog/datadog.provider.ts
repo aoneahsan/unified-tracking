@@ -91,7 +91,8 @@ export class DataDogErrorTrackingProvider extends BaseErrorTrackingProvider {
   readonly version = '1.0.0';
 
   private dataDog?: DataDogSDK;
-  private dataDogConfig: DataDogConfig | null = null;
+  // @ts-ignore - Reserved for future use
+  private _dataDogConfig: DataDogConfig | null = null;
   private scriptLoaded = false;
 
   protected async doInitialize(config: DataDogConfig): Promise<void> {
@@ -99,7 +100,7 @@ export class DataDogErrorTrackingProvider extends BaseErrorTrackingProvider {
       throw new Error('DataDog client token and application ID are required');
     }
 
-    this.dataDogConfig = config;
+    this._dataDogConfig = config;
 
     // Load DataDog SDK
     await this.loadDataDogSDK();
@@ -172,7 +173,7 @@ export class DataDogErrorTrackingProvider extends BaseErrorTrackingProvider {
 
   protected async doShutdown(): Promise<void> {
     this.dataDog = undefined;
-    this.dataDogConfig = null;
+    this._dataDogConfig = null;
     this.scriptLoaded = false;
   }
 
@@ -185,7 +186,7 @@ export class DataDogErrorTrackingProvider extends BaseErrorTrackingProvider {
     this.logger.info(`DataDog tracking consent updated: ${trackingConsent}`);
   }
 
-  protected async doTrackError(error: Error | string, context?: ErrorContext): Promise<void> {
+  protected async doLogError(error: Error | string, context?: ErrorContext): Promise<void> {
     if (!this.dataDog) {
       throw new Error('DataDog RUM not initialized');
     }
@@ -205,19 +206,15 @@ export class DataDogErrorTrackingProvider extends BaseErrorTrackingProvider {
         errorContext.extra = context.extra;
       }
 
-      if (context.level) {
-        errorContext.level = context.level;
-      }
-
-      if (context.fingerprint) {
-        errorContext.fingerprint = context.fingerprint;
+      if (context.severity) {
+        errorContext.severity = context.severity;
       }
     }
 
     this.dataDog.addError(error, errorContext);
   }
 
-  protected async doSetUser(user: Record<string, any>): Promise<void> {
+  protected doSetUserContext(user: Record<string, any>): void {
     if (!this.dataDog) return;
 
     const userContext: any = {};
@@ -248,24 +245,43 @@ export class DataDogErrorTrackingProvider extends BaseErrorTrackingProvider {
     this.dataDog.setUser(userContext);
   }
 
-  protected async doSetContext(context: Record<string, any>): Promise<void> {
+  protected doSetExtraContext(key: string, value: any): void {
     if (!this.dataDog) return;
+    this.dataDog.setGlobalContextProperty(key, value);
+  }
 
-    Object.entries(context).forEach(([key, value]) => {
-      this.dataDog!.setGlobalContextProperty(key, value);
+  protected doSetTags(tags: Record<string, string>): void {
+    if (!this.dataDog) return;
+    Object.entries(tags).forEach(([key, value]) => {
+      this.dataDog!.setGlobalContextProperty(`tag_${key}`, value);
     });
   }
 
-  protected async doRemoveContext(key: string): Promise<void> {
-    if (!this.dataDog) return;
-
-    this.dataDog.removeGlobalContextProperty(key);
+  protected async doCaptureException(exception: Error, context: ErrorContext): Promise<void> {
+    // Same as doLogError for DataDog
+    await this.doLogError(exception, context);
   }
 
-  protected async doClearContext(): Promise<void> {
+  protected async doProviderReset(): Promise<void> {
     if (!this.dataDog) return;
-
+    this.dataDog.clearUser();
     this.dataDog.setGlobalContext({});
+  }
+
+
+  protected async doEnable(): Promise<void> {
+    if (!this.dataDog) return;
+    this.dataDog.setTrackingConsent('granted');
+  }
+
+  protected async doDisable(): Promise<void> {
+    if (!this.dataDog) return;
+    this.dataDog.setTrackingConsent('not-granted');
+  }
+
+  protected doAddBreadcrumb(message: string, category?: string, _data?: Record<string, any>): void {
+    if (!this.dataDog) return;
+    this.dataDog.addAction(category ? `${category}: ${message}` : message);
   }
 
   protected async doCaptureBreadcrumb(breadcrumb: {
@@ -389,9 +405,10 @@ export class DataDogErrorTrackingProvider extends BaseErrorTrackingProvider {
   /**
    * Log a message
    */
-  logMessage(level: 'debug' | 'info' | 'warn' | 'error', message: string, context?: Record<string, any>): void {
+  protected async doLogMessage(message: string, level: 'debug' | 'info' | 'warning', extra?: Record<string, any>): Promise<void> {
     if (!this.dataDog) return;
-
-    this.dataDog.logger[level](message, context);
+    
+    const ddLevel = level === 'warning' ? 'warn' : level;
+    this.dataDog.logger[ddLevel](message, extra);
   }
 }

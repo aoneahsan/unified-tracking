@@ -125,7 +125,7 @@ export abstract class BaseProviderImpl implements BaseProvider {
   /**
    * Provider-specific debug mode handling
    */
-  protected doSetDebugMode(enabled: boolean): void {
+  protected doSetDebugMode(_enabled: boolean): void {
     // Override in subclasses if needed
   }
 

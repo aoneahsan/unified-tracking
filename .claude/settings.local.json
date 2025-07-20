@@ -146,7 +146,8 @@
       "Bash(yarn run prettier:*)",
       "Bash(yarn rollup:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(awk:*)"
     ],
     "deny": []
   }

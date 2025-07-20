@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useUnifiedTracking } from './context';
+
+// Re-export from context
+export { useUnifiedTracking };
 import type { ErrorContext, RevenueData, ConsentSettings } from '../definitions';
 
 // Hook for tracking events with automatic error handling
@@ -399,7 +402,8 @@ export const useFeatureFlags = () => {
   const refreshFlags = useCallback(async () => {
     setIsLoading(true);
     try {
-      const providers = await getActiveProviders();
+      // Check for feature flag providers
+      await getActiveProviders();
       // This would integrate with PostHog or other feature flag providers
       // For now, we'll just return the current flags
       setFlags(prevFlags => ({ ...prevFlags }));

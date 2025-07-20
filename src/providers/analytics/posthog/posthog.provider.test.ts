@@ -123,9 +123,9 @@ describe('PostHogAnalyticsProvider', () => {
 
       await provider.initialize(config);
 
-      expect(provider.isInitialized()).toBe(true);
-      expect(provider.getId()).toBe('posthog');
-      expect(provider.getName()).toBe('PostHog Analytics');
+      expect(provider.isReady()).toBe(true);
+      expect(provider.id).toBe('posthog');
+      expect(provider.name).toBe('PostHog Analytics');
       expect(mockPostHog.init).toHaveBeenCalledWith('test-api-key', expect.objectContaining({
         api_host: 'https://app.posthog.com',
         autocapture: true,

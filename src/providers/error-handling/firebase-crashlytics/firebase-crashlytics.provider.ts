@@ -57,7 +57,7 @@ interface FirebaseSDK {
 
 declare global {
   interface Window {
-    firebase?: FirebaseSDK;
+    firebase?: any;
   }
 }
 
@@ -87,7 +87,8 @@ export class FirebaseCrashlyticsProvider extends BaseErrorTrackingProvider {
   private firebase?: FirebaseSDK;
   private crashlytics?: FirebaseCrashlytics;
   private firebaseApp?: FirebaseApp;
-  private crashlyticsConfig: FirebaseCrashlyticsConfig | null = null;
+  // @ts-ignore - Reserved for future use
+  private _crashlyticsConfig: FirebaseCrashlyticsConfig | null = null;
   private scriptLoaded = false;
 
   protected async doInitialize(config: FirebaseCrashlyticsConfig): Promise<void> {
@@ -95,7 +96,7 @@ export class FirebaseCrashlyticsProvider extends BaseErrorTrackingProvider {
       throw new Error('Firebase configuration requires apiKey, authDomain, projectId, and appId');
     }
 
-    this.crashlyticsConfig = config;
+    this._crashlyticsConfig = config;
 
     // Load Firebase SDK
     await this.loadFirebaseSDK();
@@ -119,14 +120,14 @@ export class FirebaseCrashlyticsProvider extends BaseErrorTrackingProvider {
 
     // Check if app already exists
     try {
-      this.firebaseApp = this.firebase.getApp();
+      this.firebaseApp = this.firebase!.getApp();
     } catch (error) {
       // App doesn't exist, initialize it
-      this.firebaseApp = this.firebase.initializeApp(firebaseConfig);
+      this.firebaseApp = this.firebase!.initializeApp(firebaseConfig);
     }
 
     // Initialize Crashlytics
-    this.crashlytics = this.firebase.crashlytics.getCrashlytics(this.firebaseApp);
+    this.crashlytics = this.firebase!.crashlytics.getCrashlytics(this.firebaseApp);
 
     // Configure Crashlytics
     if (config.crashlyticsCollectionEnabled !== undefined) {
@@ -193,7 +194,7 @@ export class FirebaseCrashlyticsProvider extends BaseErrorTrackingProvider {
     this.crashlytics = undefined;
     this.firebaseApp = undefined;
     this.firebase = undefined;
-    this.crashlyticsConfig = null;
+    this._crashlyticsConfig = null;
     this.scriptLoaded = false;
   }
 
@@ -239,10 +240,20 @@ export class FirebaseCrashlyticsProvider extends BaseErrorTrackingProvider {
       this.crashlytics.setCustomKeys(customKeys);
     }
 
-    // Add breadcrumbs as log messages
-    if (context.breadcrumbs) {
-      context.breadcrumbs.forEach((breadcrumb) => {
-        this.crashlytics!.log(`[${breadcrumb.category}] ${breadcrumb.message}`);
+    // Add tags and extra as custom keys
+    if (context.tags) {
+      Object.entries(context.tags).forEach(([key, value]) => {
+        this.crashlytics!.setCustomKey(`tag_${key}`, value);
+      });
+    }
+    
+    if (context.extra) {
+      Object.entries(context.extra).forEach(([key, value]) => {
+        if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+          this.crashlytics!.setCustomKey(`extra_${key}`, value);
+        } else {
+          this.crashlytics!.setCustomKey(`extra_${key}`, JSON.stringify(value));
+        }
       });
     }
 

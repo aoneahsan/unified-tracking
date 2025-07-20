@@ -327,7 +327,7 @@ describe('AppCenterProvider', () => {
         ],
       };
 
-      await provider.trackError(error, context);
+      await provider.logError(error, context);
 
       expect(mockAppCenter.Crashes.trackError).toHaveBeenCalledWith(
         error,
@@ -356,7 +356,7 @@ describe('AppCenterProvider', () => {
     it('should handle errors without context', async () => {
       const error = new Error('Test error');
 
-      await provider.trackError(error);
+      await provider.logError(error);
 
       expect(mockAppCenter.Crashes.trackError).toHaveBeenCalledWith(
         error,
@@ -373,8 +373,8 @@ describe('AppCenterProvider', () => {
     it('should throw error when not initialized', async () => {
       const uninitializedProvider = new AppCenterProvider();
       
-      await expect(uninitializedProvider.trackError(new Error('test'))).rejects.toThrow(
-        'App Center Crashes not initialized'
+      await expect(uninitializedProvider.logError(new Error('test'))).rejects.toThrow(
+        'Provider not initialized'
       );
     });
 

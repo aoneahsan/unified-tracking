@@ -25,11 +25,12 @@ interface AppCenterConfig extends ProviderConfig {
   enablePush?: boolean;
 }
 
-interface AppCenterUser {
-  userId?: string;
-  countryCode?: string;
-  distributionGroupId?: string;
-}
+// AppCenterUser interface not used but reserved for future use
+// interface AppCenterUser {
+//   userId?: string;
+//   countryCode?: string;
+//   distributionGroupId?: string;
+// }
 
 interface AppCenterCrashReport {
   id: string;
@@ -123,7 +124,8 @@ export class AppCenterProvider extends BaseErrorTrackingProvider {
   readonly version = '1.0.0';
 
   private appCenter?: AppCenterSDK;
-  private appCenterConfig: AppCenterConfig | null = null;
+  // @ts-ignore - Reserved for future use
+  private _appCenterConfig: AppCenterConfig | null = null;
   private scriptLoaded = false;
 
   /**
@@ -138,7 +140,7 @@ export class AppCenterProvider extends BaseErrorTrackingProvider {
       throw new Error('App Center app secret is required');
     }
 
-    this.appCenterConfig = config;
+    this._appCenterConfig = config;
 
     // Load App Center SDK
     await this.loadAppCenterSDK();
@@ -239,7 +241,7 @@ export class AppCenterProvider extends BaseErrorTrackingProvider {
       await this.appCenter.setEnabled(false);
     }
     this.appCenter = undefined;
-    this.appCenterConfig = null;
+    this._appCenterConfig = null;
     this.scriptLoaded = false;
   }
 
@@ -313,7 +315,7 @@ export class AppCenterProvider extends BaseErrorTrackingProvider {
     // Add breadcrumbs as text attachment
     if (context.breadcrumbs && context.breadcrumbs.length > 0) {
       const breadcrumbsText = context.breadcrumbs
-        .map(b => `[${new Date(b.timestamp).toISOString()}] ${b.category || 'default'}: ${b.message}`)
+        .map(b => `[${b.timestamp ? new Date(b.timestamp).toISOString() : 'no-timestamp'}] ${b.category || 'default'}: ${b.message}`)
         .join('\n');
       
       attachments.push({
@@ -360,12 +362,12 @@ export class AppCenterProvider extends BaseErrorTrackingProvider {
     }
   }
 
-  protected doSetExtraContext(key: string, value: any): void {
+  protected doSetExtraContext(_key: string, _value: any): void {
     // App Center doesn't have a direct way to set global extra context
     // This will be included in individual error reports
   }
 
-  protected doSetTags(tags: Record<string, string>): void {
+  protected doSetTags(_tags: Record<string, string>): void {
     // App Center doesn't have a direct way to set global tags
     // These will be included in individual error reports
   }
@@ -393,10 +395,25 @@ export class AppCenterProvider extends BaseErrorTrackingProvider {
     }
   }
 
+  protected async doDisable(): Promise<void> {
+    if (!this.appCenter) return;
+    await this.appCenter.setEnabled(false);
+  }
+
+  protected async doEnable(): Promise<void> {
+    if (!this.appCenter) return;
+    await this.appCenter.setEnabled(true);
+  }
+
+  protected doAddBreadcrumb(_message: string, _category?: string, _data?: Record<string, any>): void {
+    // App Center doesn't have a direct way to add breadcrumbs
+    // Breadcrumbs will be included in error reports
+  }
+
   /**
-   * Check if App Center is enabled
+   * Check if App Center is enabled (async method specific to AppCenter)
    */
-  async isEnabled(): Promise<boolean> {
+  async isAppCenterEnabled(): Promise<boolean> {
     if (!this.appCenter) return false;
     return this.appCenter.isEnabled();
   }

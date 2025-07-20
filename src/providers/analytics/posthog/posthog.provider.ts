@@ -103,22 +103,9 @@ export class PostHogAnalyticsProvider extends BaseAnalyticsProvider {
   readonly version = '1.0.0';
 
   private posthog?: PostHogSDK;
-  private posthogConfig: PostHogConfig | null = null;
+  // @ts-ignore - Reserved for future use
+  private _posthogConfig: PostHogConfig | null = null;
   private scriptLoaded = false;
-
-  /**
-   * Check if provider is initialized
-   */
-  isInitialized(): boolean {
-    return this.initialized;
-  }
-
-  /**
-   * Get provider ID
-   */
-  getId(): string {
-    return this.id;
-  }
 
   /**
    * Get provider name
@@ -132,7 +119,7 @@ export class PostHogAnalyticsProvider extends BaseAnalyticsProvider {
       throw new Error('PostHog API key is required');
     }
 
-    this.posthogConfig = config;
+    this._posthogConfig = config;
 
     // Load PostHog SDK
     await this.loadPostHogSDK();
@@ -176,6 +163,11 @@ export class PostHogAnalyticsProvider extends BaseAnalyticsProvider {
     // Initialize PostHog
     this.posthog.init(config.apiKey, posthogOptions);
 
+    // Call loaded callback if provided
+    if (config.loaded) {
+      config.loaded(this.posthog);
+    }
+
     this.logger.info('PostHog Analytics initialized successfully', {
       apiKey: config.apiKey,
       apiHost: config.apiHost,
@@ -215,8 +207,15 @@ export class PostHogAnalyticsProvider extends BaseAnalyticsProvider {
 
   protected async doShutdown(): Promise<void> {
     this.posthog = undefined;
-    this.posthogConfig = null;
+    this._posthogConfig = null;
     this.scriptLoaded = false;
+  }
+
+  protected async doProviderReset(): Promise<void> {
+    if (!this.posthog) return;
+
+    // PostHog reset clears the user ID and super properties
+    this.posthog.reset();
   }
 
   protected async doUpdateConsent(consent: ConsentSettings): Promise<void> {

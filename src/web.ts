@@ -56,8 +56,18 @@ export class UnifiedTrackingWeb extends WebPlugin implements UnifiedTrackingPlug
       const result: InitializeResult = {
         success: true,
         activeProviders: {
-          analytics: analyticsProviders.map(p => p.id),
-          errorTracking: errorProviders.map(p => p.id)
+          analytics: analyticsProviders.map(p => ({
+            name: p.name,
+            enabled: true,
+            initialized: p.isReady(),
+            version: p.version
+          })),
+          errorTracking: errorProviders.map(p => ({
+            name: p.name,
+            enabled: true,
+            initialized: p.isReady(),
+            version: p.version
+          }))
         }
       };
       

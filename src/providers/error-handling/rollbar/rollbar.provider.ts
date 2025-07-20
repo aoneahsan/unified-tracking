@@ -83,10 +83,10 @@ interface RollbarSDK {
     captureNavigation: (from: string, to: string, metadata?: any, level?: string) => void;
     captureConnectivity: (metadata: any, level?: string) => void;
   };
-  wrap: (func: Function, context?: any) => Function;
+  wrap: (func: (...args: any[]) => any, context?: any) => (...args: any[]) => any;
   loadFull: () => void;
   captureEvent: (type: string, metadata: any, level?: string) => void;
-  lambdaHandler: (handler: Function) => Function;
+  lambdaHandler: (handler: (...args: any[]) => any) => (...args: any[]) => any;
   isIgnored: (payload: any) => boolean;
   buildPayload: (data: any) => any;
   sendPayload: (payload: any, callback?: (err: any, response: any) => void) => void;
@@ -135,7 +135,8 @@ export class RollbarErrorTrackingProvider extends BaseErrorTrackingProvider {
   readonly version = '1.0.0';
 
   private rollbar?: RollbarSDK;
-  private rollbarConfig: RollbarConfig | null = null;
+  // @ts-ignore - Reserved for future use
+  private _rollbarConfig: RollbarConfig | null = null;
   private scriptLoaded = false;
 
   protected async doInitialize(config: RollbarConfig): Promise<void> {
@@ -143,7 +144,7 @@ export class RollbarErrorTrackingProvider extends BaseErrorTrackingProvider {
       throw new Error('Rollbar access token is required');
     }
 
-    this.rollbarConfig = config;
+    this._rollbarConfig = config;
 
     // Load Rollbar SDK
     await this.loadRollbarSDK();
@@ -235,7 +236,7 @@ export class RollbarErrorTrackingProvider extends BaseErrorTrackingProvider {
       this.rollbar.configure({ enabled: false });
     }
     this.rollbar = undefined;
-    this.rollbarConfig = null;
+    this._rollbarConfig = null;
     this.scriptLoaded = false;
   }
 
@@ -248,7 +249,7 @@ export class RollbarErrorTrackingProvider extends BaseErrorTrackingProvider {
     this.logger.info(`Rollbar tracking ${enabled ? 'enabled' : 'disabled'} by consent`);
   }
 
-  protected async doTrackError(error: Error | string, context?: ErrorContext): Promise<void> {
+  protected async doLogError(error: Error | string, context?: ErrorContext): Promise<void> {
     if (!this.rollbar) {
       throw new Error('Rollbar not initialized');
     }
@@ -261,7 +262,7 @@ export class RollbarErrorTrackingProvider extends BaseErrorTrackingProvider {
         extra.person = {
           id: context.user.id,
           email: context.user.email,
-          username: context.user.name,
+          username: context.user.username,
         };
       }
 
@@ -275,16 +276,14 @@ export class RollbarErrorTrackingProvider extends BaseErrorTrackingProvider {
         Object.assign(extra, context.extra);
       }
 
-      // Add fingerprint
-      if (context.fingerprint) {
-        extra.fingerprint = Array.isArray(context.fingerprint) 
-          ? context.fingerprint.join(':') 
-          : context.fingerprint;
+      // Add severity
+      if (context.severity) {
+        extra.severity = context.severity;
       }
     }
 
     // Choose the appropriate log level
-    const level = this.mapSeverityToRollbarLevel(context?.level || 'error');
+    const level = this.mapSeverityToRollbarLevel(context?.severity || 'error');
     
     switch (level) {
       case 'critical':
@@ -319,10 +318,10 @@ export class RollbarErrorTrackingProvider extends BaseErrorTrackingProvider {
     return severityMap[severity] || 'error';
   }
 
-  protected async doSetUser(user: Record<string, any>): Promise<void> {
+  protected doSetUserContext(user: Record<string, any>): void {
     if (!this.rollbar) return;
 
-    const person = {
+    const person: any = {
       id: user.id,
       email: user.email,
       username: user.name || user.username,
@@ -338,33 +337,74 @@ export class RollbarErrorTrackingProvider extends BaseErrorTrackingProvider {
     this.rollbar.person(person);
   }
 
-  protected async doSetContext(context: Record<string, any>): Promise<void> {
+  protected doSetExtraContext(key: string, value: any): void {
     if (!this.rollbar) return;
 
-    // Rollbar doesn't have a direct context API, so we'll use the global configuration
+    const payload: any = {};
+    payload[key] = value;
+    
     this.rollbar.configure({
       payload: {
-        context: context,
+        custom: payload,
       },
     });
   }
 
-  protected async doRemoveContext(key: string): Promise<void> {
-    if (!this.rollbar) return;
-
-    // Rollbar doesn't have a direct way to remove specific context keys
-    // This is a limitation of the Rollbar API
-    this.logger.warn(`Rollbar does not support removing individual context keys: ${key}`);
-  }
-
-  protected async doClearContext(): Promise<void> {
+  protected doSetTags(tags: Record<string, string>): void {
     if (!this.rollbar) return;
 
     this.rollbar.configure({
       payload: {
+        tags: tags,
+      },
+    });
+  }
+
+  protected async doCaptureException(exception: Error, context: ErrorContext): Promise<void> {
+    // Same as doLogError for Rollbar
+    await this.doLogError(exception, context);
+  }
+
+  protected async doProviderReset(): Promise<void> {
+    if (!this.rollbar) return;
+
+    this.rollbar.configure({
+      payload: {
+        person: {},
         context: {},
+        custom: {},
+        tags: {},
       },
     });
+  }
+
+  protected async doEnable(): Promise<void> {
+    if (!this.rollbar) return;
+    this.rollbar.configure({ enabled: true });
+  }
+
+  protected async doDisable(): Promise<void> {
+    if (!this.rollbar) return;
+    this.rollbar.configure({ enabled: false });
+  }
+
+  protected doAddBreadcrumb(message: string, category?: string, data?: Record<string, any>): void {
+    if (!this.rollbar) return;
+    
+    const metadata = {
+      message,
+      category,
+      ...data,
+    };
+    
+    this.rollbar.telemetry.captureEvent('log', metadata, 'info');
+  }
+
+  protected async doLogMessage(message: string, level: 'debug' | 'info' | 'warning', _extra?: Record<string, any>): Promise<void> {
+    if (!this.rollbar) return;
+    
+    const rollbarLevel = level === 'warning' ? 'warning' : level;
+    this.rollbar[rollbarLevel](message);
   }
 
   protected async doCaptureBreadcrumb(breadcrumb: {
@@ -435,7 +475,7 @@ export class RollbarErrorTrackingProvider extends BaseErrorTrackingProvider {
   /**
    * Wrap a function to capture errors
    */
-  wrap(func: Function, context?: any): Function | null {
+  wrap(func: (...args: any[]) => any, context?: any): ((...args: any[]) => any) | null {
     if (!this.rollbar) return null;
 
     return this.rollbar.wrap(func, context);

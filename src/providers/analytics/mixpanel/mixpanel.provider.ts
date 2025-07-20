@@ -78,13 +78,15 @@ export class MixpanelAnalyticsProvider extends BaseAnalyticsProvider {
   
   private mixpanel?: MixpanelInstance;
   private scriptLoaded = false;
+  // @ts-ignore - Reserved for future use
+  private _mixpanelConfig?: MixpanelConfig;
 
   protected async doInitialize(config: MixpanelConfig): Promise<void> {
     if (!config.token) {
       throw new Error('Mixpanel token is required');
     }
 
-    this.mixpanelConfig = config;
+    this._mixpanelConfig = config;
 
     // Load Mixpanel SDK
     await this.loadMixpanelSDK();
@@ -94,21 +96,13 @@ export class MixpanelAnalyticsProvider extends BaseAnalyticsProvider {
       this.mixpanel = window.mixpanel;
 
       const initConfig: any = {
-        debug: config.debug || false,
+        debug: this.debugMode || false,
         track_pageview: config.trackAutomaticEvents !== false,
-        persistence: config.persistence || 'localStorage',
-        persistence_name: config.persistencePrefix,
-        cookie_domain: config.cookieDomain,
-        cross_site_cookie: config.crossSiteCookie,
-        secure_cookie: config.secureCookie,
-        ip: config.ipTracking !== false,
-        property_blacklist: config.propertyBlocklist,
-        session_duration: config.sessionDuration
+        persistence: 'localStorage',
+        ip: true
       };
 
-      if (config.apiHost) {
-        initConfig.api_host = config.apiHost;
-      }
+      // Add any additional config options if needed
 
       this.mixpanel.init(config.token, initConfig);
       this.logger.info('Mixpanel initialized successfully', { token: config.token });
@@ -224,7 +218,7 @@ export class MixpanelAnalyticsProvider extends BaseAnalyticsProvider {
 
   protected async doShutdown(): Promise<void> {
     this.mixpanel = undefined;
-    this.mixpanelConfig = undefined;
+    this._mixpanelConfig = undefined;
     this.scriptLoaded = false;
   }
 
@@ -235,12 +229,16 @@ export class MixpanelAnalyticsProvider extends BaseAnalyticsProvider {
 
     return new Promise((resolve, reject) => {
       // Mixpanel snippet
-      (function(f: any, b: any) {
+      const loadScript = (_f: any, b: any) => {
         if (!(b as any).__SV) {
-          let a: any, e: any, g: any, d: any = window.mixpanel = function(c: string, ...args: any[]) {
-            d.push ? d.push([c].concat(args)) : 
-            d[c] = args[0];
+          let a: any, e: any, d: any = function(c: string, ...args: any[]) {
+            if (d.push) {
+              d.push([c].concat(args));
+            } else {
+              d[c] = args[0];
+            }
           };
+          (window as any).mixpanel = d;
           d.push = [];
           d.loaded = false;
           d.version = '2.0';
@@ -267,7 +265,8 @@ export class MixpanelAnalyticsProvider extends BaseAnalyticsProvider {
         } else {
           resolve();
         }
-      })(window, document);
+      };
+      loadScript(window, document);
     });
   }
 

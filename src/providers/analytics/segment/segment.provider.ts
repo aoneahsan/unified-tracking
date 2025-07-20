@@ -66,9 +66,10 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
   readonly version = '1.0.0';
 
   private analytics?: SegmentSDK;
-  private segmentConfig: SegmentConfig | null = null;
+  // @ts-ignore - Reserved for future use
+  private _segmentConfig: SegmentConfig | null = null;
   private scriptLoaded = false;
-  private isReady = false;
+  private _isReady = false;
   private _isInitialized = false;
 
   protected async doInitialize(config: SegmentConfig): Promise<void> {
@@ -76,7 +77,7 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
       throw new Error('Segment write key is required');
     }
 
-    this.segmentConfig = config;
+    this._segmentConfig = config;
 
     // Load Segment SDK
     await this.loadSegmentSDK();
@@ -89,12 +90,7 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
 
     // Configure Segment
     const segmentOptions: any = {
-      apiHost: config.apiHost,
-      flushAt: config.flushAt ?? 20,
-      flushInterval: config.flushInterval ?? 10000,
-      defaultIntegrations: config.defaultIntegrations ?? true,
-      timeout: config.timeout ?? 300,
-      retryCount: config.retryCount ?? 3,
+      apiHost: config.apiHost
     };
 
     if (config.enabledIntegrations) {
@@ -111,7 +107,7 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
     // Wait for Segment to be ready
     await new Promise<void>((resolve) => {
       this.analytics!.ready(() => {
-        this.isReady = true;
+        this._isReady = true;
         this._isInitialized = true;
         resolve();
       });
@@ -131,7 +127,8 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
     return new Promise((resolve, reject) => {
       // Segment snippet
       (() => {
-        const analytics = (window.analytics = window.analytics || []);
+        const analytics: any = window.analytics || [];
+        window.analytics = analytics as SegmentSDK;
         if (!analytics.initialize) {
           if (analytics.invoked) {
             window.console && console.error && console.error('Segment snippet included twice.');
@@ -208,9 +205,9 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
 
   protected async doShutdown(): Promise<void> {
     this.analytics = undefined;
-    this.segmentConfig = null;
+    this._segmentConfig = null;
     this.scriptLoaded = false;
-    this.isReady = false;
+    this._isReady = false;
     this._isInitialized = false;
   }
 
@@ -229,16 +226,16 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
 
 
   protected async doIdentifyUser(userId: string, traits: Record<string, any>): Promise<void> {
-    if (!this.analytics || !this.isReady) {
+    if (!this.analytics || !this._isReady) {
       throw new Error('Segment not initialized');
     }
 
     const cleanTraits = this.sanitizeProperties(traits);
 
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>((resolve, _reject) => {
       this.analytics!.identify(userId, cleanTraits, {}, (error?: Error) => {
         if (error) {
-          reject(error);
+          _reject(error);
         } else {
           resolve();
         }
@@ -247,7 +244,7 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
   }
 
   protected async doSetUserProperties(properties: Record<string, any>): Promise<void> {
-    if (!this.analytics || !this.isReady) {
+    if (!this.analytics || !this._isReady) {
       throw new Error('Segment not initialized');
     }
 
@@ -255,10 +252,10 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
 
     // Segment doesn't have a separate setUserProperties method
     // We can identify with the current user ID and new traits
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>((resolve, _reject) => {
       this.analytics!.identify(undefined, cleanProperties, {}, (error?: Error) => {
         if (error) {
-          reject(error);
+          _reject(error);
         } else {
           resolve();
         }
@@ -267,7 +264,7 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
   }
 
   protected async doLogScreenView(screenName: string, properties: Record<string, any>): Promise<void> {
-    if (!this.analytics || !this.isReady) {
+    if (!this.analytics || !this._isReady) {
       throw new Error('Segment not initialized');
     }
 
@@ -276,10 +273,10 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
       ...this.sanitizeProperties(properties),
     };
 
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>((resolve, _reject) => {
       this.analytics!.screen(screenName, screenProperties, {}, (error?: Error) => {
         if (error) {
-          reject(error);
+          _reject(error);
         } else {
           resolve();
         }
@@ -288,7 +285,7 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
   }
 
   protected async doLogRevenue(data: RevenueData): Promise<void> {
-    if (!this.analytics || !this.isReady) {
+    if (!this.analytics || !this._isReady) {
       throw new Error('Segment not initialized');
     }
 
@@ -346,16 +343,16 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
     previousId?: string,
     options?: Record<string, any>
   ): Promise<void> {
-    if (!this.analytics || !this.isReady) {
+    if (!this.analytics || !this._isReady) {
       throw new Error('Segment not initialized');
     }
 
     const cleanOptions = options || {};
 
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>((resolve, _reject) => {
       this.analytics!.alias(userId, previousId, cleanOptions, (error?: Error) => {
         if (error) {
-          reject(error);
+          _reject(error);
         } else {
           resolve();
         }
@@ -371,17 +368,17 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
     traits?: Record<string, any>,
     options?: Record<string, any>
   ): Promise<void> {
-    if (!this.analytics || !this.isReady) {
+    if (!this.analytics || !this._isReady) {
       throw new Error('Segment not initialized');
     }
 
     const cleanTraits = traits ? this.sanitizeProperties(traits) : {};
     const cleanOptions = options || {};
 
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>((resolve, _reject) => {
       this.analytics!.group(groupId, cleanTraits, cleanOptions, (error?: Error) => {
         if (error) {
-          reject(error);
+          _reject(error);
         } else {
           resolve();
         }
@@ -393,20 +390,24 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
    * Track a page view
    */
   async page(name?: string, properties?: Record<string, any>): Promise<void> {
-    if (!this.analytics || !this.isReady) {
+    if (!this.analytics || !this._isReady) {
       throw new Error('Segment not initialized');
     }
 
     const cleanProperties = properties ? this.sanitizeProperties(properties) : {};
 
-    return new Promise<void>((resolve, reject) => {
-      this.analytics!.page(name, cleanProperties, {}, (error?: Error) => {
-        if (error) {
-          reject(error);
-        } else {
+    return new Promise<void>((resolve, _reject) => {
+      // If name is provided, use it as the page name
+      if (name) {
+        this.analytics!.page(undefined, name, cleanProperties, {}, () => {
           resolve();
-        }
-      });
+        });
+      } else {
+        // No name provided, just track a page view
+        this.analytics!.page(undefined, undefined, cleanProperties, {}, () => {
+          resolve();
+        });
+      }
     });
   }
 
@@ -414,7 +415,7 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
    * Flush queued events
    */
   async flush(): Promise<void> {
-    if (!this.analytics || !this.isReady) {
+    if (!this.analytics || !this._isReady) {
       throw new Error('Segment not initialized');
     }
 
@@ -429,7 +430,7 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
    * Get the current user
    */
   getUser(): any {
-    if (!this.analytics || !this.isReady) {
+    if (!this.analytics || !this._isReady) {
       return null;
     }
 
@@ -467,20 +468,16 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
     properties?: Record<string, any>,
     options?: Record<string, any>
   ): Promise<void> {
-    if (!this.analytics || !this.isReady) {
+    if (!this.analytics || !this._isReady) {
       throw new Error('Segment not initialized');
     }
 
     const cleanProperties = properties ? this.sanitizeProperties(properties) : {};
     const cleanOptions = options || {};
 
-    return new Promise<void>((resolve, reject) => {
-      this.analytics!.page(pageName, cleanProperties, cleanOptions, (error?: Error) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve();
-        }
+    return new Promise<void>((resolve, _reject) => {
+      this.analytics!.page(undefined, pageName, cleanProperties, cleanOptions, () => {
+        resolve();
       });
     });
   }
@@ -494,17 +491,17 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
     properties?: Record<string, any>,
     options?: Record<string, any>
   ): Promise<void> {
-    if (!this.analytics || !this.isReady) {
+    if (!this.analytics || !this._isReady) {
       throw new Error('Segment not initialized');
     }
 
     const cleanProperties = properties ? this.sanitizeProperties(properties) : {};
     const cleanOptions = options || {};
 
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>((resolve, _reject) => {
       this.analytics!.page(category, pageName, cleanProperties, cleanOptions, (error?: Error) => {
         if (error) {
-          reject(error);
+          _reject(error);
         } else {
           resolve();
         }
@@ -520,17 +517,17 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
     traits?: Record<string, any>,
     options?: Record<string, any>
   ): Promise<void> {
-    if (!this.analytics || !this.isReady) {
+    if (!this.analytics || !this._isReady) {
       throw new Error('Segment not initialized');
     }
 
     const cleanTraits = traits ? this.sanitizeProperties(traits) : {};
     const cleanOptions = options || {};
 
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>((resolve, _reject) => {
       this.analytics!.identify(userId, cleanTraits, cleanOptions, (error?: Error) => {
         if (error) {
-          reject(error);
+          _reject(error);
         } else {
           resolve();
         }
@@ -546,17 +543,17 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
     properties?: Record<string, any>,
     options?: Record<string, any>
   ): Promise<void> {
-    if (!this.analytics || !this.isReady) {
+    if (!this.analytics || !this._isReady) {
       throw new Error('Segment not initialized');
     }
 
     const cleanProperties = properties ? this.sanitizeProperties(properties) : {};
     const cleanOptions = options || {};
 
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>((resolve, _reject) => {
       this.analytics!.track(eventName, cleanProperties, cleanOptions, (error?: Error) => {
         if (error) {
-          reject(error);
+          _reject(error);
         } else {
           resolve();
         }
@@ -568,7 +565,7 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
    * Get user ID
    */
   async getUserId(): Promise<string | null> {
-    if (!this.analytics || !this.isReady) {
+    if (!this.analytics || !this._isReady) {
       return null;
     }
 
@@ -580,7 +577,7 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
    * Get user traits
    */
   async getUserTraits(): Promise<Record<string, any> | null> {
-    if (!this.analytics || !this.isReady) {
+    if (!this.analytics || !this._isReady) {
       return null;
     }
 
@@ -592,7 +589,7 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
    * Get anonymous ID async
    */
   async getAnonymousId(): Promise<string | null> {
-    if (!this.analytics || !this.isReady) {
+    if (!this.analytics || !this._isReady) {
       return null;
     }
 
@@ -604,7 +601,7 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
    * Set anonymous ID async
    */
   async setAnonymousId(anonymousId: string): Promise<void> {
-    if (!this.analytics || !this.isReady) {
+    if (!this.analytics || !this._isReady) {
       return;
     }
 
@@ -615,7 +612,7 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
    * Add source middleware
    */
   async addSourceMiddleware(middleware: any): Promise<void> {
-    if (!this.analytics || !this.isReady) {
+    if (!this.analytics || !this._isReady) {
       throw new Error('Segment not initialized');
     }
 
@@ -626,7 +623,7 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
    * Add destination middleware
    */
   async addDestinationMiddleware(integrationName: string, middleware: any): Promise<void> {
-    if (!this.analytics || !this.isReady) {
+    if (!this.analytics || !this._isReady) {
       throw new Error('Segment not initialized');
     }
 
@@ -637,7 +634,7 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
    * Add event listener
    */
   async on(event: string, callback: (...args: any[]) => void): Promise<void> {
-    if (!this.analytics || !this.isReady) {
+    if (!this.analytics || !this._isReady) {
       throw new Error('Segment not initialized');
     }
 
@@ -648,7 +645,7 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
    * Remove event listener
    */
   async off(event: string, callback?: (...args: any[]) => void): Promise<void> {
-    if (!this.analytics || !this.isReady) {
+    if (!this.analytics || !this._isReady) {
       throw new Error('Segment not initialized');
     }
 
@@ -659,7 +656,7 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
    * Add one-time event listener
    */
   async once(event: string, callback: (...args: any[]) => void): Promise<void> {
-    if (!this.analytics || !this.isReady) {
+    if (!this.analytics || !this._isReady) {
       throw new Error('Segment not initialized');
     }
 
@@ -670,7 +667,7 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
    * Enable debug mode
    */
   async enableDebug(): Promise<void> {
-    if (!this.analytics || !this.isReady) {
+    if (!this.analytics || !this._isReady) {
       throw new Error('Segment not initialized');
     }
 
@@ -682,7 +679,7 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
    * Disable debug mode
    */
   async disableDebug(): Promise<void> {
-    if (!this.analytics || !this.isReady) {
+    if (!this.analytics || !this._isReady) {
       throw new Error('Segment not initialized');
     }
 
@@ -694,7 +691,7 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
    * Set timeout
    */
   async setTimeout(timeout: number): Promise<void> {
-    if (!this.analytics || !this.isReady) {
+    if (!this.analytics || !this._isReady) {
       throw new Error('Segment not initialized');
     }
 
@@ -704,7 +701,7 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
   /**
    * Wait for ready state
    */
-  async ready(callback: () => void): Promise<void> {
+  async waitForReady(callback: () => void): Promise<void> {
     if (!this.analytics) {
       throw new Error('Segment not initialized');
     }

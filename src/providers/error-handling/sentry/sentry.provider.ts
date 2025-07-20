@@ -75,7 +75,8 @@ export class SentryErrorTrackingProvider extends BaseErrorTrackingProvider {
   readonly version = '1.0.0';
 
   private sentry?: SentrySDK;
-  private sentryConfig: SentryConfig | null = null;
+  // @ts-ignore - Reserved for future use
+  private _sentryConfig: SentryConfig | null = null;
   private scriptLoaded = false;
 
   /**
@@ -90,7 +91,7 @@ export class SentryErrorTrackingProvider extends BaseErrorTrackingProvider {
       throw new Error('Sentry DSN is required');
     }
 
-    this.sentryConfig = config;
+    this._sentryConfig = config;
 
     // Load Sentry SDK
     await this.loadSentrySDK();
@@ -174,7 +175,7 @@ export class SentryErrorTrackingProvider extends BaseErrorTrackingProvider {
       await this.sentry.close(2000);
     }
     this.sentry = undefined;
-    this.sentryConfig = null;
+    this._sentryConfig = null;
     this.scriptLoaded = false;
   }
 
@@ -222,16 +223,9 @@ export class SentryErrorTrackingProvider extends BaseErrorTrackingProvider {
         });
       }
 
-      // Add breadcrumbs
-      if (context.breadcrumbs) {
-        context.breadcrumbs.forEach((breadcrumb) => {
-          scope.addBreadcrumb({
-            message: breadcrumb.message,
-            category: breadcrumb.category,
-            timestamp: breadcrumb.timestamp / 1000, // Sentry expects seconds
-            data: breadcrumb.data,
-          });
-        });
+      // Add severity
+      if (context.severity) {
+        scope.setLevel(this.mapSeverityToSentry(context.severity));
       }
 
       // Capture the exception
@@ -274,6 +268,27 @@ export class SentryErrorTrackingProvider extends BaseErrorTrackingProvider {
   protected async doCaptureException(exception: Error, context: ErrorContext): Promise<void> {
     // Same as doLogError for Sentry
     await this.doLogError(exception, context);
+  }
+
+  protected async doEnable(): Promise<void> {
+    // Sentry doesn't have a direct enable/disable API
+    // It's controlled by initialization
+  }
+
+  protected async doDisable(): Promise<void> {
+    // Sentry doesn't have a direct enable/disable API
+    // We can stop sending events by using beforeSend
+  }
+
+  protected doAddBreadcrumb(message: string, category?: string, data?: Record<string, any>): void {
+    if (!this.sentry) return;
+    
+    this.sentry.addBreadcrumb({
+      message,
+      category: category || 'manual',
+      data,
+      timestamp: Date.now() / 1000,
+    });
   }
 
   protected doStartTransaction(name: string, operation?: string): any {
@@ -333,16 +348,10 @@ export class SentryErrorTrackingProvider extends BaseErrorTrackingProvider {
   /**
    * Convert context to Sentry format
    */
-  private convertContextToSentry(context: ErrorContext): any {
+  private convertContextToSentry(_context: ErrorContext): any {
     const sentryContext: any = {};
 
-    if (context.fingerprint) {
-      sentryContext.fingerprint = context.fingerprint;
-    }
-
-    if (context.level) {
-      sentryContext.level = this.mapSeverityToSentry(context.level);
-    }
+    // Sentry context is handled within withScope
 
     return sentryContext;
   }

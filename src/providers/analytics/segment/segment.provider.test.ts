@@ -6,11 +6,11 @@ import type { ConsentSettings } from '../../../types/provider';
 const mockAnalytics = {
   load: vi.fn(),
   ready: vi.fn((callback) => callback()),
-  track: vi.fn((event, properties, options, callback) => callback?.()),
-  page: vi.fn((category, name, properties, options, callback) => {
+  track: vi.fn((_event: any, _properties: any, _options: any, callback: any) => callback?.()),
+  page: vi.fn((category: any, name: any, _properties: any, options: any, _callback: any) => {
     // Handle different overloads of page method
     if (typeof category === 'string' && typeof name === 'string') {
-      callback?.();
+      _callback?.();
     } else if (typeof category === 'string' && typeof name === 'object') {
       // page(name, properties, options, callback)
       const actualCallback = options;
@@ -20,9 +20,9 @@ const mockAnalytics = {
       category();
     }
   }),
-  identify: vi.fn((userId, traits, options, callback) => callback?.()),
-  alias: vi.fn((userId, previousId, options, callback) => callback?.()),
-  group: vi.fn((groupId, traits, options, callback) => callback?.()),
+  identify: vi.fn((_userId: any, _traits: any, _options: any, callback: any) => callback?.()),
+  alias: vi.fn((_userId: any, _previousId: any, _options: any, callback: any) => callback?.()),
+  group: vi.fn((_groupId: any, _traits: any, _options: any, callback: any) => callback?.()),
   reset: vi.fn(),
   debug: vi.fn(),
   timeout: vi.fn(),
@@ -37,6 +37,9 @@ const mockAnalytics = {
   on: vi.fn(),
   off: vi.fn(),
   once: vi.fn(),
+  screen: vi.fn(),
+  anonymousId: vi.fn(() => 'test-anonymous-id'),
+  flush: vi.fn(),
 };
 
 // Mock document.createElement for script loading
@@ -471,9 +474,9 @@ describe('SegmentProvider', () => {
       const callback = vi.fn();
 
       // Check if the method exists
-      expect(typeof provider.ready).toBe('function');
+      expect(typeof provider.waitForReady).toBe('function');
       
-      await provider.ready(callback);
+      await provider.waitForReady(callback);
 
       expect(mockAnalytics.ready).toHaveBeenCalledWith(callback);
     });

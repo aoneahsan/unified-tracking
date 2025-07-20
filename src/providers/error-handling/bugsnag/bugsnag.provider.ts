@@ -102,7 +102,8 @@ export class BugsnagErrorTrackingProvider extends BaseErrorTrackingProvider {
   readonly version = '1.0.0';
 
   private bugsnag?: BugsnagSDK;
-  private bugsnagConfig: BugsnagConfig | null = null;
+  // @ts-ignore - Reserved for future use
+  private _bugsnagConfig: BugsnagConfig | null = null;
   private scriptLoaded = false;
 
   protected async doInitialize(config: BugsnagConfig): Promise<void> {
@@ -110,7 +111,7 @@ export class BugsnagErrorTrackingProvider extends BaseErrorTrackingProvider {
       throw new Error('Bugsnag API key is required');
     }
 
-    this.bugsnagConfig = config;
+    this._bugsnagConfig = config;
 
     // Load Bugsnag SDK
     await this.loadBugsnagSDK();
@@ -192,7 +193,7 @@ export class BugsnagErrorTrackingProvider extends BaseErrorTrackingProvider {
 
   protected async doShutdown(): Promise<void> {
     this.bugsnag = undefined;
-    this.bugsnagConfig = null;
+    this._bugsnagConfig = null;
     this.scriptLoaded = false;
   }
 
@@ -208,7 +209,7 @@ export class BugsnagErrorTrackingProvider extends BaseErrorTrackingProvider {
     }
   }
 
-  protected async doTrackError(error: Error | string, context?: ErrorContext): Promise<void> {
+  protected async doLogError(error: Error | string, context?: ErrorContext): Promise<void> {
     if (!this.bugsnag) {
       throw new Error('Bugsnag not initialized');
     }
@@ -217,7 +218,7 @@ export class BugsnagErrorTrackingProvider extends BaseErrorTrackingProvider {
       if (context) {
         // Set user information
         if (context.user) {
-          event.setUser(context.user.id, context.user.email, context.user.name);
+          event.setUser(context.user.id, context.user.email, context.user.username);
         }
 
         // Set context
@@ -239,23 +240,14 @@ export class BugsnagErrorTrackingProvider extends BaseErrorTrackingProvider {
           });
         }
 
-        // Set severity
-        if (context.level) {
+        // Set severity based on context
+        if (context.severity) {
           const severityMap: Record<string, string> = {
-            'debug': 'info',
             'info': 'info',
             'warning': 'warning',
             'error': 'error',
-            'fatal': 'error',
           };
-          event.severity = severityMap[context.level] || 'error';
-        }
-
-        // Set fingerprint as grouping hash
-        if (context.fingerprint) {
-          event.groupingHash = Array.isArray(context.fingerprint) 
-            ? context.fingerprint.join(':') 
-            : context.fingerprint;
+          event.severity = severityMap[context.severity] || 'error';
         }
       }
 
@@ -263,10 +255,10 @@ export class BugsnagErrorTrackingProvider extends BaseErrorTrackingProvider {
     });
   }
 
-  protected async doSetUser(user: Record<string, any>): Promise<void> {
+  protected doSetUserContext(user: Record<string, any>): void {
     if (!this.bugsnag) return;
 
-    this.bugsnag.setUser(user.id, user.email, user.name);
+    this.bugsnag.setUser(user.id, user.email, user.username);
 
     // Add additional user properties as metadata
     const additionalProps = { ...user };
@@ -281,24 +273,59 @@ export class BugsnagErrorTrackingProvider extends BaseErrorTrackingProvider {
     }
   }
 
-  protected async doSetContext(context: Record<string, any>): Promise<void> {
+  protected doSetExtraContext(key: string, value: any): void {
     if (!this.bugsnag) return;
 
-    Object.entries(context).forEach(([key, value]) => {
-      this.bugsnag!.addMetadata('context', key, value);
+    this.bugsnag!.addMetadata('extra', key, value);
+  }
+
+  protected doSetTags(tags: Record<string, string>): void {
+    if (!this.bugsnag) return;
+
+    Object.entries(tags).forEach(([key, value]) => {
+      this.bugsnag!.addMetadata('tags', key, value);
     });
   }
 
-  protected async doRemoveContext(key: string): Promise<void> {
-    if (!this.bugsnag) return;
-
-    this.bugsnag.clearMetadata('context', key);
+  protected async doCaptureException(exception: Error, context: ErrorContext): Promise<void> {
+    // Same as doLogError for Bugsnag
+    await this.doLogError(exception, context);
   }
 
-  protected async doClearContext(): Promise<void> {
+  protected async doProviderReset(): Promise<void> {
     if (!this.bugsnag) return;
 
     this.bugsnag.clearMetadata('context');
+    this.bugsnag.clearMetadata('extra');
+    this.bugsnag.clearMetadata('tags');
+    this.bugsnag.clearMetadata('user');
+    this.bugsnag.setUser();
+  }
+
+  protected doSetDebugMode(_enabled: boolean): void {
+    // Bugsnag doesn't have a specific debug mode
+    // Debug logging is handled by the logger
+  }
+
+  protected async doEnable(): Promise<void> {
+    if (!this.bugsnag) return;
+    this.bugsnag.resumeSession();
+  }
+
+  protected async doDisable(): Promise<void> {
+    if (!this.bugsnag) return;
+    this.bugsnag.pauseSession();
+  }
+
+  protected doAddBreadcrumb(message: string, category?: string, data?: Record<string, any>): void {
+    if (!this.bugsnag) return;
+    this.bugsnag.leaveBreadcrumb(message, data, category);
+  }
+
+  protected async doLogMessage(message: string, level: 'debug' | 'info' | 'warning', _extra?: Record<string, any>): Promise<void> {
+    // Bugsnag doesn't have a specific message logging API
+    // Messages are typically added as breadcrumbs
+    this.doAddBreadcrumb(message, `log.${level}`);
   }
 
   protected async doCaptureBreadcrumb(breadcrumb: {
@@ -318,11 +345,6 @@ export class BugsnagErrorTrackingProvider extends BaseErrorTrackingProvider {
     this.bugsnag.leaveBreadcrumb(breadcrumb.message, metaData, breadcrumb.category);
   }
 
-  protected doSetDebugMode(enabled: boolean): void {
-    // Bugsnag doesn't have a specific debug mode API
-    // Debug information is controlled by the releaseStage configuration
-    this.logger.info(`Bugsnag debug mode ${enabled ? 'enabled' : 'disabled'}`);
-  }
 
   /**
    * Set context for all future errors

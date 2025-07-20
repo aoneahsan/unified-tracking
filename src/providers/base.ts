@@ -214,9 +214,9 @@ export interface UnifiedProvider extends AnalyticsProvider, ErrorTrackingProvide
 export type ProviderFactory<T extends BaseProvider> = () => T;
 
 /**
- * Provider registry
+ * Provider registry interface
  */
-export interface ProviderRegistry {
+export interface IProviderRegistry {
   analytics: Map<string, ProviderFactory<AnalyticsProvider>>;
   errorTracking: Map<string, ProviderFactory<ErrorTrackingProvider>>;
   unified: Map<string, ProviderFactory<UnifiedProvider>>;

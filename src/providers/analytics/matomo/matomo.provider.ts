@@ -337,10 +337,10 @@ export class MatomoAnalyticsProvider extends BaseAnalyticsProvider {
     if (data.items && data.items.length > 0) {
       data.items.forEach(item => {
         this.tracker!.addEcommerceItem(
-          item.itemId,
-          item.itemName,
-          item.itemCategory,
-          item.price,
+          item.itemId || '',
+          item.itemName || '',
+          item.itemCategory || '',
+          item.price || 0,
           item.quantity || 1
         );
       });

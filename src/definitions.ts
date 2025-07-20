@@ -211,10 +211,7 @@ export interface ConsentSettings {
 
 export interface InitializeResult {
   success: boolean;
-  activeProviders: {
-    analytics: string[];
-    errorTracking: string[];
-  };
+  activeProviders: ActiveProvidersResult;
   warnings?: string[];
 }
 
@@ -227,6 +224,14 @@ export interface ErrorContext {
     email?: string;
     username?: string;
   };
+  breadcrumbs?: Array<{
+    message: string;
+    category?: string;
+    timestamp?: number;
+    data?: Record<string, any>;
+  }>;
+  timestamp?: string;
+  platform?: string;
 }
 
 export interface RevenueData {

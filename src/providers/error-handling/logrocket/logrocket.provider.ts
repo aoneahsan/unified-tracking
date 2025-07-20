@@ -121,7 +121,7 @@ export class LogRocketErrorTrackingProvider extends BaseErrorTrackingProvider {
   readonly version = '1.0.0';
 
   private logRocket?: LogRocketSDK;
-  private logRocketConfig: LogRocketConfig | null = null;
+  private _logRocketConfig: LogRocketConfig | null = null;
   private scriptLoaded = false;
 
   protected async doInitialize(config: LogRocketConfig): Promise<void> {
@@ -129,7 +129,7 @@ export class LogRocketErrorTrackingProvider extends BaseErrorTrackingProvider {
       throw new Error('LogRocket app ID is required');
     }
 
-    this.logRocketConfig = config;
+    this._logRocketConfig = config;
 
     // Load LogRocket SDK
     await this.loadLogRocketSDK();
@@ -222,7 +222,7 @@ export class LogRocketErrorTrackingProvider extends BaseErrorTrackingProvider {
       this.logRocket.stop();
     }
     this.logRocket = undefined;
-    this.logRocketConfig = null;
+    this._logRocketConfig = null;
     this.scriptLoaded = false;
   }
 
@@ -234,14 +234,14 @@ export class LogRocketErrorTrackingProvider extends BaseErrorTrackingProvider {
       this.logger.info('LogRocket tracking disabled by consent');
     } else if (consent.errorTracking === true) {
       // LogRocket doesn't have a resume method, so we might need to reinitialize
-      if (this.logRocketConfig) {
-        await this.doInitialize(this.logRocketConfig);
+      if (this._logRocketConfig) {
+        await this.doInitialize(this._logRocketConfig);
       }
       this.logger.info('LogRocket tracking enabled by consent');
     }
   }
 
-  protected async doTrackError(error: Error | string, context?: ErrorContext): Promise<void> {
+  protected async doLogError(error: Error | string, context?: ErrorContext): Promise<void> {
     if (!this.logRocket) {
       throw new Error('LogRocket not initialized');
     }
@@ -266,11 +266,9 @@ export class LogRocketErrorTrackingProvider extends BaseErrorTrackingProvider {
         Object.assign(extra, context.extra);
       }
 
-      // Add fingerprint
-      if (context.fingerprint) {
-        extra.fingerprint = Array.isArray(context.fingerprint) 
-          ? context.fingerprint.join(':') 
-          : context.fingerprint;
+      // Add severity
+      if (context.severity) {
+        extra.severity = context.severity;
       }
     }
 
@@ -279,7 +277,7 @@ export class LogRocketErrorTrackingProvider extends BaseErrorTrackingProvider {
       this.logRocket.captureException(error, extra);
     } else {
       // For string errors, use captureMessage
-      const level = this.mapSeverityToLogRocketLevel(context?.level || 'error');
+      const level = this.mapSeverityToLogRocketLevel(context?.severity || 'error');
       this.logRocket.captureMessage(error, level, extra);
     }
   }
@@ -296,7 +294,7 @@ export class LogRocketErrorTrackingProvider extends BaseErrorTrackingProvider {
     return severityMap[severity] || 'error';
   }
 
-  protected async doSetUser(user: Record<string, any>): Promise<void> {
+  protected doSetUserContext(user: Record<string, any>): void {
     if (!this.logRocket) return;
 
     const traits: any = {};
@@ -320,25 +318,46 @@ export class LogRocketErrorTrackingProvider extends BaseErrorTrackingProvider {
     this.logRocket.identify(user.id || 'anonymous', traits);
   }
 
-  protected async doSetContext(context: Record<string, any>): Promise<void> {
+  protected doSetExtraContext(key: string, value: any): void {
     if (!this.logRocket) return;
+    this.logRocket.addTag(key, String(value));
+  }
 
-    // LogRocket uses tags for context
-    Object.entries(context).forEach(([key, value]) => {
-      this.logRocket!.addTag(key, String(value));
+  protected doSetTags(tags: Record<string, string>): void {
+    if (!this.logRocket) return;
+    Object.entries(tags).forEach(([key, value]) => {
+      this.logRocket!.addTag(key, value);
     });
   }
 
-  protected async doRemoveContext(key: string): Promise<void> {
-    if (!this.logRocket) return;
-
-    this.logRocket.removeTags([key]);
+  protected async doCaptureException(exception: Error, context: ErrorContext): Promise<void> {
+    // Same as doLogError for LogRocket
+    await this.doLogError(exception, context);
   }
 
-  protected async doClearContext(): Promise<void> {
+  protected async doProviderReset(): Promise<void> {
     if (!this.logRocket) return;
-
     this.logRocket.clearTags();
+    this.logRocket.startNewSession();
+  }
+
+  protected async doEnable(): Promise<void> {
+    // LogRocket doesn't have a direct enable/disable API
+    // It's controlled by initialization
+  }
+
+  protected async doDisable(): Promise<void> {
+    if (!this.logRocket) return;
+    this.logRocket.stop();
+  }
+
+  protected doAddBreadcrumb(message: string, category?: string, data?: Record<string, any>): void {
+    if (!this.logRocket) return;
+    const extra = {
+      category,
+      ...data,
+    };
+    this.logRocket.log.info(message, extra);
   }
 
   protected async doCaptureBreadcrumb(breadcrumb: {
@@ -535,30 +554,10 @@ export class LogRocketErrorTrackingProvider extends BaseErrorTrackingProvider {
     this.logRocket.log.warn(message, extra);
   }
 
-  /**
-   * Log error message
-   */
-  logError(message: string, extra?: any): void {
+  protected async doLogMessage(message: string, level: 'debug' | 'info' | 'warning', extra?: Record<string, any>): Promise<void> {
     if (!this.logRocket) return;
-
-    this.logRocket.log.error(message, extra);
-  }
-
-  /**
-   * Log debug message
-   */
-  logDebug(message: string, extra?: any): void {
-    if (!this.logRocket) return;
-
-    this.logRocket.log.debug(message, extra);
-  }
-
-  /**
-   * Log general message
-   */
-  logMessage(message: string, extra?: any): void {
-    if (!this.logRocket) return;
-
-    this.logRocket.log.log(message, extra);
+    
+    const lrLevel = level === 'warning' ? 'warn' : level;
+    this.logRocket.log[lrLevel](message, extra);
   }
 }

@@ -1,5 +1,5 @@
 import React, { ComponentType, useEffect, useRef, useState } from 'react';
-import { useUnifiedTracking, useTrackEvent, useScreenView, useErrorTracking } from './hooks';
+import { useTrackEvent, useScreenView, useErrorTracking } from './hooks';
 import type { ErrorContext } from '../definitions';
 
 // Generic props interface for tracking HOCs
@@ -278,9 +278,9 @@ export function withPerformanceTracking<P extends object>(
   const WrappedComponent: React.FC<P & TrackingHOCProps> = (props) => {
     const { trackingDisabled, trackingProperties, onTrackingError, ...componentProps } = props;
     const { trackEvent } = useTrackEvent();
-    const mountTime = useRef<number>();
-    const renderTime = useRef<number>();
-    const updateTime = useRef<number>();
+    const mountTime = useRef<number | undefined>(undefined);
+    const renderTime = useRef<number | undefined>(undefined);
+    const updateTime = useRef<number | undefined>(undefined);
 
     const componentName = Component.displayName || Component.name || 'UnknownComponent';
 

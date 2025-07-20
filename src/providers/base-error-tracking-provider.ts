@@ -120,7 +120,7 @@ export abstract class BaseErrorTrackingProvider extends BaseProviderImpl impleme
     this.checkReady();
 
     const enrichedContext = this.enrichContext(context);
-    enrichedContext.isException = true;
+    (enrichedContext as any).isException = true;
 
     this.debug('Capturing exception', { exception, context: enrichedContext });
 
