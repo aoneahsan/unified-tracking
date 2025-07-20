@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { MixpanelProvider } from './mixpanel.provider';
+import { MixpanelAnalyticsProvider } from './mixpanel.provider';
 import type { ConsentSettings } from '../../../types/provider';
 
 // Mock the global Mixpanel object
@@ -62,10 +62,10 @@ global.window = {
 global.document = mockDocument as any;
 
 describe('MixpanelProvider', () => {
-  let provider: MixpanelProvider;
+  let provider: MixpanelAnalyticsProvider;
 
   beforeEach(() => {
-    provider = new MixpanelProvider();
+    provider = new MixpanelAnalyticsProvider();
     vi.clearAllMocks();
   });
 

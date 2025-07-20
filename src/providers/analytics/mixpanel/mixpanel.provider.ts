@@ -77,7 +77,6 @@ export class MixpanelAnalyticsProvider extends BaseAnalyticsProvider {
   readonly version = '1.0.0';
   
   private mixpanel?: MixpanelInstance;
-  private mixpanelConfig?: MixpanelConfig;
   private scriptLoaded = false;
 
   protected async doInitialize(config: MixpanelConfig): Promise<void> {
@@ -236,8 +235,8 @@ export class MixpanelAnalyticsProvider extends BaseAnalyticsProvider {
 
     return new Promise((resolve, reject) => {
       // Mixpanel snippet
-      (function(f: any, b: Document) {
-        if (!b.__SV) {
+      (function(f: any, b: any) {
+        if (!(b as any).__SV) {
           let a: any, e: any, g: any, d: any = window.mixpanel = function(c: string, ...args: any[]) {
             d.push ? d.push([c].concat(args)) : 
             d[c] = args[0];

@@ -212,5 +212,5 @@ export abstract class BaseAnalyticsProvider extends BaseProviderImpl implements 
   /**
    * Get session ID (override in subclasses if needed)
    */
-  protected getSessionId?(): string;
+  protected getSessionId?(): string | null;
 }

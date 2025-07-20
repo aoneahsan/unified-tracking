@@ -6,7 +6,7 @@ import { Logger } from '../../../utils/logger';
 
 declare global {
   interface Window {
-    firebase: any;
+    firebase?: any;
     gtag?: (...args: any[]) => void;
   }
 }
@@ -29,7 +29,6 @@ export class FirebaseAnalyticsProvider implements AnalyticsProvider {
   private ready = false;
   private enabled = true;
   private analytics: any;
-  private userId?: string;
 
   constructor() {
     this.logger = new Logger('FirebaseAnalytics');
@@ -118,7 +117,6 @@ export class FirebaseAnalyticsProvider implements AnalyticsProvider {
     if (!this.isReady()) return;
 
     try {
-      this.userId = undefined;
       await this.analytics.setUserId(null);
       this.logger.info('Firebase Analytics reset');
     } catch (error) {
@@ -155,8 +153,7 @@ export class FirebaseAnalyticsProvider implements AnalyticsProvider {
     }
 
     try {
-      this.userId = userId;
-      await this.analytics.setUserId(userId);
+        await this.analytics.setUserId(userId);
 
       if (traits) {
         await this.setUserProperties(traits);

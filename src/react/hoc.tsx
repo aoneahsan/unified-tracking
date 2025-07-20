@@ -3,7 +3,7 @@ import { useUnifiedTracking, useTrackEvent, useScreenView, useErrorTracking } fr
 import type { ErrorContext } from '../definitions';
 
 // Generic props interface for tracking HOCs
-interface TrackingHOCProps {
+export interface TrackingHOCProps {
   trackingDisabled?: boolean;
   trackingProperties?: Record<string, any>;
   onTrackingError?: (error: Error) => void;

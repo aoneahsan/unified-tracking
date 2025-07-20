@@ -43,7 +43,6 @@ export class GoogleAnalyticsProvider extends BaseAnalyticsProvider {
 
   private measurementId = '';
   private scriptLoaded = false;
-  private gtagConfig: GoogleAnalyticsConfig | null = null;
 
   /**
    * Check if provider is initialized
@@ -58,7 +57,6 @@ export class GoogleAnalyticsProvider extends BaseAnalyticsProvider {
     }
 
     this.measurementId = config.measurementId;
-    this.gtagConfig = config;
 
     // Initialize dataLayer if it doesn't exist
     if (!window.dataLayer) {
@@ -148,7 +146,6 @@ export class GoogleAnalyticsProvider extends BaseAnalyticsProvider {
     // Just clear our state
     this.scriptLoaded = false;
     this.measurementId = '';
-    this.gtagConfig = null;
   }
 
   protected async doUpdateConsent(consent: ConsentSettings): Promise<void> {
@@ -228,11 +225,11 @@ export class GoogleAnalyticsProvider extends BaseAnalyticsProvider {
       }];
     } else if (data.items) {
       purchaseEvent.items = data.items.map(item => ({
-        item_id: item.id,
-        item_name: item.name,
+        item_id: item.itemId,
+        item_name: item.itemName,
         price: item.price,
         quantity: item.quantity || 1,
-        item_category: item.category,
+        item_category: item.itemCategory,
       }));
     }
 
@@ -267,40 +264,4 @@ export class GoogleAnalyticsProvider extends BaseAnalyticsProvider {
     }
   }
 
-  /**
-   * Convert event name to GA4 format
-   */
-  private convertToGA4EventName(eventName: string): string {
-    // GA4 recommends snake_case for event names
-    return eventName
-      .replace(/([A-Z])/g, '_$1')
-      .toLowerCase()
-      .replace(/^_/, '')
-      .replace(/[^a-z0-9_]/g, '_')
-      .substring(0, 40); // GA4 limit
-  }
-
-  /**
-   * Convert properties to GA4 format
-   */
-  private convertToGA4Properties(properties: Record<string, any>): Record<string, any> {
-    const ga4Properties: Record<string, any> = {};
-
-    for (const [key, value] of Object.entries(properties)) {
-      // Convert key to snake_case
-      const ga4Key = key
-        .replace(/([A-Z])/g, '_$1')
-        .toLowerCase()
-        .replace(/^_/, '')
-        .replace(/[^a-z0-9_]/g, '_')
-        .substring(0, 40); // GA4 limit
-
-      // GA4 has specific value type requirements
-      if (value !== null && value !== undefined) {
-        ga4Properties[ga4Key] = value;
-      }
-    }
-
-    return ga4Properties;
-  }
 }

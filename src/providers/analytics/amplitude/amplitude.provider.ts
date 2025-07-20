@@ -62,7 +62,6 @@ export class AmplitudeAnalyticsProvider implements AnalyticsProvider {
   private config: ProviderConfig = {};
   private ready = false;
   private enabled = true;
-  private userId?: string;
 
   constructor() {
     this.logger = new Logger('AmplitudeAnalytics');
@@ -173,7 +172,6 @@ export class AmplitudeAnalyticsProvider implements AnalyticsProvider {
     if (!this.isReady()) return;
 
     try {
-      this.userId = undefined;
       this.amplitude!.reset();
       this.logger.info('Amplitude Analytics reset');
     } catch (error) {
@@ -210,8 +208,7 @@ export class AmplitudeAnalyticsProvider implements AnalyticsProvider {
     }
 
     try {
-      this.userId = userId;
-      this.amplitude!.setUserId(userId);
+        this.amplitude!.setUserId(userId);
 
       if (traits) {
         await this.setUserProperties(traits);

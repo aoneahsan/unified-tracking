@@ -235,6 +235,18 @@ export interface RevenueData {
   productId?: string;
   productName?: string;
   quantity?: number;
+  transactionId?: string;
+  items?: Array<{
+    itemId?: string;
+    itemName?: string;
+    itemCategory?: string;
+    itemVariant?: string;
+    itemBrand?: string;
+    price?: number;
+    quantity?: number;
+    currency?: string;
+    index?: number;
+  }>;
   properties?: Record<string, any>;
 }
 

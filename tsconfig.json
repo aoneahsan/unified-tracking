@@ -6,7 +6,7 @@
     "forceConsistentCasingInFileNames": true,
     "lib": ["dom", "es2023"],
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": true,
     "noImplicitReturns": true,
@@ -17,6 +17,7 @@
     "sourceMap": true,
     "strict": true,
     "target": "es2022",
+    "jsx": "react",
     "paths": {
       "@/*": ["./src/*"],
       "@providers/*": ["./src/providers/*"],
@@ -25,5 +26,6 @@
     },
     "baseUrl": "."
   },
-  "files": ["src/index.ts"]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "vitest.config.ts"],
+  "exclude": ["node_modules", "dist"]
 }

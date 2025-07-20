@@ -337,9 +337,9 @@ export class MatomoAnalyticsProvider extends BaseAnalyticsProvider {
     if (data.items && data.items.length > 0) {
       data.items.forEach(item => {
         this.tracker!.addEcommerceItem(
-          item.id,
-          item.name,
-          item.category,
+          item.itemId,
+          item.itemName,
+          item.itemCategory,
           item.price,
           item.quantity || 1
         );
@@ -349,10 +349,10 @@ export class MatomoAnalyticsProvider extends BaseAnalyticsProvider {
     // Track ecommerce order
     const orderId = data.transactionId || `order_${Date.now()}`;
     const grandTotal = data.amount;
-    const subTotal = data.items?.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
-    const tax = data.tax;
-    const shipping = data.shipping;
-    const discount = data.discount;
+    const subTotal = data.items?.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0);
+    const tax = 0; // Not available in RevenueData
+    const shipping = 0; // Not available in RevenueData
+    const discount = 0; // Not available in RevenueData
 
     this.tracker.trackEcommerceOrder(orderId, grandTotal, subTotal, tax, shipping, discount);
   }
