@@ -106,6 +106,27 @@ export class PostHogAnalyticsProvider extends BaseAnalyticsProvider {
   private posthogConfig: PostHogConfig | null = null;
   private scriptLoaded = false;
 
+  /**
+   * Check if provider is initialized
+   */
+  isInitialized(): boolean {
+    return this.initialized;
+  }
+
+  /**
+   * Get provider ID
+   */
+  getId(): string {
+    return this.id;
+  }
+
+  /**
+   * Get provider name
+   */
+  getName(): string {
+    return this.name;
+  }
+
   protected async doInitialize(config: PostHogConfig): Promise<void> {
     if (!config.apiKey) {
       throw new Error('PostHog API key is required');
@@ -174,7 +195,14 @@ export class PostHogAnalyticsProvider extends BaseAnalyticsProvider {
 
       script.onload = () => {
         this.scriptLoaded = true;
-        resolve();
+        // Wait a bit for posthog to initialize
+        setTimeout(() => {
+          if (window.posthog) {
+            resolve();
+          } else {
+            reject(new Error('PostHog SDK loaded but window.posthog is not available'));
+          }
+        }, 100);
       };
 
       script.onerror = () => {
@@ -203,6 +231,13 @@ export class PostHogAnalyticsProvider extends BaseAnalyticsProvider {
     }
   }
 
+  async track(eventName: string, properties?: Record<string, any>): Promise<void> {
+    if (!this.initialized || !this.posthog) {
+      throw new Error('PostHog not initialized');
+    }
+    return super.track(eventName, properties);
+  }
+
   protected async doTrack(eventName: string, properties: Record<string, any>): Promise<void> {
     if (!this.posthog) {
       throw new Error('PostHog not initialized');
@@ -221,6 +256,23 @@ export class PostHogAnalyticsProvider extends BaseAnalyticsProvider {
     this.posthog.identify(userId, cleanTraits);
   }
 
+  /**
+   * Alias for identifyUser to match test expectations
+   */
+  async identify(userId: string, traits?: Record<string, any>): Promise<void> {
+    if (!this.initialized || !this.posthog) {
+      throw new Error('PostHog not initialized');
+    }
+    return this.identifyUser(userId, traits);
+  }
+
+  async setUserProperties(properties: Record<string, any>): Promise<void> {
+    if (!this.initialized || !this.posthog) {
+      throw new Error('PostHog not initialized');
+    }
+    return super.setUserProperties(properties);
+  }
+
   protected async doSetUserProperties(properties: Record<string, any>): Promise<void> {
     if (!this.posthog) {
       throw new Error('PostHog not initialized');
@@ -230,17 +282,34 @@ export class PostHogAnalyticsProvider extends BaseAnalyticsProvider {
     this.posthog.people.set(cleanProperties);
   }
 
+  async logScreenView(screenName: string, properties?: Record<string, any>): Promise<void> {
+    if (!this.initialized || !this.posthog) {
+      throw new Error('PostHog not initialized');
+    }
+    return super.logScreenView(screenName, properties);
+  }
+
   protected async doLogScreenView(screenName: string, properties: Record<string, any>): Promise<void> {
     if (!this.posthog) {
       throw new Error('PostHog not initialized');
     }
 
+    // Remove screen_name from properties to avoid duplication
+    const { screen_name, ...otherProperties } = properties;
+    
     const screenProperties = {
       $screen_name: screenName,
-      ...this.sanitizeProperties(properties),
+      ...this.sanitizeProperties(otherProperties),
     };
 
     this.posthog.capture('$pageview', screenProperties);
+  }
+
+  async logRevenue(data: RevenueData): Promise<void> {
+    if (!this.initialized || !this.posthog) {
+      throw new Error('PostHog not initialized');
+    }
+    return super.logRevenue(data);
   }
 
   protected async doLogRevenue(data: RevenueData): Promise<void> {
@@ -274,7 +343,7 @@ export class PostHogAnalyticsProvider extends BaseAnalyticsProvider {
     this.posthog.capture('Purchase', revenueProperties);
   }
 
-  protected async doProviderReset(): Promise<void> {
+  protected async doReset(): Promise<void> {
     if (!this.posthog) return;
 
     this.posthog.reset();
@@ -293,7 +362,7 @@ export class PostHogAnalyticsProvider extends BaseAnalyticsProvider {
     if (!this.posthog) return;
 
     const cleanProperties = this.sanitizeProperties(properties);
-    this.posthog.register(properties);
+    this.posthog.register(cleanProperties);
   }
 
   /**
@@ -432,6 +501,7 @@ export class PostHogAnalyticsProvider extends BaseAnalyticsProvider {
     const sanitized: Record<string, any> = {};
 
     for (const [key, value] of Object.entries(properties)) {
+      // Only exclude null and undefined values
       if (value !== null && value !== undefined) {
         // PostHog has some reserved properties that start with $
         // We'll keep them as is

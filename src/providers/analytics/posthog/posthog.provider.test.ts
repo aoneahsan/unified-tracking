@@ -69,14 +69,22 @@ global.document = mockDocument as any;
 
 describe('PostHogAnalyticsProvider', () => {
   let provider: PostHogAnalyticsProvider;
+  let originalPostHog: any;
 
   beforeEach(() => {
     provider = new PostHogAnalyticsProvider();
     vi.clearAllMocks();
+    // Store original posthog
+    originalPostHog = (global.window as any).posthog;
+    (global.window as any).posthog = mockPostHog;
   });
 
   afterEach(() => {
     vi.clearAllMocks();
+    // Restore original posthog
+    if (originalPostHog) {
+      (global.window as any).posthog = originalPostHog;
+    }
   });
 
   describe('initialization', () => {
@@ -159,20 +167,41 @@ describe('PostHogAnalyticsProvider', () => {
     it('should handle script loading failure', async () => {
       const config = { apiKey: 'test-api-key' };
       
+      // Remove posthog to trigger script loading
+      delete (global.window as any).posthog;
+      
       // Mock script loading failure
-      vi.mocked(mockDocument.createElement).mockImplementation(() => ({
-        ...mockScript,
-        onerror: null,
-      }));
+      let scriptErrorCallback: any = null;
+      vi.mocked(mockDocument.createElement).mockImplementation(() => {
+        const script = {
+          src: '',
+          async: false,
+          type: '',
+          onload: null,
+          onerror: null,
+        };
+        // Capture the error callback
+        Object.defineProperty(script, 'onerror', {
+          set(value) {
+            scriptErrorCallback = value;
+          },
+          get() {
+            return scriptErrorCallback;
+          }
+        });
+        return script as any;
+      });
 
-      // Simulate script error
-      setTimeout(() => {
-        if (mockScript.onerror) {
-          mockScript.onerror();
-        }
-      }, 10);
+      // Start initialization
+      const initPromise = provider.initialize(config);
 
-      await expect(provider.initialize(config)).rejects.toThrow('Failed to load PostHog SDK');
+      // Simulate script error after a brief delay
+      await new Promise(resolve => setTimeout(resolve, 10));
+      if (scriptErrorCallback) {
+        scriptErrorCallback();
+      }
+
+      await expect(initPromise).rejects.toThrow('Failed to load PostHog SDK');
     });
   });
 
@@ -499,7 +528,38 @@ describe('PostHogAnalyticsProvider', () => {
 
       const config = { apiKey: 'test-api-key' };
 
-      await expect(provider.initialize(config)).rejects.toThrow('Failed to load PostHog SDK');
+      // Mock script loading that doesn't set window.posthog
+      let scriptLoadCallback: any = null;
+      vi.mocked(mockDocument.createElement).mockImplementation(() => {
+        const script = {
+          src: '',
+          async: false,
+          type: '',
+          onload: null,
+          onerror: null,
+        };
+        // Capture the load callback
+        Object.defineProperty(script, 'onload', {
+          set(value) {
+            scriptLoadCallback = value;
+          },
+          get() {
+            return scriptLoadCallback;
+          }
+        });
+        return script as any;
+      });
+
+      // Start initialization
+      const initPromise = provider.initialize(config);
+
+      // Simulate script load (but window.posthog is still not available)
+      await new Promise(resolve => setTimeout(resolve, 10));
+      if (scriptLoadCallback) {
+        scriptLoadCallback();
+      }
+
+      await expect(initPromise).rejects.toThrow('PostHog SDK loaded but window.posthog is not available');
     });
 
     it('should handle methods when not initialized', async () => {

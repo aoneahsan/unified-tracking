@@ -78,6 +78,13 @@ export class SentryErrorTrackingProvider extends BaseErrorTrackingProvider {
   private sentryConfig: SentryConfig | null = null;
   private scriptLoaded = false;
 
+  /**
+   * Check if provider is initialized
+   */
+  get isInitialized(): boolean {
+    return this.initialized;
+  }
+
   protected async doInitialize(config: SentryConfig): Promise<void> {
     if (!config.dsn) {
       throw new Error('Sentry DSN is required');
@@ -98,22 +105,32 @@ export class SentryErrorTrackingProvider extends BaseErrorTrackingProvider {
     const sentryOptions: any = {
       dsn: config.dsn,
       environment: config.environment || 'production',
-      release: config.release,
-      serverName: config.serverName,
-      sampleRate: config.sampleRate ?? 1.0,
-      tracesSampleRate: config.tracesSampleRate ?? 0.1,
-      maxBreadcrumbs: config.maxBreadcrumbs ?? 100,
-      attachStacktrace: config.attachStacktrace ?? true,
-      normalizeDepth: config.normalizeDepth ?? 3,
-      maxValueLength: config.maxValueLength ?? 250,
-      sendDefaultPii: config.sendDefaultPii ?? false,
-      beforeSend: config.beforeSend,
-      beforeBreadcrumb: config.beforeBreadcrumb,
-      integrations: config.integrations,
-      transport: config.transport,
-      allowUrls: config.allowUrls,
-      denyUrls: config.denyUrls,
     };
+    
+    // Only add optional properties if they're defined
+    if (config.release !== undefined) sentryOptions.release = config.release;
+    if (config.serverName !== undefined) sentryOptions.serverName = config.serverName;
+    if (config.sampleRate !== undefined) sentryOptions.sampleRate = config.sampleRate;
+    if (config.tracesSampleRate !== undefined) sentryOptions.tracesSampleRate = config.tracesSampleRate;
+    if (config.maxBreadcrumbs !== undefined) sentryOptions.maxBreadcrumbs = config.maxBreadcrumbs;
+    if (config.attachStacktrace !== undefined) sentryOptions.attachStacktrace = config.attachStacktrace;
+    if (config.normalizeDepth !== undefined) sentryOptions.normalizeDepth = config.normalizeDepth;
+    if (config.maxValueLength !== undefined) sentryOptions.maxValueLength = config.maxValueLength;
+    if (config.sendDefaultPii !== undefined) sentryOptions.sendDefaultPii = config.sendDefaultPii;
+    if (config.allowUrls !== undefined) sentryOptions.allowUrls = config.allowUrls;
+    if (config.denyUrls !== undefined) sentryOptions.denyUrls = config.denyUrls;
+    if (config.transport !== undefined) sentryOptions.transport = config.transport;
+    
+    // Always set beforeSend (use provided or default)
+    sentryOptions.beforeSend = config.beforeSend || ((event: any) => {
+      // Default beforeSend - can filter or modify events
+      return event;
+    });
+    
+    // Always set integrations (use provided or default)
+    sentryOptions.integrations = config.integrations || [];
+    
+    if (config.beforeBreadcrumb !== undefined) sentryOptions.beforeBreadcrumb = config.beforeBreadcrumb;
 
     this.sentry.init(sentryOptions);
 
@@ -128,7 +145,7 @@ export class SentryErrorTrackingProvider extends BaseErrorTrackingProvider {
   }
 
   private async loadSentrySDK(): Promise<void> {
-    if (this.scriptLoaded || window.Sentry) {
+    if (this.scriptLoaded) {
       return;
     }
 
@@ -218,7 +235,12 @@ export class SentryErrorTrackingProvider extends BaseErrorTrackingProvider {
       }
 
       // Capture the exception
-      this.sentry!.captureException(error, sentryContext);
+      // Only pass context if it has meaningful data
+      if (Object.keys(sentryContext).length > 0) {
+        this.sentry!.captureException(error, sentryContext);
+      } else {
+        this.sentry!.captureException(error);
+      }
     });
   }
 
@@ -281,7 +303,9 @@ export class SentryErrorTrackingProvider extends BaseErrorTrackingProvider {
     // Sentry debug mode is set at initialization
     // We can add more verbose logging here
     if (enabled) {
-      this.logger.debug('Sentry debug mode enabled');
+      this.logger.info('Sentry debug mode enabled');
+    } else {
+      this.logger.info('Sentry debug mode disabled');
     }
   }
 
@@ -380,6 +404,103 @@ export class SentryErrorTrackingProvider extends BaseErrorTrackingProvider {
         ...data,
       },
       timestamp: Date.now() / 1000,
+    });
+  }
+
+  /**
+   * Track error (alias for logError)
+   */
+  async trackError(error: Error | string, context?: ErrorContext): Promise<void> {
+    if (!this.initialized) {
+      throw new Error('Sentry not initialized');
+    }
+    
+    // Handle string errors differently
+    if (typeof error === 'string') {
+      this.checkReady();
+      const enrichedContext = (this as any).enrichContext(context);
+      
+      this.sentry!.withScope((scope) => {
+        // Set severity
+        if (enrichedContext.severity) {
+          scope.setLevel(this.mapSeverityToSentry(enrichedContext.severity));
+        }
+        
+        // Set tags
+        if (enrichedContext.tags) {
+          Object.entries(enrichedContext.tags).forEach(([key, value]) => {
+            scope.setTag(key, value as string);
+          });
+        }
+        
+        // Capture as message
+        const level = enrichedContext.severity || 'error';
+        this.sentry!.captureMessage(error, this.mapSeverityToSentry(level));
+      });
+      
+      return;
+    }
+    
+    return this.logError(error, context);
+  }
+
+  /**
+   * Set user (alias for setUserContext)
+   */
+  async setUser(user: Record<string, any>): Promise<void> {
+    // Transform 'name' to 'username' if present
+    const sentryUser = { ...user };
+    if ('name' in sentryUser && !('username' in sentryUser)) {
+      sentryUser.username = sentryUser.name;
+      delete sentryUser.name;
+    }
+    this.setUserContext(sentryUser);
+  }
+
+  /**
+   * Set context (generic context setter)
+   */
+  async setContext(keyOrContext: string | Record<string, any>, value?: any): Promise<void> {
+    if (typeof keyOrContext === 'string') {
+      this.setExtraContext(keyOrContext, value);
+    } else {
+      // If single object parameter, set as 'custom' context
+      this.setExtraContext('custom', keyOrContext);
+    }
+  }
+
+  /**
+   * Remove context
+   */
+  async removeContext(key: string): Promise<void> {
+    if (!this.sentry) return;
+    this.sentry.setContext(key, null);
+  }
+
+  /**
+   * Clear all context
+   */
+  async clearContext(): Promise<void> {
+    if (!this.sentry) return;
+    // Clear context by setting an empty object
+    this.sentry.setContext('custom', {});
+  }
+
+  /**
+   * Capture breadcrumb
+   */
+  captureBreadcrumb(breadcrumb: any): void {
+    if (!this.sentry) return;
+    
+    // Extract properties from breadcrumb object
+    const { message, category, level, data } = breadcrumb;
+    
+    // Call Sentry's addBreadcrumb
+    this.sentry.addBreadcrumb({
+      message,
+      category,
+      level,
+      data,
     });
   }
 }

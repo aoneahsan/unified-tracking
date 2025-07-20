@@ -176,16 +176,20 @@ export abstract class BaseErrorTrackingProvider extends BaseProviderImpl impleme
    * Enrich error context with global context data
    */
   protected enrichContext(context?: ErrorContext): ErrorContext {
-    const breadcrumbsCopy = [...this.breadcrumbs];
+    // Merge breadcrumbs from context and provider
+    const allBreadcrumbs = [
+      ...this.breadcrumbs,
+      ...(context?.breadcrumbs || [])
+    ];
     
     return {
       ...context,
       user: { ...this.userContext, ...context?.user },
       extra: { ...this.extraContext, ...context?.extra },
       tags: { ...this.tags, ...context?.tags },
-      breadcrumbs: breadcrumbsCopy,
-      timestamp: new Date().toISOString(),
-      platform: this.getPlatform(),
+      breadcrumbs: allBreadcrumbs,
+      timestamp: context?.timestamp || new Date().toISOString(),
+      platform: context?.platform || this.getPlatform(),
     };
   }
 

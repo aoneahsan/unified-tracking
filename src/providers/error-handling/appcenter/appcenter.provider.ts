@@ -126,6 +126,13 @@ export class AppCenterProvider extends BaseErrorTrackingProvider {
   private appCenterConfig: AppCenterConfig | null = null;
   private scriptLoaded = false;
 
+  /**
+   * Check if provider is initialized
+   */
+  get isInitialized(): boolean {
+    return this.initialized;
+  }
+
   protected async doInitialize(config: AppCenterConfig): Promise<void> {
     if (!config.appSecret) {
       throw new Error('App Center app secret is required');
@@ -204,7 +211,7 @@ export class AppCenterProvider extends BaseErrorTrackingProvider {
   }
 
   private async loadAppCenterSDK(): Promise<void> {
-    if (this.scriptLoaded || window.AppCenter) {
+    if (this.scriptLoaded) {
       return;
     }
 
@@ -265,21 +272,21 @@ export class AppCenterProvider extends BaseErrorTrackingProvider {
     const properties: Record<string, string> = {};
     
     // Add context properties
-    if (context.tags) {
+    if (context.tags && Object.keys(context.tags).length > 0) {
       Object.entries(context.tags).forEach(([key, value]) => {
         properties[key] = value;
       });
     }
 
     // Add extra context
-    if (context.extra) {
+    if (context.extra && Object.keys(context.extra).length > 0) {
       Object.entries(context.extra).forEach(([key, value]) => {
         properties[key] = typeof value === 'string' ? value : JSON.stringify(value);
       });
     }
 
     // Add user context
-    if (context.user) {
+    if (context.user && Object.keys(context.user).length > 0) {
       Object.entries(context.user).forEach(([key, value]) => {
         properties[`user_${key}`] = String(value);
       });
@@ -290,14 +297,14 @@ export class AppCenterProvider extends BaseErrorTrackingProvider {
       properties.severity = context.severity;
     }
 
-    // Add timestamp
-    if (context.timestamp) {
-      properties.timestamp = context.timestamp;
-    }
-
-    // Add platform
-    if (context.platform) {
-      properties.platform = context.platform;
+    // Only add timestamp and platform if we have other properties
+    if (Object.keys(properties).length > 0) {
+      if (context.timestamp) {
+        properties.timestamp = context.timestamp;
+      }
+      if (context.platform) {
+        properties.platform = context.platform;
+      }
     }
 
     // Prepare attachments
@@ -306,7 +313,7 @@ export class AppCenterProvider extends BaseErrorTrackingProvider {
     // Add breadcrumbs as text attachment
     if (context.breadcrumbs && context.breadcrumbs.length > 0) {
       const breadcrumbsText = context.breadcrumbs
-        .map(b => `[${new Date(b.timestamp).toISOString()}] ${b.category}: ${b.message}`)
+        .map(b => `[${new Date(b.timestamp).toISOString()}] ${b.category || 'default'}: ${b.message}`)
         .join('\n');
       
       attachments.push({
@@ -512,5 +519,29 @@ export class AppCenterProvider extends BaseErrorTrackingProvider {
   disableAutomaticCheckForUpdate(): void {
     if (!this.appCenter?.Distribute) return;
     this.appCenter.Distribute.disableAutomaticCheckForUpdate();
+  }
+
+  /**
+   * Track error (alias for logError)
+   */
+  async trackError(error: Error | string, context?: ErrorContext): Promise<void> {
+    if (!this.initialized) {
+      throw new Error('App Center Crashes not initialized');
+    }
+    return this.logError(error, context);
+  }
+
+  /**
+   * Set user (alias for setUserContext)
+   */
+  async setUser(user: Record<string, any>): Promise<void> {
+    this.setUserContext(user);
+  }
+
+  /**
+   * Set context (generic context setter)
+   */
+  async setContext(key: string, value: any): Promise<void> {
+    this.setExtraContext(key, value);
   }
 }

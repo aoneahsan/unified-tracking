@@ -19,7 +19,7 @@ interface SegmentSDK {
   load: (writeKey: string, options?: any) => void;
   identify: (userId?: string, traits?: any, options?: any, callback?: () => void) => void;
   track: (event: string, properties?: any, options?: any, callback?: () => void) => void;
-  page: (name?: string, properties?: any, options?: any, callback?: () => void) => void;
+  page: (category?: string, name?: string, properties?: any, options?: any, callback?: () => void) => void;
   screen: (name?: string, properties?: any, options?: any, callback?: () => void) => void;
   group: (groupId: string, traits?: any, options?: any, callback?: () => void) => void;
   alias: (userId: string, previousId?: string, options?: any, callback?: () => void) => void;
@@ -29,8 +29,13 @@ interface SegmentSDK {
   anonymousId: () => string;
   on: (event: string, callback: (...args: any[]) => void) => void;
   off: (event: string, callback?: (...args: any[]) => void) => void;
+  once: (event: string, callback: (...args: any[]) => void) => void;
   flush: (callback?: () => void) => void;
   setAnonymousId: (anonymousId: string) => void;
+  debug: (enabled: boolean) => void;
+  timeout: (ms: number) => void;
+  addSourceMiddleware: (middleware: any) => void;
+  addDestinationMiddleware: (integrationName: string, middleware: any) => void;
 }
 
 declare global {
@@ -64,10 +69,11 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
   private segmentConfig: SegmentConfig | null = null;
   private scriptLoaded = false;
   private isReady = false;
+  private _isInitialized = false;
 
   protected async doInitialize(config: SegmentConfig): Promise<void> {
     if (!config.writeKey) {
-      throw new Error('Segment writeKey is required');
+      throw new Error('Segment write key is required');
     }
 
     this.segmentConfig = config;
@@ -106,6 +112,7 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
     await new Promise<void>((resolve) => {
       this.analytics!.ready(() => {
         this.isReady = true;
+        this._isInitialized = true;
         resolve();
       });
     });
@@ -181,8 +188,14 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
               reject(new Error('Failed to load Segment SDK'));
             };
 
-            const first = document.getElementsByTagName('script')[0];
-            first.parentNode!.insertBefore(script, first);
+            const scripts = document.getElementsByTagName('script');
+            if (scripts && scripts.length > 0) {
+              const first = scripts[0];
+              first.parentNode!.insertBefore(script, first);
+            } else {
+              // Fallback for test environments
+              document.head?.appendChild(script) || document.body?.appendChild(script);
+            }
             analytics._writeKey = writeKey;
             analytics._options = options;
           };
@@ -198,6 +211,7 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
     this.segmentConfig = null;
     this.scriptLoaded = false;
     this.isReady = false;
+    this._isInitialized = false;
   }
 
   protected async doUpdateConsent(consent: ConsentSettings): Promise<void> {
@@ -213,23 +227,6 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
     }
   }
 
-  protected async doTrack(eventName: string, properties: Record<string, any>): Promise<void> {
-    if (!this.analytics || !this.isReady) {
-      throw new Error('Segment not initialized');
-    }
-
-    const cleanProperties = this.sanitizeProperties(properties);
-
-    return new Promise<void>((resolve, reject) => {
-      this.analytics!.track(eventName, cleanProperties, {}, (error?: Error) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve();
-        }
-      });
-    });
-  }
 
   protected async doIdentifyUser(userId: string, traits: Record<string, any>): Promise<void> {
     if (!this.analytics || !this.isReady) {
@@ -314,12 +311,16 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
       revenueProperties.quantity = data.quantity;
     }
 
+    if (data.transactionId) {
+      revenueProperties.order_id = data.transactionId;
+    }
+
     if (data.properties) {
       Object.assign(revenueProperties, this.sanitizeProperties(data.properties));
     }
 
-    // Track as a purchase event
-    await this.doTrack('Purchase', revenueProperties);
+    // Track as an Order Completed event
+    await this.doTrack('Order Completed', revenueProperties);
   }
 
   protected async doProviderReset(): Promise<void> {
@@ -329,24 +330,30 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
   }
 
   protected doSetDebugMode(enabled: boolean): void {
-    if (this.analytics) {
-      // Segment doesn't have a debug mode, but we can enable logging
-      if (enabled) {
-        this.logger.debug('Segment debug mode enabled');
-      }
+    if (this.analytics && 'debug' in this.analytics) {
+      (this.analytics as any).debug(enabled);
+    }
+    if (enabled) {
+      this.logger.debug('Segment debug mode enabled');
     }
   }
 
   /**
    * Alias a user ID
    */
-  async alias(userId: string, previousId?: string): Promise<void> {
+  async alias(
+    userId: string,
+    previousId?: string,
+    options?: Record<string, any>
+  ): Promise<void> {
     if (!this.analytics || !this.isReady) {
       throw new Error('Segment not initialized');
     }
 
+    const cleanOptions = options || {};
+
     return new Promise<void>((resolve, reject) => {
-      this.analytics!.alias(userId, previousId, {}, (error?: Error) => {
+      this.analytics!.alias(userId, previousId, cleanOptions, (error?: Error) => {
         if (error) {
           reject(error);
         } else {
@@ -359,15 +366,20 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
   /**
    * Associate a user with a group
    */
-  async group(groupId: string, traits?: Record<string, any>): Promise<void> {
+  async group(
+    groupId: string,
+    traits?: Record<string, any>,
+    options?: Record<string, any>
+  ): Promise<void> {
     if (!this.analytics || !this.isReady) {
       throw new Error('Segment not initialized');
     }
 
     const cleanTraits = traits ? this.sanitizeProperties(traits) : {};
+    const cleanOptions = options || {};
 
     return new Promise<void>((resolve, reject) => {
-      this.analytics!.group(groupId, cleanTraits, {}, (error?: Error) => {
+      this.analytics!.group(groupId, cleanTraits, cleanOptions, (error?: Error) => {
         if (error) {
           reject(error);
         } else {
@@ -424,27 +436,6 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
     return this.analytics.user();
   }
 
-  /**
-   * Get the anonymous ID
-   */
-  getAnonymousId(): string | null {
-    if (!this.analytics || !this.isReady) {
-      return null;
-    }
-
-    return this.analytics.anonymousId();
-  }
-
-  /**
-   * Set the anonymous ID
-   */
-  setAnonymousId(anonymousId: string): void {
-    if (!this.analytics || !this.isReady) {
-      return;
-    }
-
-    this.analytics.setAnonymousId(anonymousId);
-  }
 
   /**
    * Sanitize properties for Segment
@@ -459,5 +450,280 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
     }
 
     return sanitized;
+  }
+
+  /**
+   * Check if provider is initialized
+   */
+  isInitialized(): boolean {
+    return this._isInitialized;
+  }
+
+  /**
+   * Track page view
+   */
+  async trackPageView(
+    pageName?: string,
+    properties?: Record<string, any>,
+    options?: Record<string, any>
+  ): Promise<void> {
+    if (!this.analytics || !this.isReady) {
+      throw new Error('Segment not initialized');
+    }
+
+    const cleanProperties = properties ? this.sanitizeProperties(properties) : {};
+    const cleanOptions = options || {};
+
+    return new Promise<void>((resolve, reject) => {
+      this.analytics!.page(pageName, cleanProperties, cleanOptions, (error?: Error) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve();
+        }
+      });
+    });
+  }
+
+  /**
+   * Track page view with category
+   */
+  async trackPageViewWithCategory(
+    category: string,
+    pageName?: string,
+    properties?: Record<string, any>,
+    options?: Record<string, any>
+  ): Promise<void> {
+    if (!this.analytics || !this.isReady) {
+      throw new Error('Segment not initialized');
+    }
+
+    const cleanProperties = properties ? this.sanitizeProperties(properties) : {};
+    const cleanOptions = options || {};
+
+    return new Promise<void>((resolve, reject) => {
+      this.analytics!.page(category, pageName, cleanProperties, cleanOptions, (error?: Error) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve();
+        }
+      });
+    });
+  }
+
+  /**
+   * Identify user with options
+   */
+  async identify(
+    userId?: string,
+    traits?: Record<string, any>,
+    options?: Record<string, any>
+  ): Promise<void> {
+    if (!this.analytics || !this.isReady) {
+      throw new Error('Segment not initialized');
+    }
+
+    const cleanTraits = traits ? this.sanitizeProperties(traits) : {};
+    const cleanOptions = options || {};
+
+    return new Promise<void>((resolve, reject) => {
+      this.analytics!.identify(userId, cleanTraits, cleanOptions, (error?: Error) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve();
+        }
+      });
+    });
+  }
+
+  /**
+   * Override the base track method to support options
+   */
+  async track(
+    eventName: string,
+    properties?: Record<string, any>,
+    options?: Record<string, any>
+  ): Promise<void> {
+    if (!this.analytics || !this.isReady) {
+      throw new Error('Segment not initialized');
+    }
+
+    const cleanProperties = properties ? this.sanitizeProperties(properties) : {};
+    const cleanOptions = options || {};
+
+    return new Promise<void>((resolve, reject) => {
+      this.analytics!.track(eventName, cleanProperties, cleanOptions, (error?: Error) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve();
+        }
+      });
+    });
+  }
+
+  /**
+   * Get user ID
+   */
+  async getUserId(): Promise<string | null> {
+    if (!this.analytics || !this.isReady) {
+      return null;
+    }
+
+    const user = this.analytics.user();
+    return user?.id ? user.id() : null;
+  }
+
+  /**
+   * Get user traits
+   */
+  async getUserTraits(): Promise<Record<string, any> | null> {
+    if (!this.analytics || !this.isReady) {
+      return null;
+    }
+
+    const user = this.analytics.user();
+    return user?.traits ? user.traits() : null;
+  }
+
+  /**
+   * Get anonymous ID async
+   */
+  async getAnonymousId(): Promise<string | null> {
+    if (!this.analytics || !this.isReady) {
+      return null;
+    }
+
+    const user = this.analytics.user();
+    return user?.anonymousId ? user.anonymousId() : null;
+  }
+
+  /**
+   * Set anonymous ID async
+   */
+  async setAnonymousId(anonymousId: string): Promise<void> {
+    if (!this.analytics || !this.isReady) {
+      return;
+    }
+
+    this.analytics.setAnonymousId(anonymousId);
+  }
+
+  /**
+   * Add source middleware
+   */
+  async addSourceMiddleware(middleware: any): Promise<void> {
+    if (!this.analytics || !this.isReady) {
+      throw new Error('Segment not initialized');
+    }
+
+    this.analytics.addSourceMiddleware(middleware);
+  }
+
+  /**
+   * Add destination middleware
+   */
+  async addDestinationMiddleware(integrationName: string, middleware: any): Promise<void> {
+    if (!this.analytics || !this.isReady) {
+      throw new Error('Segment not initialized');
+    }
+
+    this.analytics.addDestinationMiddleware(integrationName, middleware);
+  }
+
+  /**
+   * Add event listener
+   */
+  async on(event: string, callback: (...args: any[]) => void): Promise<void> {
+    if (!this.analytics || !this.isReady) {
+      throw new Error('Segment not initialized');
+    }
+
+    this.analytics.on(event, callback);
+  }
+
+  /**
+   * Remove event listener
+   */
+  async off(event: string, callback?: (...args: any[]) => void): Promise<void> {
+    if (!this.analytics || !this.isReady) {
+      throw new Error('Segment not initialized');
+    }
+
+    this.analytics.off(event, callback);
+  }
+
+  /**
+   * Add one-time event listener
+   */
+  async once(event: string, callback: (...args: any[]) => void): Promise<void> {
+    if (!this.analytics || !this.isReady) {
+      throw new Error('Segment not initialized');
+    }
+
+    this.analytics.once(event, callback);
+  }
+
+  /**
+   * Enable debug mode
+   */
+  async enableDebug(): Promise<void> {
+    if (!this.analytics || !this.isReady) {
+      throw new Error('Segment not initialized');
+    }
+
+    this.analytics.debug(true);
+    this.setDebugMode(true);
+  }
+
+  /**
+   * Disable debug mode
+   */
+  async disableDebug(): Promise<void> {
+    if (!this.analytics || !this.isReady) {
+      throw new Error('Segment not initialized');
+    }
+
+    this.analytics.debug(false);
+    this.setDebugMode(false);
+  }
+
+  /**
+   * Set timeout
+   */
+  async setTimeout(timeout: number): Promise<void> {
+    if (!this.analytics || !this.isReady) {
+      throw new Error('Segment not initialized');
+    }
+
+    this.analytics.timeout(timeout);
+  }
+
+  /**
+   * Wait for ready state
+   */
+  async ready(callback: () => void): Promise<void> {
+    if (!this.analytics) {
+      throw new Error('Segment not initialized');
+    }
+
+    this.analytics.ready(callback);
+  }
+
+  /**
+   * Track revenue with RevenueData
+   */
+  async trackRevenue(data: RevenueData): Promise<void> {
+    await this.logRevenue(data);
+  }
+
+  /**
+   * Override doTrack to not include callback in base class call
+   */
+  protected async doTrack(eventName: string, properties: Record<string, any>): Promise<void> {
+    // Call the public track method with no options to handle callbacks properly
+    await this.track(eventName, properties);
   }
 }
