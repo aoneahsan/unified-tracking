@@ -5,12 +5,32 @@ import type { ConsentSettings } from '../../../types/provider';
 // Mock the global Mixpanel object
 const mockMixpanel = {
   init: vi.fn(),
-  track: vi.fn(),
-  identify: vi.fn(),
+  track: vi.fn((event, properties, callback) => {
+    // Call the callback if provided
+    if (callback && typeof callback === 'function') {
+      callback();
+    }
+  }),
+  identify: vi.fn((id, callback) => {
+    // Call the callback if provided
+    if (callback && typeof callback === 'function') {
+      callback();
+    }
+  }),
   people: {
-    set: vi.fn(),
+    set: vi.fn((properties, callback) => {
+      // Call the callback if provided
+      if (callback && typeof callback === 'function') {
+        callback();
+      }
+    }),
     increment: vi.fn(),
-    track_charge: vi.fn(),
+    track_charge: vi.fn((amount, properties, callback) => {
+      // Call the callback if provided
+      if (callback && typeof callback === 'function') {
+        callback();
+      }
+    }),
   },
   register: vi.fn(),
   register_once: vi.fn(),
@@ -42,12 +62,20 @@ const mockMixpanel = {
 const mockScript = {
   src: '',
   async: false,
+  type: '',
   onload: null as (() => void) | null,
   onerror: null as (() => void) | null,
 };
 
+const mockScriptElement = {
+  parentNode: {
+    insertBefore: vi.fn(),
+  },
+};
+
 const mockDocument = {
   createElement: vi.fn(() => mockScript),
+  getElementsByTagName: vi.fn(() => [mockScriptElement]),
   head: {
     appendChild: vi.fn(),
   },
@@ -130,21 +158,34 @@ describe('MixpanelProvider', () => {
 
     it('should handle script loading failure', async () => {
       const config = { token: 'test-token' };
-      
+
+      // Remove existing mixpanel to force script loading
+      delete (window as any).mixpanel;
+
       // Mock script loading failure
-      vi.mocked(mockDocument.createElement).mockImplementation(() => ({
+      const failScript = {
         ...mockScript,
+        onload: null,
         onerror: null,
-      }));
+      };
 
-      // Simulate script error
-      setTimeout(() => {
-        if (mockScript.onerror) {
-          mockScript.onerror();
-        }
-      }, 10);
+      vi.mocked(mockDocument.createElement).mockReturnValueOnce(failScript);
 
-      await expect(provider.initialize(config)).rejects.toThrow('Failed to load Mixpanel SDK');
+      // Simulate script error after a short delay
+      const initPromise = provider.initialize(config);
+
+      // Wait for the promise to start
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      // Trigger the error
+      if (failScript.onerror) {
+        failScript.onerror();
+      }
+
+      await expect(initPromise).rejects.toThrow('Failed to load Mixpanel SDK');
+
+      // Restore mixpanel for other tests
+      (window as any).mixpanel = mockMixpanel;
     });
   });
 
@@ -159,7 +200,7 @@ describe('MixpanelProvider', () => {
 
       await provider.track(eventName, properties);
 
-      expect(mockMixpanel.track).toHaveBeenCalledWith(eventName, properties);
+      expect(mockMixpanel.track).toHaveBeenCalledWith(eventName, properties, expect.any(Function));
     });
 
     it('should track events without properties', async () => {
@@ -167,7 +208,7 @@ describe('MixpanelProvider', () => {
 
       await provider.track(eventName);
 
-      expect(mockMixpanel.track).toHaveBeenCalledWith(eventName, {});
+      expect(mockMixpanel.track).toHaveBeenCalledWith(eventName, {}, expect.any(Function));
     });
 
     it('should track page views', async () => {
@@ -176,10 +217,14 @@ describe('MixpanelProvider', () => {
 
       await provider.logScreenView(pageName, properties);
 
-      expect(mockMixpanel.track).toHaveBeenCalledWith('Screen View', {
-        screen_name: pageName,
-        ...properties
-      });
+      expect(mockMixpanel.track).toHaveBeenCalledWith(
+        'Screen View',
+        {
+          screen_name: pageName,
+          ...properties,
+        },
+        expect.any(Function),
+      );
     });
 
     // Removed test for timeEvent as it's not implemented in the provider
@@ -197,7 +242,7 @@ describe('MixpanelProvider', () => {
       await provider.identifyUser(userId, traits);
 
       expect(mockMixpanel.identify).toHaveBeenCalledWith(userId);
-      expect(mockMixpanel.people.set).toHaveBeenCalledWith(traits);
+      expect(mockMixpanel.people.set).toHaveBeenCalledWith(traits, expect.any(Function));
     });
 
     it('should identify users without traits', async () => {
@@ -214,7 +259,7 @@ describe('MixpanelProvider', () => {
 
       await provider.setUserProperties(properties);
 
-      expect(mockMixpanel.people.set).toHaveBeenCalledWith(properties);
+      expect(mockMixpanel.people.set).toHaveBeenCalledWith(properties, expect.any(Function));
     });
 
     // Removed tests for incrementUserProperty and alias - not available in base provider
@@ -242,7 +287,8 @@ describe('MixpanelProvider', () => {
           currency: revenue.currency,
           product_id: revenue.productId,
           ...revenue.properties,
-        })
+        }),
+        expect.any(Function),
       );
     });
 
@@ -255,7 +301,8 @@ describe('MixpanelProvider', () => {
         revenue.amount,
         expect.objectContaining({
           currency: 'USD',
-        })
+        }),
+        expect.any(Function),
       );
     });
   });
@@ -369,15 +416,41 @@ describe('MixpanelProvider', () => {
 
       const config = { token: 'test-token' };
 
-      await expect(provider.initialize(config)).rejects.toThrow('Failed to load Mixpanel SDK');
+      // Mock script loading to fail
+      const failScript = {
+        ...mockScript,
+        onload: null,
+        onerror: null,
+      };
+
+      vi.mocked(mockDocument.createElement).mockReturnValueOnce(failScript);
+
+      // Start initialization
+      const initPromise = provider.initialize(config);
+
+      // Wait a bit then trigger error
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      if (failScript.onerror) {
+        failScript.onerror();
+      }
+
+      await expect(initPromise).rejects.toThrow('Failed to load Mixpanel SDK');
+
+      // Restore mixpanel for other tests
+      (global.window as any).mixpanel = mockMixpanel;
     });
 
     it('should handle methods when not initialized', async () => {
       const uninitializedProvider = new MixpanelAnalyticsProvider();
 
-      await expect(uninitializedProvider.track('test')).rejects.toThrow('Mixpanel not initialized');
-      await expect(uninitializedProvider.identifyUser('user')).rejects.toThrow('Mixpanel not initialized');
-      await expect(uninitializedProvider.logRevenue({ amount: 10 })).rejects.toThrow('Mixpanel not initialized');
+      await expect(uninitializedProvider.track('test')).rejects.toThrow('Provider Mixpanel Analytics not initialized');
+      await expect(uninitializedProvider.identifyUser('user')).rejects.toThrow(
+        'Provider Mixpanel Analytics not initialized',
+      );
+      await expect(uninitializedProvider.logRevenue({ amount: 10 })).rejects.toThrow(
+        'Provider Mixpanel Analytics not initialized',
+      );
     });
   });
 });

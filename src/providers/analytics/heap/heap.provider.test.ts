@@ -270,9 +270,16 @@ describe('HeapAnalyticsProvider', () => {
 
       await provider.updateConsent(consent);
 
-      // Note: Heap doesn't have built-in consent management
-      // This test mainly ensures no errors are thrown
+      // When analytics consent is false, the provider should be disabled
+      expect(provider.isReady()).toBe(false);
+      expect(provider.isEnabled()).toBe(false);
+
+      // Re-enable with consent
+      const consentEnabled = { analytics: true };
+      await provider.updateConsent(consentEnabled);
+
       expect(provider.isReady()).toBe(true);
+      expect(provider.isEnabled()).toBe(true);
     });
   });
 
@@ -359,23 +366,25 @@ describe('HeapAnalyticsProvider', () => {
 
   describe('error handling', () => {
     it('should throw error when tracking without initialization', async () => {
-      await expect(provider.track('test_event')).rejects.toThrow('Heap not initialized');
+      await expect(provider.track('test_event')).rejects.toThrow('Provider Heap Analytics not initialized');
     });
 
     it('should throw error when identifying without initialization', async () => {
-      await expect(provider.identifyUser('user-123')).rejects.toThrow('Heap not initialized');
+      await expect(provider.identifyUser('user-123')).rejects.toThrow('Provider Heap Analytics not initialized');
     });
 
     it('should throw error when setting user properties without initialization', async () => {
-      await expect(provider.setUserProperties({ key: 'value' })).rejects.toThrow('Heap not initialized');
+      await expect(provider.setUserProperties({ key: 'value' })).rejects.toThrow(
+        'Provider Heap Analytics not initialized',
+      );
     });
 
     it('should throw error when logging screen view without initialization', async () => {
-      await expect(provider.logScreenView('Home')).rejects.toThrow('Heap not initialized');
+      await expect(provider.logScreenView('Home')).rejects.toThrow('Provider Heap Analytics not initialized');
     });
 
     it('should throw error when logging revenue without initialization', async () => {
-      await expect(provider.logRevenue({ amount: 10 })).rejects.toThrow('Heap not initialized');
+      await expect(provider.logRevenue({ amount: 10 })).rejects.toThrow('Provider Heap Analytics not initialized');
     });
   });
 });

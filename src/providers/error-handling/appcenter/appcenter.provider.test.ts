@@ -95,30 +95,30 @@ describe('AppCenterProvider', () => {
       error: vi.fn(),
     };
     (provider as any).logger = mockLogger;
-    
+
     // Reset mocks
     vi.clearAllMocks();
-    Object.values(mockAppCenter).forEach(mock => {
+    Object.values(mockAppCenter).forEach((mock) => {
       if (typeof mock === 'function') {
         mock.mockClear();
       }
     });
-    Object.values(mockAppCenter.Crashes).forEach(mock => {
+    Object.values(mockAppCenter.Crashes).forEach((mock) => {
       if (typeof mock === 'function') {
         mock.mockClear();
       }
     });
-    Object.values(mockAppCenter.Analytics).forEach(mock => {
+    Object.values(mockAppCenter.Analytics).forEach((mock) => {
       if (typeof mock === 'function') {
         mock.mockClear();
       }
     });
-    Object.values(mockAppCenter.Push).forEach(mock => {
+    Object.values(mockAppCenter.Push).forEach((mock) => {
       if (typeof mock === 'function') {
         mock.mockClear();
       }
     });
-    Object.values(mockAppCenter.Distribute).forEach(mock => {
+    Object.values(mockAppCenter.Distribute).forEach((mock) => {
       if (typeof mock === 'function') {
         mock.mockClear();
       }
@@ -151,7 +151,7 @@ describe('AppCenterProvider', () => {
       expect(mockAppCenter.setLogLevel).toHaveBeenCalledWith('info');
       expect(mockAppCenter.start).toHaveBeenCalledWith(
         'test-app-secret',
-        expect.arrayContaining([mockAppCenter.Crashes, mockAppCenter.Analytics])
+        expect.arrayContaining([mockAppCenter.Crashes, mockAppCenter.Analytics]),
       );
       expect(mockAppCenter.setUserId).toHaveBeenCalledWith('test-user');
       expect(mockAppCenter.setCountryCode).toHaveBeenCalledWith('US');
@@ -160,9 +160,7 @@ describe('AppCenterProvider', () => {
     it('should throw error if app secret is missing', async () => {
       const config = {};
 
-      await expect(provider.initialize(config)).rejects.toThrow(
-        'App Center app secret is required'
-      );
+      await expect(provider.initialize(config)).rejects.toThrow('App Center app secret is required');
     });
 
     it('should handle script loading failure', async () => {
@@ -175,9 +173,7 @@ describe('AppCenterProvider', () => {
         mockScriptElement.onerror?.();
       }, 0);
 
-      await expect(provider.initialize(config)).rejects.toThrow(
-        'Failed to load App Center SDK'
-      );
+      await expect(provider.initialize(config)).rejects.toThrow('Failed to load App Center SDK');
     });
 
     it('should initialize with selective services', async () => {
@@ -198,15 +194,11 @@ describe('AppCenterProvider', () => {
 
       expect(mockAppCenter.start).toHaveBeenCalledWith(
         'test-app-secret',
-        expect.arrayContaining([
-          mockAppCenter.Analytics,
-          mockAppCenter.Distribute,
-          mockAppCenter.Push,
-        ])
+        expect.arrayContaining([mockAppCenter.Analytics, mockAppCenter.Distribute, mockAppCenter.Push]),
       );
       expect(mockAppCenter.start).toHaveBeenCalledWith(
         'test-app-secret',
-        expect.not.arrayContaining([mockAppCenter.Crashes])
+        expect.not.arrayContaining([mockAppCenter.Crashes]),
       );
     });
 
@@ -349,7 +341,7 @@ describe('AppCenterProvider', () => {
             fileName: 'context.json',
             contentType: 'application/json',
           }),
-        ])
+        ]),
       );
     });
 
@@ -366,15 +358,15 @@ describe('AppCenterProvider', () => {
             fileName: 'context.json',
             contentType: 'application/json',
           }),
-        ])
+        ]),
       );
     });
 
     it('should throw error when not initialized', async () => {
       const uninitializedProvider = new AppCenterProvider();
-      
+
       await expect(uninitializedProvider.logError(new Error('test'))).rejects.toThrow(
-        'Provider not initialized'
+        'Provider Microsoft App Center not initialized',
       );
     });
 
@@ -389,7 +381,7 @@ describe('AppCenterProvider', () => {
         expect.objectContaining({
           message: 'Test message',
           timestamp: expect.any(String),
-        })
+        }),
       );
     });
   });
@@ -470,12 +462,12 @@ describe('AppCenterProvider', () => {
     });
 
     it('should check if enabled', async () => {
-      mockAppCenter.isEnabled.mockResolvedValue(true);
+      // isEnabled() returns the internal enabled state, not the AppCenter SDK state
+      const result = provider.isEnabled();
 
-      const result = await provider.isEnabled();
-
-      expect(result).toBe(true);
-      expect(mockAppCenter.isEnabled).toHaveBeenCalled();
+      expect(result).toBe(true); // Should be true after initialization
+      // Note: provider.isEnabled() doesn't call mockAppCenter.isEnabled()
+      // To check AppCenter SDK state, use isAppCenterEnabled() instead
     });
 
     it('should set enabled state', async () => {
@@ -633,7 +625,7 @@ describe('AppCenterProvider', () => {
       uninitializedProvider.disableAutomaticCheckForUpdate();
 
       // These should return default values
-      expect(await uninitializedProvider.isEnabled()).toBe(false);
+      expect(uninitializedProvider.isEnabled()).toBe(true); // Base class defaults to true
       expect(await uninitializedProvider.getInstallId()).toBe('');
       expect(await uninitializedProvider.hasCrashedInLastSession()).toBe(false);
       expect(await uninitializedProvider.hasReceivedMemoryWarningInLastSession()).toBe(false);

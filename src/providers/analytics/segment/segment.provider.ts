@@ -90,7 +90,7 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
 
     // Configure Segment
     const segmentOptions: any = {
-      apiHost: config.apiHost
+      apiHost: config.apiHost,
     };
 
     if (config.enabledIntegrations) {
@@ -131,7 +131,9 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
         window.analytics = analytics as SegmentSDK;
         if (!analytics.initialize) {
           if (analytics.invoked) {
-            window.console && console.error && console.error('Segment snippet included twice.');
+            if (window.console && console.error) {
+              console.error('Segment snippet included twice.');
+            }
             return;
           }
           analytics.invoked = true;
@@ -175,12 +177,12 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
             script.type = 'text/javascript';
             script.async = true;
             script.src = 'https://cdn.segment.com/analytics.js/v1/' + writeKey + '/analytics.min.js';
-            
+
             script.onload = () => {
               this.scriptLoaded = true;
               resolve();
             };
-            
+
             script.onerror = () => {
               reject(new Error('Failed to load Segment SDK'));
             };
@@ -191,7 +193,11 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
               first.parentNode!.insertBefore(script, first);
             } else {
               // Fallback for test environments
-              document.head?.appendChild(script) || document.body?.appendChild(script);
+              if (document.head) {
+                document.head.appendChild(script);
+              } else if (document.body) {
+                document.body.appendChild(script);
+              }
             }
             analytics._writeKey = writeKey;
             analytics._options = options;
@@ -223,7 +229,6 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
       this.logger.info('Segment tracking enabled by consent');
     }
   }
-
 
   protected async doIdentifyUser(userId: string, traits: Record<string, any>): Promise<void> {
     if (!this.analytics || !this._isReady) {
@@ -338,11 +343,7 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
   /**
    * Alias a user ID
    */
-  async alias(
-    userId: string,
-    previousId?: string,
-    options?: Record<string, any>
-  ): Promise<void> {
+  async alias(userId: string, previousId?: string, options?: Record<string, any>): Promise<void> {
     if (!this.analytics || !this._isReady) {
       throw new Error('Segment not initialized');
     }
@@ -363,11 +364,7 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
   /**
    * Associate a user with a group
    */
-  async group(
-    groupId: string,
-    traits?: Record<string, any>,
-    options?: Record<string, any>
-  ): Promise<void> {
+  async group(groupId: string, traits?: Record<string, any>, options?: Record<string, any>): Promise<void> {
     if (!this.analytics || !this._isReady) {
       throw new Error('Segment not initialized');
     }
@@ -437,7 +434,6 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
     return this.analytics.user();
   }
 
-
   /**
    * Sanitize properties for Segment
    */
@@ -466,7 +462,7 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
   async trackPageView(
     pageName?: string,
     properties?: Record<string, any>,
-    options?: Record<string, any>
+    options?: Record<string, any>,
   ): Promise<void> {
     if (!this.analytics || !this._isReady) {
       throw new Error('Segment not initialized');
@@ -489,7 +485,7 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
     category: string,
     pageName?: string,
     properties?: Record<string, any>,
-    options?: Record<string, any>
+    options?: Record<string, any>,
   ): Promise<void> {
     if (!this.analytics || !this._isReady) {
       throw new Error('Segment not initialized');
@@ -512,11 +508,7 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
   /**
    * Identify user with options
    */
-  async identify(
-    userId?: string,
-    traits?: Record<string, any>,
-    options?: Record<string, any>
-  ): Promise<void> {
+  async identify(userId?: string, traits?: Record<string, any>, options?: Record<string, any>): Promise<void> {
     if (!this.analytics || !this._isReady) {
       throw new Error('Segment not initialized');
     }
@@ -538,11 +530,7 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
   /**
    * Override the base track method to support options
    */
-  async track(
-    eventName: string,
-    properties?: Record<string, any>,
-    options?: Record<string, any>
-  ): Promise<void> {
+  async track(eventName: string, properties?: Record<string, any>, options?: Record<string, any>): Promise<void> {
     if (!this.analytics || !this._isReady) {
       throw new Error('Segment not initialized');
     }

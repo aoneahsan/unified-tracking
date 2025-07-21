@@ -125,6 +125,10 @@ export class HeapAnalyticsProvider extends BaseAnalyticsProvider {
 
   private async loadHeapSDK(): Promise<void> {
     if (this.scriptLoaded || window.heap) {
+      // If heap already exists (e.g., in tests), mark as loaded
+      if (window.heap) {
+        this.scriptLoaded = true;
+      }
       return;
     }
 
