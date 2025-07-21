@@ -295,7 +295,7 @@ export class PostHogAnalyticsProvider extends BaseAnalyticsProvider {
 
     // Remove screen_name from properties to avoid duplication
     const { screen_name, ...otherProperties } = properties;
-    
+
     const screenProperties = {
       $screen_name: screenName,
       ...this.sanitizeProperties(otherProperties),
