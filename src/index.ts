@@ -7,4 +7,4 @@ const UnifiedTracking = registerPlugin<UnifiedTrackingPlugin>('UnifiedTracking',
 });
 
 export * from './definitions';
-export { UnifiedTracking };
+export { UnifiedTracking, UnifiedTrackingPlugin };

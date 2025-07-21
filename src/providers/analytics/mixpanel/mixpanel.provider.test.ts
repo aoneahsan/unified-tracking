@@ -5,27 +5,27 @@ import type { ConsentSettings } from '../../../types/provider';
 // Mock the global Mixpanel object
 const mockMixpanel = {
   init: vi.fn(),
-  track: vi.fn((event, properties, callback) => {
+  track: vi.fn((_event, _properties, callback) => {
     // Call the callback if provided
     if (callback && typeof callback === 'function') {
       callback();
     }
   }),
-  identify: vi.fn((id, callback) => {
+  identify: vi.fn((_id, callback) => {
     // Call the callback if provided
     if (callback && typeof callback === 'function') {
       callback();
     }
   }),
   people: {
-    set: vi.fn((properties, callback) => {
+    set: vi.fn((_properties, callback) => {
       // Call the callback if provided
       if (callback && typeof callback === 'function') {
         callback();
       }
     }),
     increment: vi.fn(),
-    track_charge: vi.fn((amount, properties, callback) => {
+    track_charge: vi.fn((_amount, _properties, callback) => {
       // Call the callback if provided
       if (callback && typeof callback === 'function') {
         callback();
@@ -179,7 +179,7 @@ describe('MixpanelProvider', () => {
 
       // Trigger the error
       if (failScript.onerror) {
-        failScript.onerror();
+        (failScript.onerror as () => void)();
       }
 
       await expect(initPromise).rejects.toThrow('Failed to load Mixpanel SDK');
@@ -432,7 +432,7 @@ describe('MixpanelProvider', () => {
       await new Promise((resolve) => setTimeout(resolve, 10));
 
       if (failScript.onerror) {
-        failScript.onerror();
+        (failScript.onerror as () => void)();
       }
 
       await expect(initPromise).rejects.toThrow('Failed to load Mixpanel SDK');

@@ -1,7 +1,7 @@
 {
-  "name": "@capacitor/unified-tracking",
-  "version": "0.0.2",
-  "description": "Unified analytics and error tracking plugin for Capacitor",
+  "name": "unified-tracking",
+  "version": "0.0.3",
+  "description": "Unified analytics and error tracking plugin for React + Capacitor Apps",
   "type": "module",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
