@@ -2,7 +2,14 @@
 
 A comprehensive Capacitor plugin that provides a unified API for multiple analytics and error tracking providers. Track events, identify users, and monitor errors across all major platforms with a single, consistent interface.
 
-📚 [Documentation](https://unified-tracking.github.io/docs) | 🔧 [API Reference](https://unified-tracking.github.io/api) | 💬 [Discussions](https://github.com/unified-tracking/capacitor-plugin/discussions) | 🐛 [Issues](https://github.com/unified-tracking/capacitor-plugin/issues)
+## 📚 Documentation
+
+- [Setup Guide](./docs/setup-guide.md) - Installation and configuration instructions
+- [API Reference](./docs/api/README.md) - Complete API documentation
+- [React Integration](./docs/react-integration.md) - React hooks and components
+- [Migration Guide](./docs/migration-guide.md) - Migrate from other analytics solutions
+- [Provider Setup](./docs/providers/README.md) - Provider-specific configuration
+- [Advanced Usage](./docs/advanced/README.md) - Performance, debugging, and custom providers
 
 ## Features
 
@@ -294,10 +301,32 @@ await UnifiedTracking.logError(error);
 
 ## Documentation
 
+### Getting Started
+
 - [Setup Guide](./docs/setup-guide.md) - Detailed installation and configuration
-- [API Reference](./docs/api-reference.md) - Complete API documentation
-- [React Integration](./docs/react-integration.md) - React-specific features
+- [Quick Start](./docs/quick-start.md) - Get up and running in minutes
+- [Configuration](./docs/configuration.md) - Configuration options
+
+### API Reference
+
+- [Plugin Methods](./docs/api/plugin-methods.md) - Core plugin API methods
+- [Interfaces](./docs/api/interfaces/core-interfaces.md) - TypeScript interfaces
+- [Classes](./docs/api/classes/base-provider.md) - Exported classes
+- [React Hooks](./docs/api/react/hooks.md) - React integration hooks
+- [Constants](./docs/api/constants/events.md) - Predefined constants
+
+### Providers
+
+- [Analytics Providers](./docs/providers/analytics/README.md) - Analytics provider setup
+- [Error Tracking](./docs/providers/error-handling/README.md) - Error tracking setup
+- [Provider Configuration](./docs/api/interfaces/provider-interfaces.md) - Provider configs
+
+### Advanced
+
 - [Migration Guide](./docs/migration-guide.md) - Migrate from existing solutions
+- [React Integration](./docs/react-integration.md) - React-specific features
+- [Performance](./docs/advanced/performance.md) - Optimization tips
+- [Custom Providers](./docs/advanced/custom-providers.md) - Build custom providers
 
 ## Contributing
 

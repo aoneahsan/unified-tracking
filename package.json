@@ -1,6 +1,6 @@
 {
   "name": "unified-tracking",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Unified analytics and error tracking plugin for React + Capacitor Apps",
   "type": "module",
   "main": "dist/plugin.cjs.js",
