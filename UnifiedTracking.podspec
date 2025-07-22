@@ -31,10 +31,14 @@ Pod::Spec.new do |s|
   s.dependency 'Raygun4iOS'
   s.dependency 'AppCenter'
   
+  # Configure static framework linking
+  s.static_framework = true
+  
   s.xcconfig = {
     'LIBRARY_SEARCH_PATHS' => '$(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)',
     'OTHER_LDFLAGS' => '-lswiftCore -lswiftFoundation',
     'SWIFT_VERSION' => '5.1',
-    'IPHONEOS_DEPLOYMENT_TARGET' => '13.0'
+    'IPHONEOS_DEPLOYMENT_TARGET' => '13.0',
+    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64'
   }
 end
