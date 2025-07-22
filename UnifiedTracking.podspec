@@ -19,7 +19,7 @@ Pod::Spec.new do |s|
   s.dependency 'Mixpanel-swift'
   s.dependency 'Analytics' # Segment Analytics
   s.dependency 'PostHog'
-  s.dependency 'Heap/SwiftPackageManager', '~> 9.0'
+  s.dependency 'Heap', '~> 9.1'
   s.dependency 'MatomoTracker', '~> 7.0'
   
   # Error tracking dependencies
