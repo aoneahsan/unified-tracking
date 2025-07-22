@@ -17,19 +17,18 @@ Pod::Spec.new do |s|
   s.dependency 'GoogleAnalytics'
   s.dependency 'Amplitude'
   s.dependency 'Mixpanel-swift'
-  s.dependency 'Segment'
+  s.dependency 'Analytics' # Segment Analytics
   s.dependency 'PostHog'
-  s.dependency 'HeapSwift'
-  s.dependency 'Matomo'
+  s.dependency 'Heap/SwiftPackageManager', '~> 9.0'
+  s.dependency 'MatomoTracker', '~> 7.0'
   
   # Error tracking dependencies
-  s.dependency 'Sentry'
+  s.dependency 'Sentry', '~> 8.0'
   s.dependency 'Bugsnag'
   s.dependency 'Rollbar'
   s.dependency 'DatadogCore'
   s.dependency 'DatadogRUM'
-  s.dependency 'LogRocket'
-  s.dependency 'RaygunProvider'
+  s.dependency 'Raygun4iOS'
   s.dependency 'AppCenter'
   
   s.xcconfig = {
