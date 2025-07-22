@@ -8,8 +8,8 @@ A comprehensive Capacitor plugin that provides a unified API for multiple analyt
 - [API Reference](./docs/api/README.md) - Complete API documentation
 - [React Integration](./docs/react-integration.md) - React hooks and components
 - [Migration Guide](./docs/migration-guide.md) - Migrate from other analytics solutions
-- [Provider Setup](./docs/providers/README.md) - Provider-specific configuration
-- [Advanced Usage](./docs/advanced/README.md) - Performance, debugging, and custom providers
+- [Provider Configuration](./docs/api/interfaces/provider-interfaces.md) - Provider-specific configuration
+- [Plugin Methods](./docs/api/plugin-methods.md) - All available plugin methods
 
 ## Features
 

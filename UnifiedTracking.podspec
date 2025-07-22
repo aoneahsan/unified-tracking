@@ -3,9 +3,9 @@ Pod::Spec.new do |s|
   s.version          = '0.0.1'
   s.summary          = 'Unified analytics and error tracking plugin for Capacitor'
   s.license          = 'MIT'
-  s.homepage         = 'https://github.com/unified-tracking/capacitor-plugin'
+  s.homepage         = 'https://github.com/aoneahsan/unified-tracking'
   s.author           = { 'Unified Tracking' => 'support@unified-tracking.dev' }
-  s.source           = { :git => 'https://github.com/unified-tracking/capacitor-plugin.git', :tag => s.version.to_s }
+  s.source           = { :git => 'https://github.com/aoneahsan/unified-tracking.git', :tag => s.version.to_s }
   s.source_files     = 'ios/Sources/UnifiedTrackingPlugin/**/*.{swift,h,m,c,cc,mm,cpp}'
   s.ios.deployment_target = '13.0'
   s.swift_version = '5.1'

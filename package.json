@@ -1,6 +1,6 @@
 {
   "name": "unified-tracking",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Unified analytics and error tracking plugin for React + Capacitor Apps",
   "type": "module",
   "main": "dist/plugin.cjs.js",
@@ -24,9 +24,9 @@
   },
   "author": "Unified Tracking",
   "license": "MIT",
-  "repository": "https://github.com/unified-tracking/capacitor-plugin.git",
+  "repository": "https://github.com/aoneahsan/unified-tracking.git",
   "bugs": {
-    "url": "https://github.com/unified-tracking/capacitor-plugin/issues"
+    "url": "https://github.com/aoneahsan/unified-tracking/issues"
   },
   "keywords": [
     "capacitor",
