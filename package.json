@@ -22,7 +22,11 @@
   "bin": {
     "unified-tracking-setup": "./bin/setup.js"
   },
-  "author": "Unified Tracking",
+  "author": {
+    "name": "Ahsan Mahmood",
+    "email": "aoneahsan@gmail.com",
+    "url": "https://github.com/aoneahsan"
+  },
   "license": "MIT",
   "repository": "https://github.com/aoneahsan/unified-tracking.git",
   "bugs": {
