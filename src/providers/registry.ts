@@ -36,7 +36,7 @@ export class ProviderRegistry {
   register(arg1: ProviderRegistration | string, arg2?: string, arg3?: ProviderConstructor): void {
     if (typeof arg1 === 'object') {
       const { metadata } = arg1;
-      
+
       if (this.providers.has(metadata.id)) {
         this.logger.warn(`Provider ${metadata.id} already registered, overwriting`);
       }
@@ -47,7 +47,7 @@ export class ProviderRegistry {
       // Handle the decorator case where we don't have full metadata yet
       const id = arg1;
       const constructor = arg3!;
-      
+
       if (this.providers.has(id)) {
         this.logger.warn(`Provider ${id} already registered, overwriting`);
       }
@@ -59,9 +59,9 @@ export class ProviderRegistry {
           name: id,
           type: arg2 as any,
           version: '1.0.0',
-          supportedPlatforms: ['web', 'ios', 'android']
+          supportedPlatforms: ['web', 'ios', 'android'],
         },
-        constructor
+        constructor,
       };
 
       this.providers.set(id, registration);
@@ -96,16 +96,14 @@ export class ProviderRegistry {
    * Get providers by type
    */
   getByType(type: 'analytics' | 'error-tracking'): ProviderRegistration[] {
-    return this.getAll().filter(reg => reg.metadata.type === type);
+    return this.getAll().filter((reg) => reg.metadata.type === type);
   }
 
   /**
    * Get providers by platform support
    */
   getByPlatform(platform: 'web' | 'ios' | 'android'): ProviderRegistration[] {
-    return this.getAll().filter(reg => 
-      reg.metadata.supportedPlatforms.includes(platform)
-    );
+    return this.getAll().filter((reg) => reg.metadata.supportedPlatforms.includes(platform));
   }
 
   /**
@@ -113,7 +111,7 @@ export class ProviderRegistry {
    */
   createProvider(id: string): Provider | null {
     const registration = this.providers.get(id);
-    
+
     if (!registration) {
       this.logger.error(`Provider ${id} not found in registry`);
       return null;

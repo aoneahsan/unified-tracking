@@ -31,11 +31,11 @@ export class EventQueue {
 
   start(): void {
     if (this.intervalId) return;
-    
+
     this.intervalId = window.setInterval(() => {
       this.flush();
     }, this.flushInterval);
-    
+
     // Process any queued events immediately
     this.flush();
   }
@@ -54,10 +54,10 @@ export class EventQueue {
       timestamp: Date.now(),
       retryCount: 0,
     };
-    
+
     this.queue.push(queuedEvent);
     this.persistEvents();
-    
+
     // If queue is getting large, flush immediately
     if (this.queue.length >= this.batchSize * 2) {
       this.flush();
@@ -79,24 +79,22 @@ export class EventQueue {
     if (this.processing || this.queue.length === 0 || this.listeners.length === 0) {
       return;
     }
-    
+
     this.processing = true;
-    
+
     try {
       // Get batch of events
       const batch = this.queue.splice(0, this.batchSize);
-      
+
       // Process batch with all listeners
-      const results = await Promise.allSettled(
-        this.listeners.map(listener => listener(batch))
-      );
-      
+      const results = await Promise.allSettled(this.listeners.map((listener) => listener(batch)));
+
       // Handle failed events
       const failedEvents: QueuedEvent[] = [];
       results.forEach((result) => {
         if (result.status === 'rejected') {
           // Re-queue events that failed for this listener
-          batch.forEach(event => {
+          batch.forEach((event) => {
             if (event.retryCount < this.maxRetries) {
               failedEvents.push({
                 ...event,
@@ -106,12 +104,12 @@ export class EventQueue {
           });
         }
       });
-      
+
       // Re-add failed events to the front of the queue
       if (failedEvents.length > 0) {
         this.queue.unshift(...failedEvents);
       }
-      
+
       this.persistEvents();
     } finally {
       this.processing = false;

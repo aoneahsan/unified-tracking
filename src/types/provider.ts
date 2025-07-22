@@ -26,14 +26,14 @@ export interface Provider {
   name: string;
   type: ProviderType;
   version: string;
-  
+
   initialize(config: ProviderConfig): Promise<void>;
   shutdown(): Promise<void>;
   updateConsent(consent: ConsentSettings): Promise<void>;
-  
+
   pause?(): Promise<void>;
   resume?(): Promise<void>;
-  
+
   isReady(): boolean;
   getConfig(): ProviderConfig;
 }

@@ -177,11 +177,8 @@ export abstract class BaseErrorTrackingProvider extends BaseProviderImpl impleme
    */
   protected enrichContext(context?: ErrorContext): ErrorContext {
     // Merge breadcrumbs from context and provider
-    const allBreadcrumbs = [
-      ...this.breadcrumbs,
-      ...(context?.breadcrumbs || [])
-    ];
-    
+    const allBreadcrumbs = [...this.breadcrumbs, ...(context?.breadcrumbs || [])];
+
     return {
       ...context,
       user: { ...this.userContext, ...context?.user },
@@ -222,7 +219,7 @@ export abstract class BaseErrorTrackingProvider extends BaseProviderImpl impleme
    */
   protected extractErrorProperties(error: Error): Record<string, any> {
     const properties: Record<string, any> = {};
-    
+
     // Extract non-standard properties
     for (const key in error) {
       if (key !== 'name' && key !== 'message' && key !== 'stack') {

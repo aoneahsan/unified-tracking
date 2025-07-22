@@ -56,7 +56,7 @@ export class AmplitudeAnalyticsProvider implements AnalyticsProvider {
   readonly name = 'Amplitude Analytics';
   readonly type: ProviderType = 'analytics';
   readonly version = '1.0.0';
-  
+
   private logger: Logger;
   private amplitude?: AmplitudeInstance;
   private config: ProviderConfig = {};
@@ -69,7 +69,7 @@ export class AmplitudeAnalyticsProvider implements AnalyticsProvider {
 
   async initialize(config: ProviderConfig): Promise<void> {
     this.config = config;
-    
+
     if (config.enabled === false) {
       this.enabled = false;
       this.logger.info('Amplitude Analytics disabled by configuration');
@@ -97,7 +97,7 @@ export class AmplitudeAnalyticsProvider implements AnalyticsProvider {
 
         // Initialize with options
         const options: any = {};
-        
+
         if (amplitudeConfig.trackingOptions) {
           Object.assign(options, amplitudeConfig.trackingOptions);
         }
@@ -106,11 +106,7 @@ export class AmplitudeAnalyticsProvider implements AnalyticsProvider {
           options.defaultTracking = amplitudeConfig.defaultTracking;
         }
 
-        this.amplitude.init(
-          amplitudeConfig.apiKey,
-          amplitudeConfig.trackingOptions?.userId || undefined,
-          options
-        );
+        this.amplitude.init(amplitudeConfig.apiKey, amplitudeConfig.trackingOptions?.userId || undefined, options);
 
         this.ready = true;
         this.logger.info('Amplitude Analytics initialized successfully');
@@ -208,7 +204,7 @@ export class AmplitudeAnalyticsProvider implements AnalyticsProvider {
     }
 
     try {
-        this.amplitude!.setUserId(userId);
+      this.amplitude!.setUserId(userId);
 
       if (traits) {
         await this.setUserProperties(traits);
@@ -229,11 +225,11 @@ export class AmplitudeAnalyticsProvider implements AnalyticsProvider {
 
     try {
       const identify = new this.amplitude!.Identify();
-      
+
       Object.entries(properties).forEach(([key, value]) => {
         const sanitizedKey = this.sanitizePropertyKey(key);
         const sanitizedValue = this.sanitizePropertyValue(value);
-        
+
         if (sanitizedValue !== undefined) {
           identify.set(sanitizedKey, sanitizedValue);
         }
@@ -254,9 +250,7 @@ export class AmplitudeAnalyticsProvider implements AnalyticsProvider {
     }
 
     try {
-      const revenueObj = new this.amplitude!.Revenue()
-        .setPrice(data.amount)
-        .setQuantity(data.quantity || 1);
+      const revenueObj = new this.amplitude!.Revenue().setPrice(data.amount).setQuantity(data.quantity || 1);
 
       if (data.currency) {
         revenueObj.setRevenue(data.amount * (data.quantity || 1));
@@ -281,12 +275,11 @@ export class AmplitudeAnalyticsProvider implements AnalyticsProvider {
   async logScreenView(screenName: string, properties?: Record<string, any>): Promise<void> {
     const eventProperties = {
       screen_name: screenName,
-      ...properties
+      ...properties,
     };
 
     await this.trackEvent('Screen View', eventProperties);
   }
-
 
   private async loadAmplitudeSDK(): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -298,7 +291,7 @@ export class AmplitudeAnalyticsProvider implements AnalyticsProvider {
       const script = document.createElement('script');
       script.src = 'https://cdn.amplitude.com/libs/analytics-browser-2.3.8-min.js.gz';
       script.async = true;
-      
+
       script.onload = () => {
         // Initialize amplitude global
         if ((window as any).amplitudeAnalytics) {
@@ -308,7 +301,7 @@ export class AmplitudeAnalyticsProvider implements AnalyticsProvider {
           reject(new Error('Amplitude SDK loaded but not available'));
         }
       };
-      
+
       script.onerror = () => {
         reject(new Error('Failed to load Amplitude SDK'));
       };
@@ -316,7 +309,6 @@ export class AmplitudeAnalyticsProvider implements AnalyticsProvider {
       document.head.appendChild(script);
     });
   }
-
 
   private sanitizeEventName(name: string): string {
     // Amplitude has a 1024 character limit for event names
@@ -340,7 +332,7 @@ export class AmplitudeAnalyticsProvider implements AnalyticsProvider {
 
     if (Array.isArray(value)) {
       // Amplitude supports arrays
-      return value.map(item => this.sanitizePropertyValue(item));
+      return value.map((item) => this.sanitizePropertyValue(item));
     }
 
     if (typeof value === 'object') {
@@ -360,11 +352,11 @@ export class AmplitudeAnalyticsProvider implements AnalyticsProvider {
 
   private sanitizeProperties(properties: Record<string, any>): Record<string, any> {
     const sanitized: Record<string, any> = {};
-    
+
     Object.entries(properties).forEach(([key, value]) => {
       const sanitizedKey = this.sanitizePropertyKey(key);
       const sanitizedValue = this.sanitizePropertyValue(value);
-      
+
       if (sanitizedValue !== undefined) {
         sanitized[sanitizedKey] = sanitizedValue;
       }

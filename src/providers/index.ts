@@ -15,14 +15,14 @@ const logger = Logger.getInstance();
  */
 export async function loadProviders(): Promise<void> {
   const registry = ProviderRegistry.getInstance();
-  
+
   try {
     // Analytics providers
     await loadAnalyticsProviders();
-    
+
     // Error tracking providers
     await loadErrorTrackingProviders();
-    
+
     logger.info(`Loaded ${registry.getAll().length} providers`);
   } catch (error) {
     logger.error('Failed to load providers', error);

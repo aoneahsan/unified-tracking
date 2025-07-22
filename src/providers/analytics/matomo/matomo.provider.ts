@@ -24,9 +24,23 @@ interface MatomoTracker {
   trackPageView: (customTitle?: string) => void;
   trackEvent: (category: string, action: string, name?: string, value?: number) => void;
   trackGoal: (goalId: number, customRevenue?: number) => void;
-  trackEcommerce: (orderId: string, grandTotal: number, subTotal?: number, tax?: number, shipping?: number, discount?: number) => void;
+  trackEcommerce: (
+    orderId: string,
+    grandTotal: number,
+    subTotal?: number,
+    tax?: number,
+    shipping?: number,
+    discount?: number,
+  ) => void;
   addEcommerceItem: (sku: string, name?: string, category?: string, price?: number, quantity?: number) => void;
-  trackEcommerceOrder: (orderId: string, grandTotal: number, subTotal?: number, tax?: number, shipping?: number, discount?: number) => void;
+  trackEcommerceOrder: (
+    orderId: string,
+    grandTotal: number,
+    subTotal?: number,
+    tax?: number,
+    shipping?: number,
+    discount?: number,
+  ) => void;
   trackEcommerceCartUpdate: (grandTotal: number) => void;
   setUserId: (userId: string) => void;
   setCustomVariable: (index: number, name: string, value: string, scope?: 'visit' | 'page') => void;
@@ -166,12 +180,12 @@ export class MatomoAnalyticsProvider extends BaseAnalyticsProvider {
       const script = document.createElement('script');
       script.async = true;
       script.src = `${this.matomoConfig!.trackerUrl}/matomo.js`;
-      
+
       script.onload = () => {
         this.scriptLoaded = true;
         resolve();
       };
-      
+
       script.onerror = () => {
         reject(new Error('Failed to load Matomo SDK'));
       };
@@ -252,7 +266,7 @@ export class MatomoAnalyticsProvider extends BaseAnalyticsProvider {
     }
 
     const cleanProperties = this.sanitizeProperties(properties);
-    
+
     // Convert to Matomo event format: category, action, name, value
     const category = cleanProperties.category || 'General';
     const action = eventName;
@@ -274,9 +288,10 @@ export class MatomoAnalyticsProvider extends BaseAnalyticsProvider {
     if (traits && Object.keys(traits).length > 0) {
       const cleanTraits = this.sanitizeProperties(traits);
       let variableIndex = 1;
-      
+
       Object.entries(cleanTraits).forEach(([key, value]) => {
-        if (variableIndex <= 5) { // Matomo supports up to 5 custom variables
+        if (variableIndex <= 5) {
+          // Matomo supports up to 5 custom variables
           this.tracker!.setCustomVariable(variableIndex, key, String(value), 'visit');
           variableIndex++;
         }
@@ -291,9 +306,10 @@ export class MatomoAnalyticsProvider extends BaseAnalyticsProvider {
 
     const cleanProperties = this.sanitizeProperties(properties);
     let variableIndex = 1;
-    
+
     Object.entries(cleanProperties).forEach(([key, value]) => {
-      if (variableIndex <= 5) { // Matomo supports up to 5 custom variables
+      if (variableIndex <= 5) {
+        // Matomo supports up to 5 custom variables
         this.tracker!.setCustomVariable(variableIndex, key, String(value), 'visit');
         variableIndex++;
       }
@@ -307,7 +323,7 @@ export class MatomoAnalyticsProvider extends BaseAnalyticsProvider {
 
     // Set custom URL for screen view
     this.tracker.setCustomUrl(`/screen/${screenName}`);
-    
+
     // Set document title
     this.tracker.setDocumentTitle(screenName);
 
@@ -315,7 +331,7 @@ export class MatomoAnalyticsProvider extends BaseAnalyticsProvider {
     if (properties && Object.keys(properties).length > 0) {
       const cleanProperties = this.sanitizeProperties(properties);
       let variableIndex = 1;
-      
+
       Object.entries(cleanProperties).forEach(([key, value]) => {
         if (variableIndex <= 5) {
           this.tracker!.setCustomVariable(variableIndex, key, String(value), 'page');
@@ -335,13 +351,13 @@ export class MatomoAnalyticsProvider extends BaseAnalyticsProvider {
 
     // Add ecommerce items if provided
     if (data.items && data.items.length > 0) {
-      data.items.forEach(item => {
+      data.items.forEach((item) => {
         this.tracker!.addEcommerceItem(
           item.itemId || '',
           item.itemName || '',
           item.itemCategory || '',
           item.price || 0,
-          item.quantity || 1
+          item.quantity || 1,
         );
       });
     }
@@ -349,7 +365,7 @@ export class MatomoAnalyticsProvider extends BaseAnalyticsProvider {
     // Track ecommerce order
     const orderId = data.transactionId || `order_${Date.now()}`;
     const grandTotal = data.amount;
-    const subTotal = data.items?.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0);
+    const subTotal = data.items?.reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 1), 0);
     const tax = 0; // Not available in RevenueData
     const shipping = 0; // Not available in RevenueData
     const discount = 0; // Not available in RevenueData
@@ -367,7 +383,7 @@ export class MatomoAnalyticsProvider extends BaseAnalyticsProvider {
 
     // Clear custom dimensions
     if (this.matomoConfig?.customDimensions) {
-      Object.keys(this.matomoConfig.customDimensions).forEach(dimensionId => {
+      Object.keys(this.matomoConfig.customDimensions).forEach((dimensionId) => {
         this.tracker!.deleteCustomDimension(parseInt(dimensionId));
       });
     }

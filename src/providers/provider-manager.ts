@@ -1,13 +1,7 @@
 import { Logger } from '../utils/logger';
 import { ConfigManager } from '../utils/config-manager';
 import { EventQueue } from '../utils/event-queue';
-import type {
-  Provider,
-  ProviderType,
-  ProviderState,
-  ProviderConfig,
-  ConsentSettings,
-} from '../types/provider';
+import type { Provider, ProviderType, ProviderState, ProviderConfig, ConsentSettings } from '../types/provider';
 import type { AnalyticsProvider } from './base';
 import type { ErrorTrackingProvider } from './base';
 import type { UnifiedTrackingConfig, ErrorContext, RevenueData } from '../definitions';
@@ -35,33 +29,25 @@ export class ProviderManager {
     if (config) {
       await this.configManager.loadConfig(config);
     }
-    
+
     if (this.initialized) {
       this.logger.warn('ProviderManager already initialized');
       return;
     }
 
     this.logger.info('Initializing ProviderManager');
-    
+
     try {
       const config = this.configManager.getConfig();
-      
+
       // Initialize analytics providers
       if (config.analytics?.providers) {
-        await this.initializeProviders(
-          config.analytics.providers,
-          'analytics',
-          config.analytics
-        );
+        await this.initializeProviders(config.analytics.providers, 'analytics', config.analytics);
       }
 
       // Initialize error tracking providers
       if (config.errorTracking?.providers) {
-        await this.initializeProviders(
-          config.errorTracking.providers,
-          'error-tracking',
-          config.errorTracking
-        );
+        await this.initializeProviders(config.errorTracking.providers, 'error-tracking', config.errorTracking);
       }
 
       this.initialized = true;
@@ -72,11 +58,7 @@ export class ProviderManager {
     }
   }
 
-  private async initializeProviders(
-    providerNames: string[],
-    type: ProviderType,
-    config: any
-  ): Promise<void> {
+  private async initializeProviders(providerNames: string[], type: ProviderType, config: any): Promise<void> {
     for (const name of providerNames) {
       try {
         const provider = await this.loadProvider(name, type);
@@ -90,26 +72,22 @@ export class ProviderManager {
     }
   }
 
-  private async loadProvider(
-    name: string,
-    type: ProviderType
-  ): Promise<Provider | null> {
+  private async loadProvider(name: string, type: ProviderType): Promise<Provider | null> {
     try {
       // First check if provider is already registered
       const { ProviderRegistry } = await import('./registry');
       const registry = ProviderRegistry.getInstance();
-      
+
       if (registry.has(name)) {
         return registry.createProvider(name);
       }
 
       // Try dynamic import if not in registry
-      const modulePath = type === 'analytics' 
-        ? `./analytics/${name}/${name}.provider`
-        : `./error-handling/${name}/${name}.provider`;
+      const modulePath =
+        type === 'analytics' ? `./analytics/${name}/${name}.provider` : `./error-handling/${name}/${name}.provider`;
 
       await import(modulePath);
-      
+
       // Check registry again after import
       if (registry.has(name)) {
         return registry.createProvider(name);
@@ -122,11 +100,7 @@ export class ProviderManager {
     }
   }
 
-  async registerProvider(
-    id: string,
-    provider: Provider,
-    config: ProviderConfig
-  ): Promise<void> {
+  async registerProvider(id: string, provider: Provider, config: ProviderConfig): Promise<void> {
     if (this.providers.has(id)) {
       this.logger.warn(`Provider ${id} already registered`);
       return;
@@ -153,12 +127,9 @@ export class ProviderManager {
     }
   }
 
-  private async processQueuedEvents(
-    providerId: string,
-    provider: Provider
-  ): Promise<void> {
+  private async processQueuedEvents(providerId: string, provider: Provider): Promise<void> {
     const events = this.eventQueue.getEventsForProvider(providerId);
-    
+
     for (const event of events) {
       try {
         if (provider.type === 'analytics' && 'track' in provider) {
@@ -197,7 +168,7 @@ export class ProviderManager {
 
   getActiveProviders(type?: ProviderType): Provider[] {
     const activeProviders: Provider[] = [];
-    
+
     for (const instance of this.providers.values()) {
       if (instance.state === 'active') {
         if (!type || instance.provider.type === type) {
@@ -216,7 +187,7 @@ export class ProviderManager {
     }
 
     instance.state = state;
-    
+
     if (state === 'paused') {
       await instance.provider.pause?.();
     } else if (state === 'active') {
@@ -230,7 +201,7 @@ export class ProviderManager {
     for (const [id, instance] of this.providers) {
       try {
         await instance.provider.updateConsent(consent);
-        
+
         // Update provider state based on consent
         if (consent.analytics === false && instance.provider.type === 'analytics') {
           instance.state = 'disabled';
@@ -247,22 +218,21 @@ export class ProviderManager {
 
   async shutdown(): Promise<void> {
     this.logger.info('Shutting down ProviderManager');
-    
+
     const shutdownPromises: Promise<void>[] = [];
-    
+
     for (const [id, instance] of this.providers) {
       shutdownPromises.push(
-        instance.provider.shutdown()
-          .catch(error => {
-            this.logger.error(`Failed to shutdown provider ${id}`, error);
-          })
+        instance.provider.shutdown().catch((error) => {
+          this.logger.error(`Failed to shutdown provider ${id}`, error);
+        }),
       );
     }
 
     await Promise.all(shutdownPromises);
     this.providers.clear();
     this.initialized = false;
-    
+
     this.logger.info('ProviderManager shutdown complete');
   }
 
@@ -272,7 +242,7 @@ export class ProviderManager {
 
   getProviderStates(): Record<string, ProviderState> {
     const states: Record<string, ProviderState> = {};
-    
+
     for (const [id, instance] of this.providers) {
       states[id] = instance.state;
     }
@@ -282,73 +252,73 @@ export class ProviderManager {
 
   async trackEvent(eventName: string, properties?: Record<string, any>): Promise<void> {
     const analyticsProviders = this.getActiveProviders('analytics') as AnalyticsProvider[];
-    
-    const promises = analyticsProviders.map(provider => 
-      provider.trackEvent(eventName, properties).catch(error => {
+
+    const promises = analyticsProviders.map((provider) =>
+      provider.trackEvent(eventName, properties).catch((error) => {
         this.logger.error(`Failed to track event with provider ${provider.id}`, error);
-      })
+      }),
     );
-    
+
     await Promise.all(promises);
   }
 
   async identifyUser(userId: string, traits?: Record<string, any>): Promise<void> {
     const analyticsProviders = this.getActiveProviders('analytics') as AnalyticsProvider[];
-    
-    const promises = analyticsProviders.map(provider => 
-      provider.identifyUser(userId, traits).catch(error => {
+
+    const promises = analyticsProviders.map((provider) =>
+      provider.identifyUser(userId, traits).catch((error) => {
         this.logger.error(`Failed to identify user with provider ${provider.id}`, error);
-      })
+      }),
     );
-    
+
     await Promise.all(promises);
   }
 
   async setUserProperties(properties: Record<string, any>): Promise<void> {
     const analyticsProviders = this.getActiveProviders('analytics') as AnalyticsProvider[];
-    
-    const promises = analyticsProviders.map(provider => 
-      provider.setUserProperties(properties).catch(error => {
+
+    const promises = analyticsProviders.map((provider) =>
+      provider.setUserProperties(properties).catch((error) => {
         this.logger.error(`Failed to set user properties with provider ${provider.id}`, error);
-      })
+      }),
     );
-    
+
     await Promise.all(promises);
   }
 
   async logError(error: Error | string, context?: ErrorContext): Promise<void> {
     const errorProviders = this.getActiveProviders('error-tracking') as ErrorTrackingProvider[];
-    
-    const promises = errorProviders.map(provider => 
-      provider.logError(error, context).catch(err => {
+
+    const promises = errorProviders.map((provider) =>
+      provider.logError(error, context).catch((err) => {
         this.logger.error(`Failed to log error with provider ${provider.id}`, err);
-      })
+      }),
     );
-    
+
     await Promise.all(promises);
   }
 
   async logRevenue(revenue: RevenueData): Promise<void> {
     const analyticsProviders = this.getActiveProviders('analytics') as AnalyticsProvider[];
-    
-    const promises = analyticsProviders.map(provider => 
-      provider.logRevenue(revenue).catch(error => {
+
+    const promises = analyticsProviders.map((provider) =>
+      provider.logRevenue(revenue).catch((error) => {
         this.logger.error(`Failed to log revenue with provider ${provider.id}`, error);
-      })
+      }),
     );
-    
+
     await Promise.all(promises);
   }
 
   async logScreenView(screenName: string, properties?: Record<string, any>): Promise<void> {
     const analyticsProviders = this.getActiveProviders('analytics') as AnalyticsProvider[];
-    
-    const promises = analyticsProviders.map(provider => 
-      provider.logScreenView(screenName, properties).catch(error => {
+
+    const promises = analyticsProviders.map((provider) =>
+      provider.logScreenView(screenName, properties).catch((error) => {
         this.logger.error(`Failed to log screen view with provider ${provider.id}`, error);
-      })
+      }),
     );
-    
+
     await Promise.all(promises);
   }
 
@@ -370,7 +340,7 @@ export class ProviderManager {
 
   setDebugMode(enabled: boolean): void {
     this.logger.setDebugMode(enabled);
-    
+
     for (const [id, instance] of this.providers) {
       try {
         if ('setDebugMode' in instance.provider) {

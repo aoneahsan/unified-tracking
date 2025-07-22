@@ -284,7 +284,7 @@ export class RollbarErrorTrackingProvider extends BaseErrorTrackingProvider {
 
     // Choose the appropriate log level
     const level = this.mapSeverityToRollbarLevel(context?.severity || 'error');
-    
+
     switch (level) {
       case 'critical':
         this.rollbar.critical(error, extra);
@@ -308,11 +308,11 @@ export class RollbarErrorTrackingProvider extends BaseErrorTrackingProvider {
 
   private mapSeverityToRollbarLevel(severity: string): string {
     const severityMap: Record<string, string> = {
-      'fatal': 'critical',
-      'error': 'error',
-      'warning': 'warning',
-      'info': 'info',
-      'debug': 'debug',
+      fatal: 'critical',
+      error: 'error',
+      warning: 'warning',
+      info: 'info',
+      debug: 'debug',
     };
 
     return severityMap[severity] || 'error';
@@ -328,7 +328,7 @@ export class RollbarErrorTrackingProvider extends BaseErrorTrackingProvider {
     };
 
     // Add additional user properties
-    Object.keys(user).forEach(key => {
+    Object.keys(user).forEach((key) => {
       if (!['id', 'email', 'name', 'username'].includes(key)) {
         person[key] = user[key];
       }
@@ -342,7 +342,7 @@ export class RollbarErrorTrackingProvider extends BaseErrorTrackingProvider {
 
     const payload: any = {};
     payload[key] = value;
-    
+
     this.rollbar.configure({
       payload: {
         custom: payload,
@@ -390,19 +390,23 @@ export class RollbarErrorTrackingProvider extends BaseErrorTrackingProvider {
 
   protected doAddBreadcrumb(message: string, category?: string, data?: Record<string, any>): void {
     if (!this.rollbar) return;
-    
+
     const metadata = {
       message,
       category,
       ...data,
     };
-    
+
     this.rollbar.telemetry.captureEvent('log', metadata, 'info');
   }
 
-  protected async doLogMessage(message: string, level: 'debug' | 'info' | 'warning', _extra?: Record<string, any>): Promise<void> {
+  protected async doLogMessage(
+    message: string,
+    level: 'debug' | 'info' | 'warning',
+    _extra?: Record<string, any>,
+  ): Promise<void> {
     if (!this.rollbar) return;
-    
+
     const rollbarLevel = level === 'warning' ? 'warning' : level;
     this.rollbar[rollbarLevel](message);
   }
@@ -423,7 +427,7 @@ export class RollbarErrorTrackingProvider extends BaseErrorTrackingProvider {
     };
 
     const level = breadcrumb.level || 'info';
-    
+
     this.rollbar.telemetry.captureEvent('manual', metadata, level);
   }
 

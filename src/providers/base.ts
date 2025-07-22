@@ -89,7 +89,7 @@ export interface AnalyticsProvider extends BaseProvider {
    * Track a custom event
    */
   track(eventName: string, properties?: Record<string, any>): Promise<void>;
-  
+
   /**
    * Track a custom event (alias for track)
    */
@@ -153,21 +153,12 @@ export interface ErrorTrackingProvider extends BaseProvider {
   /**
    * Add breadcrumb
    */
-  addBreadcrumb?(
-    message: string,
-    category?: string,
-    data?: Record<string, any>,
-  ): void;
+  addBreadcrumb?(message: string, category?: string, data?: Record<string, any>): void;
 
   /**
    * Set user context
    */
-  setUserContext(user: {
-    id?: string;
-    email?: string;
-    username?: string;
-    [key: string]: any;
-  }): void;
+  setUserContext(user: { id?: string; email?: string; username?: string; [key: string]: any }): void;
 
   /**
    * Set extra context

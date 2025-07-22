@@ -22,20 +22,20 @@ export class ConfigManager {
   async loadConfig(userConfig?: UnifiedTrackingConfig): Promise<UnifiedTrackingConfig> {
     // Start with default config
     const defaultConfig = this.getDefaultConfig();
-    
+
     // Merge with user config
     this.config = this.deepMerge(defaultConfig, userConfig || {});
-    
+
     // Auto-detect providers if enabled
     if (this.config.autoDetect !== false) {
       await this.autoDetectProviders();
     }
-    
+
     // Apply consent settings
     if (this.config.settings?.defaultConsent) {
       this.consent = { ...this.consent, ...this.config.settings.defaultConsent };
     }
-    
+
     return this.config;
   }
 
@@ -155,9 +155,7 @@ export class ConfigManager {
       this.config.analytics = this.config.analytics || {};
       this.config.analytics.providers = [
         ...(this.config.analytics.providers || []),
-        ...detectedProviders.analytics.filter(
-          p => !this.config.analytics?.providers?.includes(p as any)
-        ),
+        ...detectedProviders.analytics.filter((p) => !this.config.analytics?.providers?.includes(p as any)),
       ] as any;
     }
 
@@ -165,18 +163,16 @@ export class ConfigManager {
       this.config.errorTracking = this.config.errorTracking || {};
       this.config.errorTracking.providers = [
         ...(this.config.errorTracking.providers || []),
-        ...detectedProviders.errorTracking.filter(
-          p => !this.config.errorTracking?.providers?.includes(p as any)
-        ),
+        ...detectedProviders.errorTracking.filter((p) => !this.config.errorTracking?.providers?.includes(p as any)),
       ] as any;
     }
   }
 
   private deepMerge(target: any, source: any): any {
     const output = { ...target };
-    
+
     if (this.isObject(target) && this.isObject(source)) {
-      Object.keys(source).forEach(key => {
+      Object.keys(source).forEach((key) => {
         if (this.isObject(source[key])) {
           if (!(key in target)) {
             output[key] = source[key];
@@ -188,7 +184,7 @@ export class ConfigManager {
         }
       });
     }
-    
+
     return output;
   }
 

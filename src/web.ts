@@ -36,7 +36,7 @@ export class UnifiedTrackingWeb extends WebPlugin implements UnifiedTrackingPlug
 
       // Load and merge configuration
       const config = await this.configManager.loadConfig(options);
-      
+
       // Set global settings
       if (config.settings?.debug) {
         this.logger.setDebugMode(true);
@@ -49,28 +49,28 @@ export class UnifiedTrackingWeb extends WebPlugin implements UnifiedTrackingPlug
       this.eventQueue.start();
 
       this.initialized = true;
-      
+
       const analyticsProviders = this.providerManager.getActiveProviders('analytics');
       const errorProviders = this.providerManager.getActiveProviders('error-tracking');
-      
+
       const result: InitializeResult = {
         success: true,
         activeProviders: {
-          analytics: analyticsProviders.map(p => ({
+          analytics: analyticsProviders.map((p) => ({
             name: p.name,
             enabled: true,
             initialized: p.isReady(),
-            version: p.version
+            version: p.version,
           })),
-          errorTracking: errorProviders.map(p => ({
+          errorTracking: errorProviders.map((p) => ({
             name: p.name,
             enabled: true,
             initialized: p.isReady(),
-            version: p.version
-          }))
-        }
+            version: p.version,
+          })),
+        },
       };
-      
+
       this.logger.info('Unified Tracking initialized successfully', result);
 
       return result;
@@ -82,68 +82,68 @@ export class UnifiedTrackingWeb extends WebPlugin implements UnifiedTrackingPlug
 
   async track(event: string, properties?: Record<string, any>): Promise<void> {
     this.ensureInitialized();
-    
+
     this.logger.debug('Tracking event', { event, properties });
-    
+
     await this.providerManager.trackEvent(event, properties);
-    
+
     this.notifyListeners('trackingEvent', { event, properties });
   }
 
   async identify(userId: string, traits?: Record<string, any>): Promise<void> {
     this.ensureInitialized();
-    
+
     this.logger.debug('Identifying user', { userId, traits });
-    
+
     await this.providerManager.identifyUser(userId, traits);
   }
 
   async setUserProperties(properties: Record<string, any>): Promise<void> {
     this.ensureInitialized();
-    
+
     this.logger.debug('Setting user properties', properties);
-    
+
     await this.providerManager.setUserProperties(properties);
   }
 
   async logError(error: Error | string, context?: ErrorContext): Promise<void> {
     this.ensureInitialized();
-    
+
     const errorObj = typeof error === 'string' ? new Error(error) : error;
-    
+
     this.logger.error('Logging error', errorObj, context);
-    
+
     await this.providerManager.logError(errorObj, context);
-    
+
     this.notifyListeners('error', { error: errorObj, context });
   }
 
   async logRevenue(revenue: RevenueData): Promise<void> {
     this.ensureInitialized();
-    
+
     this.logger.debug('Logging revenue', revenue);
-    
+
     await this.providerManager.logRevenue(revenue);
   }
 
   async logScreenView(screenName: string, properties?: Record<string, any>): Promise<void> {
     this.ensureInitialized();
-    
+
     this.logger.debug('Logging screen view', { screenName, properties });
-    
+
     await this.providerManager.logScreenView(screenName, properties);
   }
 
   async setConsent(consent: ConsentSettings): Promise<void> {
     this.logger.debug('Setting consent', consent);
-    
+
     this.configManager.setConsent(consent);
     await this.providerManager.handleConsentChange(consent);
   }
 
   async reset(): Promise<void> {
     this.logger.debug('Resetting Unified Tracking');
-    
+
     await this.providerManager.reset();
     this.eventQueue.clear();
   }
@@ -151,20 +151,20 @@ export class UnifiedTrackingWeb extends WebPlugin implements UnifiedTrackingPlug
   async getActiveProviders(): Promise<ActiveProvidersResult> {
     const analyticsProviders = this.providerManager.getActiveProviders('analytics');
     const errorProviders = this.providerManager.getActiveProviders('error-tracking');
-    
+
     return {
-      analytics: analyticsProviders.map(p => ({
+      analytics: analyticsProviders.map((p) => ({
         name: p.name,
         enabled: true,
         initialized: p.isReady(),
-        version: p.version
+        version: p.version,
       })),
-      errorTracking: errorProviders.map(p => ({
+      errorTracking: errorProviders.map((p) => ({
         name: p.name,
         enabled: true,
         initialized: p.isReady(),
-        version: p.version
-      }))
+        version: p.version,
+      })),
     };
   }
 

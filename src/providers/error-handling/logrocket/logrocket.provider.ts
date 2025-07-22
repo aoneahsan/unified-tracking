@@ -284,11 +284,11 @@ export class LogRocketErrorTrackingProvider extends BaseErrorTrackingProvider {
 
   private mapSeverityToLogRocketLevel(severity: string): string {
     const severityMap: Record<string, string> = {
-      'fatal': 'error',
-      'error': 'error',
-      'warning': 'warn',
-      'info': 'info',
-      'debug': 'debug',
+      fatal: 'error',
+      error: 'error',
+      warning: 'warn',
+      info: 'info',
+      debug: 'debug',
     };
 
     return severityMap[severity] || 'error';
@@ -309,7 +309,7 @@ export class LogRocketErrorTrackingProvider extends BaseErrorTrackingProvider {
     }
 
     // Add additional user properties
-    Object.keys(user).forEach(key => {
+    Object.keys(user).forEach((key) => {
       if (!['id', 'name', 'email'].includes(key)) {
         traits[key] = user[key];
       }
@@ -554,9 +554,13 @@ export class LogRocketErrorTrackingProvider extends BaseErrorTrackingProvider {
     this.logRocket.log.warn(message, extra);
   }
 
-  protected async doLogMessage(message: string, level: 'debug' | 'info' | 'warning', extra?: Record<string, any>): Promise<void> {
+  protected async doLogMessage(
+    message: string,
+    level: 'debug' | 'info' | 'warning',
+    extra?: Record<string, any>,
+  ): Promise<void> {
     if (!this.logRocket) return;
-    
+
     const lrLevel = level === 'warning' ? 'warn' : level;
     this.logRocket.log[lrLevel](message, extra);
   }

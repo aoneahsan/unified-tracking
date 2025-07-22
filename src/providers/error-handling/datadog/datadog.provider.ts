@@ -236,7 +236,7 @@ export class DataDogErrorTrackingProvider extends BaseErrorTrackingProvider {
     }
 
     // Add custom properties
-    Object.keys(user).forEach(key => {
+    Object.keys(user).forEach((key) => {
       if (!['id', 'email', 'name', 'username'].includes(key)) {
         userContext[key] = user[key];
       }
@@ -267,7 +267,6 @@ export class DataDogErrorTrackingProvider extends BaseErrorTrackingProvider {
     this.dataDog.clearUser();
     this.dataDog.setGlobalContext({});
   }
-
 
   protected async doEnable(): Promise<void> {
     if (!this.dataDog) return;
@@ -405,9 +404,13 @@ export class DataDogErrorTrackingProvider extends BaseErrorTrackingProvider {
   /**
    * Log a message
    */
-  protected async doLogMessage(message: string, level: 'debug' | 'info' | 'warning', extra?: Record<string, any>): Promise<void> {
+  protected async doLogMessage(
+    message: string,
+    level: 'debug' | 'info' | 'warning',
+    extra?: Record<string, any>,
+  ): Promise<void> {
     if (!this.dataDog) return;
-    
+
     const ddLevel = level === 'warning' ? 'warn' : level;
     this.dataDog.logger[ddLevel](message, extra);
   }

@@ -243,9 +243,9 @@ export class BugsnagErrorTrackingProvider extends BaseErrorTrackingProvider {
         // Set severity based on context
         if (context.severity) {
           const severityMap: Record<string, string> = {
-            'info': 'info',
-            'warning': 'warning',
-            'error': 'error',
+            info: 'info',
+            warning: 'warning',
+            error: 'error',
           };
           event.severity = severityMap[context.severity] || 'error';
         }
@@ -322,7 +322,11 @@ export class BugsnagErrorTrackingProvider extends BaseErrorTrackingProvider {
     this.bugsnag.leaveBreadcrumb(message, data, category);
   }
 
-  protected async doLogMessage(message: string, level: 'debug' | 'info' | 'warning', _extra?: Record<string, any>): Promise<void> {
+  protected async doLogMessage(
+    message: string,
+    level: 'debug' | 'info' | 'warning',
+    _extra?: Record<string, any>,
+  ): Promise<void> {
     // Bugsnag doesn't have a specific message logging API
     // Messages are typically added as breadcrumbs
     this.doAddBreadcrumb(message, `log.${level}`);
@@ -344,7 +348,6 @@ export class BugsnagErrorTrackingProvider extends BaseErrorTrackingProvider {
 
     this.bugsnag.leaveBreadcrumb(breadcrumb.message, metaData, breadcrumb.category);
   }
-
 
   /**
    * Set context for all future errors

@@ -11,42 +11,45 @@ export const useTrackEvent = () => {
   const [isTracking, setIsTracking] = useState(false);
   const [lastError, setLastError] = useState<Error | null>(null);
 
-  const trackEvent = useCallback(async (
-    event: string, 
-    properties?: Record<string, any>,
-    options?: {
-      onSuccess?: () => void;
-      onError?: (error: Error) => void;
-      logErrors?: boolean;
-    }
-  ) => {
-    try {
-      setIsTracking(true);
-      setLastError(null);
-      
-      await track(event, properties);
-      
-      options?.onSuccess?.();
-    } catch (error) {
-      const err = error as Error;
-      setLastError(err);
-      
-      if (options?.logErrors !== false) {
-        try {
-          await contextLogError(err, {
-            extra: { event, properties },
-            tags: { source: 'useTrackEvent' },
-          });
-        } catch (logError) {
-          console.error('Failed to log tracking error:', logError);
+  const trackEvent = useCallback(
+    async (
+      event: string,
+      properties?: Record<string, any>,
+      options?: {
+        onSuccess?: () => void;
+        onError?: (error: Error) => void;
+        logErrors?: boolean;
+      },
+    ) => {
+      try {
+        setIsTracking(true);
+        setLastError(null);
+
+        await track(event, properties);
+
+        options?.onSuccess?.();
+      } catch (error) {
+        const err = error as Error;
+        setLastError(err);
+
+        if (options?.logErrors !== false) {
+          try {
+            await contextLogError(err, {
+              extra: { event, properties },
+              tags: { source: 'useTrackEvent' },
+            });
+          } catch (logError) {
+            console.error('Failed to log tracking error:', logError);
+          }
         }
+
+        options?.onError?.(err);
+      } finally {
+        setIsTracking(false);
       }
-      
-      options?.onError?.(err);
-    } finally {
-      setIsTracking(false);
-    }
-  }, [track, contextLogError]);
+    },
+    [track, contextLogError],
+  );
 
   return {
     trackEvent,
@@ -61,29 +64,32 @@ export const useIdentifyUser = () => {
   const [isIdentifying, setIsIdentifying] = useState(false);
   const [lastError, setLastError] = useState<Error | null>(null);
 
-  const identifyUser = useCallback(async (
-    userId: string,
-    traits?: Record<string, any>,
-    options?: {
-      onSuccess?: () => void;
-      onError?: (error: Error) => void;
-    }
-  ) => {
-    try {
-      setIsIdentifying(true);
-      setLastError(null);
-      
-      await identify(userId, traits);
-      
-      options?.onSuccess?.();
-    } catch (error) {
-      const err = error as Error;
-      setLastError(err);
-      options?.onError?.(err);
-    } finally {
-      setIsIdentifying(false);
-    }
-  }, [identify]);
+  const identifyUser = useCallback(
+    async (
+      userId: string,
+      traits?: Record<string, any>,
+      options?: {
+        onSuccess?: () => void;
+        onError?: (error: Error) => void;
+      },
+    ) => {
+      try {
+        setIsIdentifying(true);
+        setLastError(null);
+
+        await identify(userId, traits);
+
+        options?.onSuccess?.();
+      } catch (error) {
+        const err = error as Error;
+        setLastError(err);
+        options?.onError?.(err);
+      } finally {
+        setIsIdentifying(false);
+      }
+    },
+    [identify],
+  );
 
   return {
     identifyUser,
@@ -101,7 +107,7 @@ export const useScreenView = (
     trackOnUnmount?: boolean;
     trackOnUpdate?: boolean;
     onError?: (error: Error) => void;
-  }
+  },
 ) => {
   const { logScreenView, logError } = useUnifiedTracking();
   const [isTracking, setIsTracking] = useState(false);
@@ -109,33 +115,33 @@ export const useScreenView = (
   const previousScreenName = useRef<string>(screenName);
   const previousProperties = useRef<Record<string, any> | undefined>(properties);
 
-  const trackScreen = useCallback(async (
-    name: string = screenName,
-    props: Record<string, any> = properties || {}
-  ) => {
-    try {
-      setIsTracking(true);
-      setLastError(null);
-      
-      await logScreenView(name, props);
-    } catch (error) {
-      const err = error as Error;
-      setLastError(err);
-      
+  const trackScreen = useCallback(
+    async (name: string = screenName, props: Record<string, any> = properties || {}) => {
       try {
-        await logError(err, {
-          extra: { screenName: name, properties: props },
-          tags: { source: 'useScreenView' },
-        });
-      } catch (logErrorErr) {
-        console.error('Failed to log screen view error:', logErrorErr);
+        setIsTracking(true);
+        setLastError(null);
+
+        await logScreenView(name, props);
+      } catch (error) {
+        const err = error as Error;
+        setLastError(err);
+
+        try {
+          await logError(err, {
+            extra: { screenName: name, properties: props },
+            tags: { source: 'useScreenView' },
+          });
+        } catch (logErrorErr) {
+          console.error('Failed to log screen view error:', logErrorErr);
+        }
+
+        options?.onError?.(err);
+      } finally {
+        setIsTracking(false);
       }
-      
-      options?.onError?.(err);
-    } finally {
-      setIsTracking(false);
-    }
-  }, [screenName, properties, logScreenView, logError, options]);
+    },
+    [screenName, properties, logScreenView, logError, options],
+  );
 
   // Track screen view on mount
   useEffect(() => {
@@ -149,12 +155,12 @@ export const useScreenView = (
     if (options?.trackOnUpdate !== false) {
       const screenChanged = previousScreenName.current !== screenName;
       const propertiesChanged = JSON.stringify(previousProperties.current) !== JSON.stringify(properties);
-      
+
       if (screenChanged || propertiesChanged) {
         trackScreen();
       }
     }
-    
+
     previousScreenName.current = screenName;
     previousProperties.current = properties;
   }, [screenName, properties, trackScreen, options?.trackOnUpdate]);
@@ -181,50 +187,53 @@ export const useRevenueTracking = () => {
   const [isTracking, setIsTracking] = useState(false);
   const [lastError, setLastError] = useState<Error | null>(null);
 
-  const trackRevenue = useCallback(async (
-    revenue: RevenueData,
-    options?: {
-      validate?: boolean;
-      onSuccess?: () => void;
-      onError?: (error: Error) => void;
-    }
-  ) => {
-    try {
-      setIsTracking(true);
-      setLastError(null);
-      
-      // Validate revenue data if requested
-      if (options?.validate !== false) {
-        if (!revenue.amount || revenue.amount <= 0) {
-          throw new Error('Revenue amount must be greater than 0');
-        }
-        
-        if (revenue.currency && !/^[A-Z]{3}$/.test(revenue.currency)) {
-          throw new Error('Currency must be a valid 3-letter ISO code');
-        }
-      }
-      
-      await logRevenue(revenue);
-      
-      options?.onSuccess?.();
-    } catch (error) {
-      const err = error as Error;
-      setLastError(err);
-      
+  const trackRevenue = useCallback(
+    async (
+      revenue: RevenueData,
+      options?: {
+        validate?: boolean;
+        onSuccess?: () => void;
+        onError?: (error: Error) => void;
+      },
+    ) => {
       try {
-        await logError(err, {
-          extra: { revenue },
-          tags: { source: 'useRevenueTracking' },
-        });
-      } catch (logErrorErr) {
-        console.error('Failed to log revenue tracking error:', logErrorErr);
+        setIsTracking(true);
+        setLastError(null);
+
+        // Validate revenue data if requested
+        if (options?.validate !== false) {
+          if (!revenue.amount || revenue.amount <= 0) {
+            throw new Error('Revenue amount must be greater than 0');
+          }
+
+          if (revenue.currency && !/^[A-Z]{3}$/.test(revenue.currency)) {
+            throw new Error('Currency must be a valid 3-letter ISO code');
+          }
+        }
+
+        await logRevenue(revenue);
+
+        options?.onSuccess?.();
+      } catch (error) {
+        const err = error as Error;
+        setLastError(err);
+
+        try {
+          await logError(err, {
+            extra: { revenue },
+            tags: { source: 'useRevenueTracking' },
+          });
+        } catch (logErrorErr) {
+          console.error('Failed to log revenue tracking error:', logErrorErr);
+        }
+
+        options?.onError?.(err);
+      } finally {
+        setIsTracking(false);
       }
-      
-      options?.onError?.(err);
-    } finally {
-      setIsTracking(false);
-    }
-  }, [logRevenue, logError]);
+    },
+    [logRevenue, logError],
+  );
 
   return {
     trackRevenue,
@@ -245,67 +254,79 @@ export const useConsent = () => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [lastError, setLastError] = useState<Error | null>(null);
 
-  const updateConsent = useCallback(async (
-    newConsent: Partial<ConsentSettings>,
-    options?: {
-      onSuccess?: () => void;
-      onError?: (error: Error) => void;
-    }
-  ) => {
-    try {
-      setIsUpdating(true);
-      setLastError(null);
-      
-      const updatedConsent = { ...consent, ...newConsent };
-      
-      await setConsent(updatedConsent);
-      setConsentState(updatedConsent);
-      
-      options?.onSuccess?.();
-    } catch (error) {
-      const err = error as Error;
-      setLastError(err);
-      options?.onError?.(err);
-    } finally {
-      setIsUpdating(false);
-    }
-  }, [consent, setConsent]);
+  const updateConsent = useCallback(
+    async (
+      newConsent: Partial<ConsentSettings>,
+      options?: {
+        onSuccess?: () => void;
+        onError?: (error: Error) => void;
+      },
+    ) => {
+      try {
+        setIsUpdating(true);
+        setLastError(null);
 
-  const acceptAll = useCallback(async (options?: {
-    onSuccess?: () => void;
-    onError?: (error: Error) => void;
-  }) => {
-    await updateConsent({
-      analytics: true,
-      errorTracking: true,
-      marketing: true,
-      personalization: true,
-    }, options);
-  }, [updateConsent]);
+        const updatedConsent = { ...consent, ...newConsent };
 
-  const rejectAll = useCallback(async (options?: {
-    onSuccess?: () => void;
-    onError?: (error: Error) => void;
-  }) => {
-    await updateConsent({
-      analytics: false,
-      errorTracking: false,
-      marketing: false,
-      personalization: false,
-    }, options);
-  }, [updateConsent]);
+        await setConsent(updatedConsent);
+        setConsentState(updatedConsent);
 
-  const acceptEssential = useCallback(async (options?: {
-    onSuccess?: () => void;
-    onError?: (error: Error) => void;
-  }) => {
-    await updateConsent({
-      analytics: true,
-      errorTracking: true,
-      marketing: false,
-      personalization: false,
-    }, options);
-  }, [updateConsent]);
+        options?.onSuccess?.();
+      } catch (error) {
+        const err = error as Error;
+        setLastError(err);
+        options?.onError?.(err);
+      } finally {
+        setIsUpdating(false);
+      }
+    },
+    [consent, setConsent],
+  );
+
+  const acceptAll = useCallback(
+    async (options?: { onSuccess?: () => void; onError?: (error: Error) => void }) => {
+      await updateConsent(
+        {
+          analytics: true,
+          errorTracking: true,
+          marketing: true,
+          personalization: true,
+        },
+        options,
+      );
+    },
+    [updateConsent],
+  );
+
+  const rejectAll = useCallback(
+    async (options?: { onSuccess?: () => void; onError?: (error: Error) => void }) => {
+      await updateConsent(
+        {
+          analytics: false,
+          errorTracking: false,
+          marketing: false,
+          personalization: false,
+        },
+        options,
+      );
+    },
+    [updateConsent],
+  );
+
+  const acceptEssential = useCallback(
+    async (options?: { onSuccess?: () => void; onError?: (error: Error) => void }) => {
+      await updateConsent(
+        {
+          analytics: true,
+          errorTracking: true,
+          marketing: false,
+          personalization: false,
+        },
+        options,
+      );
+    },
+    [updateConsent],
+  );
 
   return {
     consent,
@@ -324,29 +345,32 @@ export const useErrorTracking = () => {
   const [isLogging, setIsLogging] = useState(false);
   const [lastError, setLastError] = useState<Error | null>(null);
 
-  const trackError = useCallback(async (
-    error: Error | string,
-    context?: ErrorContext,
-    options?: {
-      onSuccess?: () => void;
-      onError?: (error: Error) => void;
-    }
-  ) => {
-    try {
-      setIsLogging(true);
-      setLastError(null);
-      
-      await logError(error, context);
-      
-      options?.onSuccess?.();
-    } catch (err) {
-      const trackingError = err as Error;
-      setLastError(trackingError);
-      options?.onError?.(trackingError);
-    } finally {
-      setIsLogging(false);
-    }
-  }, [logError]);
+  const trackError = useCallback(
+    async (
+      error: Error | string,
+      context?: ErrorContext,
+      options?: {
+        onSuccess?: () => void;
+        onError?: (error: Error) => void;
+      },
+    ) => {
+      try {
+        setIsLogging(true);
+        setLastError(null);
+
+        await logError(error, context);
+
+        options?.onSuccess?.();
+      } catch (err) {
+        const trackingError = err as Error;
+        setLastError(trackingError);
+        options?.onError?.(trackingError);
+      } finally {
+        setIsLogging(false);
+      }
+    },
+    [logError],
+  );
 
   // Automatically track unhandled errors
   useEffect(() => {
@@ -391,13 +415,19 @@ export const useFeatureFlags = () => {
   const [flags, setFlags] = useState<Record<string, any>>({});
   const [isLoading, setIsLoading] = useState(false);
 
-  const isFeatureEnabled = useCallback((flagName: string): boolean => {
-    return flags[flagName] === true;
-  }, [flags]);
+  const isFeatureEnabled = useCallback(
+    (flagName: string): boolean => {
+      return flags[flagName] === true;
+    },
+    [flags],
+  );
 
-  const getFeatureFlag = useCallback((flagName: string): any => {
-    return flags[flagName];
-  }, [flags]);
+  const getFeatureFlag = useCallback(
+    (flagName: string): any => {
+      return flags[flagName];
+    },
+    [flags],
+  );
 
   const refreshFlags = useCallback(async () => {
     setIsLoading(true);
@@ -406,7 +436,7 @@ export const useFeatureFlags = () => {
       await getActiveProviders();
       // This would integrate with PostHog or other feature flag providers
       // For now, we'll just return the current flags
-      setFlags(prevFlags => ({ ...prevFlags }));
+      setFlags((prevFlags) => ({ ...prevFlags }));
     } catch (error) {
       console.error('Failed to refresh feature flags:', error);
     } finally {

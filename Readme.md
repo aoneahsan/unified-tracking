@@ -2,6 +2,8 @@
 
 A comprehensive Capacitor plugin that provides a unified API for multiple analytics and error tracking providers. Track events, identify users, and monitor errors across all major platforms with a single, consistent interface.
 
+📚 [Documentation](https://unified-tracking.github.io/docs) | 🔧 [API Reference](https://unified-tracking.github.io/api) | 💬 [Discussions](https://github.com/unified-tracking/capacitor-plugin/discussions) | 🐛 [Issues](https://github.com/unified-tracking/capacitor-plugin/issues)
+
 ## Features
 
 - 🚀 **Unified API** - Single interface for all providers
@@ -145,11 +147,7 @@ function MyComponent() {
     await identifyUser(user.id, { email: user.email });
   };
 
-  return (
-    <button onClick={handleClick}>
-      Track This Click
-    </button>
-  );
+  return <button onClick={handleClick}>Track This Click</button>;
 }
 ```
 
@@ -170,7 +168,7 @@ const TrackedComponent = withTracking(MyComponent, {
 ### Analytics
 
 - **Google Analytics 4** - Web analytics and user behavior tracking
-- **Mixpanel** - Advanced product analytics and user segmentation  
+- **Mixpanel** - Advanced product analytics and user segmentation
 - **Segment** - Customer data platform and event routing
 - **PostHog** - Product analytics with feature flags and session replay
 - **Amplitude** - Digital product analytics and user journey tracking
@@ -201,7 +199,7 @@ const config = {
     },
     {
       id: 'posthog',
-      config: { 
+      config: {
         apiKey: 'your-posthog-key',
         sessionRecording: { enabled: true },
       },
@@ -210,7 +208,7 @@ const config = {
   errorTracking: [
     {
       id: 'sentry',
-      config: { 
+      config: {
         dsn: 'your-sentry-dsn',
         tracesSampleRate: 1.0,
       },
@@ -280,7 +278,7 @@ await UnifiedTracking.track('click', { button: 'header' });
 // Before
 mixpanel.track('Page View', { page: 'dashboard' });
 
-// After  
+// After
 await UnifiedTracking.logScreenView('dashboard');
 ```
 

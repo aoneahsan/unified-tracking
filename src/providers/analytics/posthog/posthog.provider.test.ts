@@ -126,36 +126,39 @@ describe('PostHogAnalyticsProvider', () => {
       expect(provider.isReady()).toBe(true);
       expect(provider.id).toBe('posthog');
       expect(provider.name).toBe('PostHog Analytics');
-      expect(mockPostHog.init).toHaveBeenCalledWith('test-api-key', expect.objectContaining({
-        api_host: 'https://app.posthog.com',
-        autocapture: true,
-        capture_pageview: true,
-        capture_pageleave: true,
-        cross_subdomain_cookie: true,
-        persistence: 'localStorage',
-        cookie_name: 'ph_test',
-        cookie_expiration: 365,
-        respect_dnt: false,
-        property_blacklist: ['password', 'credit_card'],
-        xhr_headers: {
-          'X-Custom-Header': 'test-value',
-        },
-        ip: true,
-        opt_out_capturing_by_default: false,
-        mask_all_text: false,
-        mask_all_element_attributes: false,
-        session_recording: {
-          enabled: true,
-          maskAllInputs: true,
-          maskInputOptions: {
-            password: true,
-            email: false,
+      expect(mockPostHog.init).toHaveBeenCalledWith(
+        'test-api-key',
+        expect.objectContaining({
+          api_host: 'https://app.posthog.com',
+          autocapture: true,
+          capture_pageview: true,
+          capture_pageleave: true,
+          cross_subdomain_cookie: true,
+          persistence: 'localStorage',
+          cookie_name: 'ph_test',
+          cookie_expiration: 365,
+          respect_dnt: false,
+          property_blacklist: ['password', 'credit_card'],
+          xhr_headers: {
+            'X-Custom-Header': 'test-value',
           },
-          sampleRate: 0.1,
-          minimumDuration: 4000,
-        },
-        loaded: expect.any(Function),
-      }));
+          ip: true,
+          opt_out_capturing_by_default: false,
+          mask_all_text: false,
+          mask_all_element_attributes: false,
+          session_recording: {
+            enabled: true,
+            maskAllInputs: true,
+            maskInputOptions: {
+              password: true,
+              email: false,
+            },
+            sampleRate: 0.1,
+            minimumDuration: 4000,
+          },
+          loaded: expect.any(Function),
+        }),
+      );
     });
 
     it('should throw error if apiKey is missing', async () => {
@@ -166,10 +169,10 @@ describe('PostHogAnalyticsProvider', () => {
 
     it('should handle script loading failure', async () => {
       const config = { apiKey: 'test-api-key' };
-      
+
       // Remove posthog to trigger script loading
       delete (global.window as any).posthog;
-      
+
       // Mock script loading failure
       let scriptErrorCallback: any = null;
       vi.mocked(mockDocument.createElement).mockImplementation(() => {
@@ -187,7 +190,7 @@ describe('PostHogAnalyticsProvider', () => {
           },
           get() {
             return scriptErrorCallback;
-          }
+          },
         });
         return script as any;
       });
@@ -196,7 +199,7 @@ describe('PostHogAnalyticsProvider', () => {
       const initPromise = provider.initialize(config);
 
       // Simulate script error after a brief delay
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
       if (scriptErrorCallback) {
         scriptErrorCallback();
       }
@@ -545,7 +548,7 @@ describe('PostHogAnalyticsProvider', () => {
           },
           get() {
             return scriptLoadCallback;
-          }
+          },
         });
         return script as any;
       });
@@ -554,7 +557,7 @@ describe('PostHogAnalyticsProvider', () => {
       const initPromise = provider.initialize(config);
 
       // Simulate script load (but window.posthog is still not available)
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
       if (scriptLoadCallback) {
         scriptLoadCallback();
       }
@@ -567,7 +570,9 @@ describe('PostHogAnalyticsProvider', () => {
 
       await expect(uninitializedProvider.track('test')).rejects.toThrow('PostHog not initialized');
       await expect(uninitializedProvider.identify('user')).rejects.toThrow('PostHog not initialized');
-      await expect(uninitializedProvider.setUserProperties({ plan: 'premium' })).rejects.toThrow('PostHog not initialized');
+      await expect(uninitializedProvider.setUserProperties({ plan: 'premium' })).rejects.toThrow(
+        'PostHog not initialized',
+      );
       await expect(uninitializedProvider.logScreenView('dashboard')).rejects.toThrow('PostHog not initialized');
       await expect(uninitializedProvider.logRevenue({ amount: 10 })).rejects.toThrow('PostHog not initialized');
     });

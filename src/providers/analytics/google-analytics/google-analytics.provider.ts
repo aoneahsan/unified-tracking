@@ -65,7 +65,7 @@ export class GoogleAnalyticsProvider extends BaseAnalyticsProvider {
 
     // Define gtag function if it doesn't exist
     if (!window.gtag) {
-      window.gtag = function() {
+      window.gtag = function () {
         window.dataLayer!.push(arguments);
       };
     }
@@ -81,9 +81,9 @@ export class GoogleAnalyticsProvider extends BaseAnalyticsProvider {
 
     // Configure gtag
     window.gtag('js', new Date());
-    
+
     const gtagConfig: any = {};
-    
+
     // Only add properties if they are explicitly set
     if (config.sendPageView !== undefined) {
       gtagConfig.send_page_view = config.sendPageView;
@@ -91,7 +91,7 @@ export class GoogleAnalyticsProvider extends BaseAnalyticsProvider {
       // Only set default send_page_view if no custom parameters
       gtagConfig.send_page_view = true;
     }
-    
+
     if (config.anonymizeIp !== undefined) {
       gtagConfig.anonymize_ip = config.anonymizeIp;
     }
@@ -107,7 +107,7 @@ export class GoogleAnalyticsProvider extends BaseAnalyticsProvider {
     if (config.customDimensions !== undefined) {
       gtagConfig.custom_map = config.customDimensions;
     }
-    
+
     // Handle custom parameters - if present, use only those
     if (config.customParameters) {
       window.gtag('config', this.measurementId, config.customParameters);
@@ -127,12 +127,12 @@ export class GoogleAnalyticsProvider extends BaseAnalyticsProvider {
       const script = document.createElement('script');
       script.async = true;
       script.src = `https://www.googletagmanager.com/gtag/js?id=${this.measurementId}`;
-      
+
       script.onload = () => {
         this.scriptLoaded = true;
         resolve();
       };
-      
+
       script.onerror = () => {
         reject(new Error('Failed to load Google Analytics SDK'));
       };
@@ -217,14 +217,16 @@ export class GoogleAnalyticsProvider extends BaseAnalyticsProvider {
 
     // Add items if present
     if (data.productId && data.productName) {
-      purchaseEvent.items = [{
-        item_id: data.productId,
-        item_name: data.productName,
-        quantity: data.quantity || 1,
-        price: data.amount,
-      }];
+      purchaseEvent.items = [
+        {
+          item_id: data.productId,
+          item_name: data.productName,
+          quantity: data.quantity || 1,
+          price: data.amount,
+        },
+      ];
     } else if (data.items) {
-      purchaseEvent.items = data.items.map(item => ({
+      purchaseEvent.items = data.items.map((item) => ({
         item_id: item.itemId,
         item_name: item.itemName,
         price: item.price,
@@ -243,7 +245,7 @@ export class GoogleAnalyticsProvider extends BaseAnalyticsProvider {
 
   protected async doProviderReset(): Promise<void> {
     if (!window.gtag) return;
-    
+
     // Clear user ID and custom properties
     window.gtag('config', this.measurementId, {
       user_id: null,
@@ -263,5 +265,4 @@ export class GoogleAnalyticsProvider extends BaseAnalyticsProvider {
       this.logger.info('Google Analytics debug mode disabled');
     }
   }
-
 }

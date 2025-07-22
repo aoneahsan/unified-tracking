@@ -313,7 +313,22 @@ export interface AmplitudeConfig {
 
 export interface MixpanelConfig {
   token: string;
+  apiHost?: string;
+  debug?: boolean;
   trackAutomaticEvents?: boolean;
+  persistence?: 'localStorage' | 'cookie' | 'none';
+  persistencePrefix?: string;
+  cookieDomain?: string;
+  crossSiteCookie?: boolean;
+  secureCookie?: boolean;
+  ipTracking?: boolean;
+  propertyBlocklist?: string[];
+  sessionDuration?: number;
+  optOutByDefault?: boolean;
+  batching?: boolean;
+  batchSize?: number;
+  batchFlushInterval?: number;
+  disableNotifications?: boolean;
   superProperties?: Record<string, any>;
 }
 

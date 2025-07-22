@@ -80,10 +80,10 @@ describe('SentryErrorTrackingProvider', () => {
       error: vi.fn(),
     };
     (provider as any).logger = mockLogger;
-    
+
     // Reset mocks
     vi.clearAllMocks();
-    Object.values(mockSentry).forEach(mock => {
+    Object.values(mockSentry).forEach((mock) => {
       if (typeof mock === 'function') {
         mock.mockClear();
       }
@@ -124,9 +124,7 @@ describe('SentryErrorTrackingProvider', () => {
     it('should throw error if DSN is missing', async () => {
       const config = {};
 
-      await expect(provider.initialize(config)).rejects.toThrow(
-        'Sentry DSN is required'
-      );
+      await expect(provider.initialize(config)).rejects.toThrow('Sentry DSN is required');
     });
 
     it('should handle script loading failure', async () => {
@@ -139,9 +137,7 @@ describe('SentryErrorTrackingProvider', () => {
         mockScriptElement.onerror?.();
       }, 0);
 
-      await expect(provider.initialize(config)).rejects.toThrow(
-        'Failed to load Sentry SDK'
-      );
+      await expect(provider.initialize(config)).rejects.toThrow('Failed to load Sentry SDK');
     });
   });
 
@@ -278,10 +274,8 @@ describe('SentryErrorTrackingProvider', () => {
 
     it('should throw error when not initialized', async () => {
       const uninitializedProvider = new SentryErrorTrackingProvider();
-      
-      await expect(uninitializedProvider.trackError(new Error('test'))).rejects.toThrow(
-        'Sentry not initialized'
-      );
+
+      await expect(uninitializedProvider.trackError(new Error('test'))).rejects.toThrow('Sentry not initialized');
     });
   });
 
@@ -424,7 +418,7 @@ describe('SentryErrorTrackingProvider', () => {
       expect(mockSentry.init).toHaveBeenCalledWith(
         expect.objectContaining({
           beforeSend: expect.any(Function),
-        })
+        }),
       );
     });
   });
@@ -445,7 +439,7 @@ describe('SentryErrorTrackingProvider', () => {
       expect(mockSentry.init).toHaveBeenCalledWith(
         expect.objectContaining({
           integrations: expect.any(Array),
-        })
+        }),
       );
     });
   });

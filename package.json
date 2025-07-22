@@ -1,6 +1,6 @@
 {
   "name": "unified-tracking",
-  "version": "0.0.3",
+  "version": "1.0.0",
   "description": "Unified analytics and error tracking plugin for React + Capacitor Apps",
   "type": "module",
   "main": "dist/plugin.cjs.js",
@@ -41,6 +41,19 @@
     "amplitude",
     "mixpanel"
   ],
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/plugin.cjs.js",
+      "types": "./dist/esm/index.d.ts"
+    },
+    "./react": {
+      "import": "./dist/esm/react/index.js",
+      "require": "./dist/plugin.cjs.js",
+      "types": "./dist/esm/react/index.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
   "scripts": {
     "verify": "npm run verify:ios && npm run verify:android && npm run verify:web",
     "verify:ios": "cd ios && pod install && xcodebuild -workspace Plugin.xcworkspace -scheme Plugin -configuration Debug CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO",

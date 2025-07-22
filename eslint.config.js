@@ -8,7 +8,7 @@ export default [
   // Base configuration
   js.configs.recommended,
   prettier,
-  
+
   // Global ignores
   {
     ignores: [
@@ -22,10 +22,10 @@ export default [
       'android/**',
       'ios/**',
       'Example/**',
-      '*.ignore.*'
-    ]
+      '*.ignore.*',
+    ],
   },
-  
+
   // TypeScript files configuration
   {
     files: ['**/*.ts', '**/*.tsx'],
@@ -36,33 +36,36 @@ export default [
       globals: {
         ...globals.browser,
         ...globals.es2021,
-        ...globals.node
+        ...globals.node,
       },
       parserOptions: {
         project: './tsconfig.json',
-        tsconfigRootDir: '.'
-      }
+        tsconfigRootDir: '.',
+      },
     },
     plugins: {
-      '@typescript-eslint': typescript
+      '@typescript-eslint': typescript,
     },
     rules: {
       ...typescript.configs['recommended'].rules,
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/no-unused-vars': ['warn', { 
-        argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_'
-      }],
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+        },
+      ],
       '@typescript-eslint/no-empty-interface': 'off',
       '@typescript-eslint/ban-ts-comment': 'off',
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       'prefer-const': 'warn',
-      'no-undef': 'off' // TypeScript handles this
-    }
+      'no-undef': 'off', // TypeScript handles this
+    },
   },
-  
+
   // JavaScript files configuration
   {
     files: ['**/*.js', '**/*.jsx'],
@@ -72,19 +75,22 @@ export default [
       globals: {
         ...globals.browser,
         ...globals.es2021,
-        ...globals.node
-      }
+        ...globals.node,
+      },
     },
     rules: {
-      'no-unused-vars': ['warn', { 
-        argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_'
-      }],
+      'no-unused-vars': [
+        'warn',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+        },
+      ],
       'no-console': ['warn', { allow: ['warn', 'error'] }],
-      'prefer-const': 'warn'
-    }
+      'prefer-const': 'warn',
+    },
   },
-  
+
   // Test files configuration
   {
     files: ['**/*.test.ts', '**/*.spec.ts', '**/*.test.js', '**/*.spec.js'],
@@ -98,12 +104,12 @@ export default [
         beforeEach: 'readonly',
         afterEach: 'readonly',
         beforeAll: 'readonly',
-        afterAll: 'readonly'
-      }
+        afterAll: 'readonly',
+      },
     },
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
-      'no-console': 'off'
-    }
-  }
+      'no-console': 'off',
+    },
+  },
 ];

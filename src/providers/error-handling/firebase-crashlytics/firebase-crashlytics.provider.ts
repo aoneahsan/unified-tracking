@@ -246,7 +246,7 @@ export class FirebaseCrashlyticsProvider extends BaseErrorTrackingProvider {
         this.crashlytics!.setCustomKey(`tag_${key}`, value);
       });
     }
-    
+
     if (context.extra) {
       Object.entries(context.extra).forEach(([key, value]) => {
         if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {

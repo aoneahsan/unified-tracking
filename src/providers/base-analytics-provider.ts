@@ -14,14 +14,14 @@ export abstract class BaseAnalyticsProvider extends BaseProviderImpl implements 
 
   async track(eventName: string, properties?: Record<string, any>): Promise<void> {
     this.checkReady();
-    
+
     const mergedProperties = {
       ...this.superProperties,
       ...properties,
     };
 
     this.debug(`Tracking event: ${eventName}`, mergedProperties);
-    
+
     try {
       await this.doTrack(eventName, mergedProperties);
     } catch (error) {
@@ -42,9 +42,9 @@ export abstract class BaseAnalyticsProvider extends BaseProviderImpl implements 
 
   async identifyUser(userId: string, traits?: Record<string, any>): Promise<void> {
     this.checkReady();
-    
+
     this.debug(`Identifying user: ${userId}`, traits);
-    
+
     try {
       await this.doIdentifyUser(userId, traits || {});
     } catch (error) {
@@ -60,9 +60,9 @@ export abstract class BaseAnalyticsProvider extends BaseProviderImpl implements 
 
   async setUserProperties(properties: Record<string, any>): Promise<void> {
     this.checkReady();
-    
+
     this.debug('Setting user properties', properties);
-    
+
     try {
       await this.doSetUserProperties(properties);
     } catch (error) {
@@ -78,14 +78,14 @@ export abstract class BaseAnalyticsProvider extends BaseProviderImpl implements 
 
   async logScreenView(screenName: string, properties?: Record<string, any>): Promise<void> {
     this.checkReady();
-    
+
     const screenProperties = {
       ...properties,
       screen_name: screenName,
     };
-    
+
     this.debug(`Logging screen view: ${screenName}`, screenProperties);
-    
+
     try {
       await this.doLogScreenView(screenName, screenProperties);
     } catch (error) {
@@ -101,9 +101,9 @@ export abstract class BaseAnalyticsProvider extends BaseProviderImpl implements 
 
   async logRevenue(data: RevenueData): Promise<void> {
     this.checkReady();
-    
+
     this.debug('Logging revenue', data);
-    
+
     try {
       await this.doLogRevenue(data);
     } catch (error) {
@@ -124,7 +124,7 @@ export abstract class BaseAnalyticsProvider extends BaseProviderImpl implements 
 
   async endTimedEvent(eventName: string, properties?: Record<string, any>): Promise<void> {
     const startTime = this.timedEvents.get(eventName);
-    
+
     if (!startTime) {
       this.logger.warn(`No timed event found for: ${eventName}`);
       return;
@@ -140,7 +140,7 @@ export abstract class BaseAnalyticsProvider extends BaseProviderImpl implements 
     };
 
     this.debug(`Ending timed event: ${eventName}`, timedProperties);
-    
+
     await this.track(eventName, timedProperties);
   }
 
@@ -154,9 +154,9 @@ export abstract class BaseAnalyticsProvider extends BaseProviderImpl implements 
 
   async incrementUserProperty(property: string, value: number = 1): Promise<void> {
     this.checkReady();
-    
+
     this.debug(`Incrementing user property: ${property} by ${value}`);
-    
+
     try {
       await this.doIncrementUserProperty(property, value);
     } catch (error) {

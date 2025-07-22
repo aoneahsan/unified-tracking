@@ -45,7 +45,7 @@ describe('GoogleAnalyticsProvider', () => {
       error: vi.fn(),
     };
     (provider as any).logger = mockLogger;
-    
+
     // Reset mocks
     vi.clearAllMocks();
     mockGtag.mockClear();
@@ -75,16 +75,14 @@ describe('GoogleAnalyticsProvider', () => {
         'Google Analytics initialized successfully',
         expect.objectContaining({
           measurementId: 'G-TEST123',
-        })
+        }),
       );
     });
 
     it('should throw error if measurement ID is missing', async () => {
       const config = {};
 
-      await expect(provider.initialize(config)).rejects.toThrow(
-        'Google Analytics measurement ID is required'
-      );
+      await expect(provider.initialize(config)).rejects.toThrow('Google Analytics measurement ID is required');
     });
 
     it('should handle script loading failure', async () => {
@@ -97,9 +95,7 @@ describe('GoogleAnalyticsProvider', () => {
         mockScriptElement.onerror?.();
       }, 0);
 
-      await expect(provider.initialize(config)).rejects.toThrow(
-        'Failed to load Google Analytics SDK'
-      );
+      await expect(provider.initialize(config)).rejects.toThrow('Failed to load Google Analytics SDK');
     });
   });
 
@@ -294,10 +290,8 @@ describe('GoogleAnalyticsProvider', () => {
   describe('error handling', () => {
     it('should throw error when tracking without initialization', async () => {
       const uninitializedProvider = new GoogleAnalyticsProvider();
-      
-      await expect(uninitializedProvider.track('test_event')).rejects.toThrow(
-        'Google Analytics not initialized'
-      );
+
+      await expect(uninitializedProvider.track('test_event')).rejects.toThrow('Google Analytics not initialized');
     });
 
     it('should handle gtag errors gracefully', async () => {
@@ -310,7 +304,7 @@ describe('GoogleAnalyticsProvider', () => {
       }, 0);
 
       await provider.initialize(config);
-      
+
       // Mock gtag to throw an error
       mockGtag.mockImplementation(() => {
         throw new Error('GA error');

@@ -158,19 +158,19 @@ export class AppCenterProvider extends BaseErrorTrackingProvider {
 
     // Determine which services to start
     const services: any[] = [];
-    
+
     if (config.enableCrashes !== false) {
       services.push(this.appCenter.Crashes);
     }
-    
+
     if (config.enableAnalytics !== false) {
       services.push(this.appCenter.Analytics);
     }
-    
+
     if (config.enableDistribute) {
       services.push(this.appCenter.Distribute);
     }
-    
+
     if (config.enablePush) {
       services.push(this.appCenter.Push);
     }
@@ -193,7 +193,7 @@ export class AppCenterProvider extends BaseErrorTrackingProvider {
       if (config.enableManualSessionTracker) {
         this.appCenter.Analytics.enableManualSessionTracker();
       }
-      
+
       if (config.sessionTimeout) {
         this.appCenter.Analytics.setTransmissionInterval(config.sessionTimeout);
       }
@@ -272,7 +272,7 @@ export class AppCenterProvider extends BaseErrorTrackingProvider {
 
     // Prepare properties
     const properties: Record<string, string> = {};
-    
+
     // Add context properties
     if (context.tags && Object.keys(context.tags).length > 0) {
       Object.entries(context.tags).forEach(([key, value]) => {
@@ -315,9 +315,12 @@ export class AppCenterProvider extends BaseErrorTrackingProvider {
     // Add breadcrumbs as text attachment
     if (context.breadcrumbs && context.breadcrumbs.length > 0) {
       const breadcrumbsText = context.breadcrumbs
-        .map(b => `[${b.timestamp ? new Date(b.timestamp).toISOString() : 'no-timestamp'}] ${b.category || 'default'}: ${b.message}`)
+        .map(
+          (b) =>
+            `[${b.timestamp ? new Date(b.timestamp).toISOString() : 'no-timestamp'}] ${b.category || 'default'}: ${b.message}`,
+        )
         .join('\n');
-      
+
       attachments.push({
         textAttachment: breadcrumbsText,
         fileName: 'breadcrumbs.txt',

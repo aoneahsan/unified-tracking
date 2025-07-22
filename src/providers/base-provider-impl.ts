@@ -55,7 +55,7 @@ export abstract class BaseProviderImpl implements BaseProvider {
     }
 
     this.logger.info(`Shutting down provider ${this.name}`);
-    
+
     try {
       await this.doShutdown();
       this.initialized = false;
@@ -74,7 +74,7 @@ export abstract class BaseProviderImpl implements BaseProvider {
 
   async updateConsent(consent: ConsentSettings): Promise<void> {
     this.logger.debug(`Updating consent for provider ${this.name}`, consent);
-    
+
     // Check if provider should be disabled based on consent
     if (this.type === 'analytics' && consent.analytics === false) {
       await this.disable();

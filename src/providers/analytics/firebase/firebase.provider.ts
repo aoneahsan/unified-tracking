@@ -36,7 +36,7 @@ export class FirebaseAnalyticsProvider implements AnalyticsProvider {
 
   async initialize(config: ProviderConfig): Promise<void> {
     this.config = config;
-    
+
     if (config.enabled === false) {
       this.enabled = false;
       this.logger.info('Firebase Analytics disabled by configuration');
@@ -46,13 +46,13 @@ export class FirebaseAnalyticsProvider implements AnalyticsProvider {
     try {
       if (typeof window !== 'undefined' && window.firebase) {
         const analytics = window.firebase.analytics;
-        
+
         if (!analytics) {
           throw new Error('Firebase Analytics not found. Make sure to include Firebase Analytics in your app.');
         }
 
         this.analytics = analytics();
-        
+
         if (config.debug) {
           this.setDebugMode(true);
         }
@@ -108,7 +108,7 @@ export class FirebaseAnalyticsProvider implements AnalyticsProvider {
   setDebugMode(enabled: boolean): void {
     if (typeof window !== 'undefined' && window.gtag) {
       window.gtag('config', 'GA_MEASUREMENT_ID', {
-        debug_mode: enabled
+        debug_mode: enabled,
       });
     }
   }
@@ -153,7 +153,7 @@ export class FirebaseAnalyticsProvider implements AnalyticsProvider {
     }
 
     try {
-        await this.analytics.setUserId(userId);
+      await this.analytics.setUserId(userId);
 
       if (traits) {
         await this.setUserProperties(traits);
@@ -196,7 +196,7 @@ export class FirebaseAnalyticsProvider implements AnalyticsProvider {
       const params = {
         screen_name: screenName,
         screen_class: properties?.screenClass || screenName,
-        ...this.sanitizeProperties(properties)
+        ...this.sanitizeProperties(properties),
       };
 
       await this.analytics.logEvent('screen_view', params);
@@ -220,17 +220,19 @@ export class FirebaseAnalyticsProvider implements AnalyticsProvider {
       };
 
       if (data.productId) {
-        params.items = [{
-          item_id: data.productId,
-          item_name: data.productName || data.productId,
-          quantity: data.quantity || 1,
-          price: data.amount
-        }];
+        params.items = [
+          {
+            item_id: data.productId,
+            item_name: data.productName || data.productId,
+            quantity: data.quantity || 1,
+            price: data.amount,
+          },
+        ];
       }
 
       const eventName = data.productId ? 'purchase' : 'earn_virtual_currency';
       await this.analytics.logEvent(eventName, params);
-      
+
       this.logger.debug('Revenue logged:', params);
     } catch (error) {
       this.logger.error('Failed to log revenue', error);
@@ -250,7 +252,7 @@ export class FirebaseAnalyticsProvider implements AnalyticsProvider {
     if (!properties) return {};
 
     const sanitized: Record<string, any> = {};
-    
+
     for (const [key, value] of Object.entries(properties)) {
       // Firebase parameter names must be 40 characters or less
       const sanitizedKey = key

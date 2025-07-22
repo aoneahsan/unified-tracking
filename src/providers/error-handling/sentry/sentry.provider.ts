@@ -107,7 +107,7 @@ export class SentryErrorTrackingProvider extends BaseErrorTrackingProvider {
       dsn: config.dsn,
       environment: config.environment || 'production',
     };
-    
+
     // Only add optional properties if they're defined
     if (config.release !== undefined) sentryOptions.release = config.release;
     if (config.serverName !== undefined) sentryOptions.serverName = config.serverName;
@@ -121,16 +121,18 @@ export class SentryErrorTrackingProvider extends BaseErrorTrackingProvider {
     if (config.allowUrls !== undefined) sentryOptions.allowUrls = config.allowUrls;
     if (config.denyUrls !== undefined) sentryOptions.denyUrls = config.denyUrls;
     if (config.transport !== undefined) sentryOptions.transport = config.transport;
-    
+
     // Always set beforeSend (use provided or default)
-    sentryOptions.beforeSend = config.beforeSend || ((event: any) => {
-      // Default beforeSend - can filter or modify events
-      return event;
-    });
-    
+    sentryOptions.beforeSend =
+      config.beforeSend ||
+      ((event: any) => {
+        // Default beforeSend - can filter or modify events
+        return event;
+      });
+
     // Always set integrations (use provided or default)
     sentryOptions.integrations = config.integrations || [];
-    
+
     if (config.beforeBreadcrumb !== undefined) sentryOptions.beforeBreadcrumb = config.beforeBreadcrumb;
 
     this.sentry.init(sentryOptions);
@@ -282,7 +284,7 @@ export class SentryErrorTrackingProvider extends BaseErrorTrackingProvider {
 
   protected doAddBreadcrumb(message: string, category?: string, data?: Record<string, any>): void {
     if (!this.sentry) return;
-    
+
     this.sentry.addBreadcrumb({
       message,
       category: category || 'manual',
@@ -363,7 +365,7 @@ export class SentryErrorTrackingProvider extends BaseErrorTrackingProvider {
     message: string,
     category: string = 'custom',
     level: 'debug' | 'info' | 'warning' | 'error' = 'info',
-    data?: Record<string, any>
+    data?: Record<string, any>,
   ): void {
     if (!this.sentry) return;
 
@@ -423,33 +425,33 @@ export class SentryErrorTrackingProvider extends BaseErrorTrackingProvider {
     if (!this.initialized) {
       throw new Error('Sentry not initialized');
     }
-    
+
     // Handle string errors differently
     if (typeof error === 'string') {
       this.checkReady();
       const enrichedContext = (this as any).enrichContext(context);
-      
+
       this.sentry!.withScope((scope) => {
         // Set severity
         if (enrichedContext.severity) {
           scope.setLevel(this.mapSeverityToSentry(enrichedContext.severity));
         }
-        
+
         // Set tags
         if (enrichedContext.tags) {
           Object.entries(enrichedContext.tags).forEach(([key, value]) => {
             scope.setTag(key, value as string);
           });
         }
-        
+
         // Capture as message
         const level = enrichedContext.severity || 'error';
         this.sentry!.captureMessage(error, this.mapSeverityToSentry(level));
       });
-      
+
       return;
     }
-    
+
     return this.logError(error, context);
   }
 
@@ -500,10 +502,10 @@ export class SentryErrorTrackingProvider extends BaseErrorTrackingProvider {
    */
   captureBreadcrumb(breadcrumb: any): void {
     if (!this.sentry) return;
-    
+
     // Extract properties from breadcrumb object
     const { message, category, level, data } = breadcrumb;
-    
+
     // Call Sentry's addBreadcrumb
     this.sentry.addBreadcrumb({
       message,

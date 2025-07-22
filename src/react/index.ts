@@ -17,18 +17,9 @@ export {
   useFeatureFlags,
 } from './hooks';
 
-export {
-  withScreenTracking,
-  withEventTracking,
-  withErrorTracking,
-  withPerformanceTracking,
-  withTracking,
-} from './hoc';
+export { withScreenTracking, withEventTracking, withErrorTracking, withPerformanceTracking, withTracking } from './hoc';
 
-export type {
-  UnifiedTrackingContextValue,
-  UnifiedTrackingProviderProps,
-} from './context';
+export type { UnifiedTrackingContextValue, UnifiedTrackingProviderProps } from './context';
 
 export type {
   TrackingHOCProps,
