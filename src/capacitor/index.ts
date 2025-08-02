@@ -1,11 +1,12 @@
 import { WebPlugin } from '@capacitor/core';
 import type { PluginListenerHandle } from '@capacitor/core';
+import { UnifiedTrackingCore } from '../core/unified-tracking-core';
 
 export interface TrackingEvent {
   type: 'trackingEvent';
   event: string;
   properties?: Record<string, unknown>;
-  timestamp: string;
+  timestamp?: string;
 }
 
 export interface ProviderEvent {
@@ -15,7 +16,7 @@ export interface ProviderEvent {
   error?: Error;
   message?: string;
 }
-import { UnifiedTrackingCore } from '../core/unified-tracking-core';
+
 import type {
   UnifiedTrackingPlugin,
   UnifiedTrackingConfig,
@@ -80,7 +81,31 @@ export class UnifiedTrackingCapacitorPlugin extends WebPlugin implements Unified
     eventName: 'trackingEvent' | 'error' | 'providerStatusChange',
     listenerFunc: (event: TrackingEvent | ProviderEvent) => void,
   ): Promise<PluginListenerHandle> {
-    const handle = await this.core.addListener(eventName, listenerFunc);
+    // Create a wrapper function that converts core events to our event types
+    const wrappedListener = (eventData: any) => {
+      let event: TrackingEvent | ProviderEvent;
+
+      if (eventName === 'trackingEvent') {
+        event = {
+          type: 'trackingEvent',
+          event: eventData.event,
+          properties: eventData.properties,
+          timestamp: eventData.timestamp,
+        } as TrackingEvent;
+      } else {
+        event = {
+          type: eventData.type || eventName,
+          provider: eventData.provider,
+          status: eventData.status,
+          error: eventData.error,
+          message: eventData.message,
+        } as ProviderEvent;
+      }
+
+      listenerFunc(event);
+    };
+
+    const handle = await this.core.addListener(eventName, wrappedListener);
 
     // Wrap in Capacitor-compatible handle
     const capacitorHandle: PluginListenerHandle = {
@@ -90,7 +115,7 @@ export class UnifiedTrackingCapacitorPlugin extends WebPlugin implements Unified
     };
 
     // Also register with WebPlugin for compatibility
-    await super.addListener(eventName, listenerFunc);
+    await super.addListener(eventName, wrappedListener);
 
     return capacitorHandle;
   }

@@ -1,12 +1,13 @@
 import { getUnifiedTracking } from './core/unified-tracking-core';
-import type { UnifiedTrackingPlugin } from './definitions';
 
-// Export the core instance as default
-export const UnifiedTracking = getUnifiedTracking();
+// Export the plugin interface for docgen
+export const UnifiedTrackingPlugin = getUnifiedTracking();
+
+// Export the core instance as UnifiedTracking
+export const UnifiedTracking = UnifiedTrackingPlugin;
 
 // Export all types and definitions
 export * from './definitions';
-export type { UnifiedTrackingPlugin };
 
 // Note: React integration is available via 'unified-tracking/react'
 // This avoids circular dependencies

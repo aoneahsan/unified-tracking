@@ -18,6 +18,7 @@
     "strict": true,
     "target": "es2022",
     "jsx": "react",
+    "rootDir": "./",
     "paths": {
       "@/*": ["./src/*"],
       "@providers/*": ["./src/providers/*"],
@@ -26,6 +27,6 @@
     },
     "baseUrl": "."
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "examples/**/*.tsx"],
-  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"]
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx", "examples"]
 }

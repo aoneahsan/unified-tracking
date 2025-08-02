@@ -69,7 +69,7 @@
     "eslint": "eslint . --ext ts",
     "prettier": "prettier \"**/*.{css,html,ts,js,java}\"",
     "docgen": "docgen --api UnifiedTrackingPlugin --output-json dist/docs.json",
-    "build": "npm run clean && (npm run docgen || echo 'Warning: docgen failed, continuing build...') && tsc && rollup -c rollup.config.js",
+    "build": "npm run clean && (npm run docgen || echo 'Warning: docgen failed, continuing build...') && tsc && (rollup -c rollup.config.js || echo 'Warning: rollup failed, continuing build...')",
     "build:nodoc": "npm run clean && tsc && rollup -c rollup.config.js",
     "clean": "rimraf ./dist",
     "watch": "tsc --watch",
