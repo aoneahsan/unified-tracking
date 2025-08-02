@@ -3,21 +3,13 @@ import esbuild from 'rollup-plugin-esbuild';
 
 export default [
   {
-    input: 'dist/esm/src/index.js',
-    output: [
-      {
-        file: 'dist/plugin.js',
-        format: 'es',
-        sourcemap: true,
-        inlineDynamicImports: true,
-      },
-      {
-        file: 'dist/plugin.cjs.js',
-        format: 'cjs',
-        sourcemap: true,
-        inlineDynamicImports: true,
-      },
-    ],
+    input: 'dist/esm/index.js',
+    output: {
+      file: 'dist/plugin.js',
+      format: 'es',
+      sourcemap: true,
+      inlineDynamicImports: true,
+    },
     plugins: [
       nodeResolve({
         preferBuiltins: false,
@@ -27,6 +19,6 @@ export default [
         target: 'es2022',
       }),
     ],
-    external: ['@capacitor/core'],
+    external: ['@capacitor/core', 'react'],
   },
 ];

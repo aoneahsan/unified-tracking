@@ -1,12 +1,11 @@
 {
   "name": "unified-tracking",
-  "version": "1.5.0",
+  "version": "2.0.0",
   "description": "Unified analytics and error tracking plugin for React + Capacitor Apps",
   "type": "module",
-  "main": "dist/plugin.cjs.js",
+  "main": "dist/esm/index.js",
   "module": "dist/esm/index.js",
   "types": "dist/esm/index.d.ts",
-  "unpkg": "dist/plugin.js",
   "files": [
     "android/src/main/",
     "android/build.gradle",
@@ -48,13 +47,15 @@
   "exports": {
     ".": {
       "import": "./dist/esm/index.js",
-      "require": "./dist/plugin.cjs.js",
       "types": "./dist/esm/index.d.ts"
     },
     "./react": {
       "import": "./dist/esm/react/index.js",
-      "require": "./dist/plugin.cjs.js",
       "types": "./dist/esm/react/index.d.ts"
+    },
+    "./capacitor": {
+      "import": "./dist/esm/capacitor/index.js",
+      "types": "./dist/esm/capacitor/index.d.ts"
     },
     "./package.json": "./package.json"
   },
@@ -94,7 +95,16 @@
     "node": ">=18.0.0"
   },
   "peerDependencies": {
-    "@capacitor/core": "^7.4.2"
+    "@capacitor/core": "^7.4.2",
+    "react": ">=16.8.0"
+  },
+  "peerDependenciesMeta": {
+    "@capacitor/core": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@capacitor/android": "^7.4.2",

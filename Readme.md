@@ -1,344 +1,274 @@
 # Unified Tracking
 
-A comprehensive Capacitor plugin that provides a unified API for multiple analytics and error tracking providers. Track events, identify users, and monitor errors across all major platforms with a single, consistent interface.
+A zero-dependency, provider-less analytics and error tracking solution for React and web applications. Track events, identify users, and monitor errors with a simple, unified API that works everywhere - no providers or wrappers needed!
 
-## 📚 Documentation
+## ✨ Features
 
-- [Setup Guide](./docs/setup-guide.md) - Installation and configuration instructions
-- [API Reference](./docs/api/README.md) - Complete API documentation
-- [React Integration](./docs/react-integration.md) - React hooks and components
-- [Migration Guide](./docs/migration-guide.md) - Migrate from other analytics solutions
-- [Provider Configuration](./docs/api/interfaces/provider-interfaces.md) - Provider-specific configuration
-- [Plugin Methods](./docs/api/plugin-methods.md) - All available plugin methods
-
-## Features
-
-- 🚀 **Unified API** - Single interface for all providers
-- 📊 **Multiple Analytics** - Google Analytics, Mixpanel, Segment, PostHog, Amplitude, Firebase
-- 🐛 **Error Tracking** - Sentry, Bugsnag, Rollbar, DataDog, LogRocket
-- ⚛️ **React Integration** - Hooks, HOCs, and Context providers
-- 🔧 **Auto Setup** - NPX script for quick configuration
-- 📱 **Cross Platform** - Web, iOS, Android support
+- 🚀 **Zero Dependencies** - Works out of the box, no required dependencies
+- 🎯 **Provider-less** - No React Context/Providers needed, works in dynamic components
+- 📊 **Multiple Analytics** - Support for Google Analytics, Mixpanel, Segment, PostHog, Amplitude, Firebase
+- 🐛 **Error Tracking** - Integrated Sentry, Bugsnag, Rollbar, DataDog, LogRocket support
+- ⚛️ **React Ready** - Simple hooks that work anywhere, even in dynamically injected components
+- 📱 **Cross Platform** - Web, iOS, Android support via optional Capacitor integration
 - 🛡️ **Privacy First** - Built-in consent management
-- 📦 **TypeScript** - Full type safety and autocompletion
-- 🎯 **Zero Config** - Works out of the box with sensible defaults
+- 📦 **Tree-Shakeable** - Only bundle what you use
+- 🎯 **TypeScript** - Full type safety and autocompletion
 
-## Quick Start
+## 🚀 Quick Start
 
-### Automatic Setup (Recommended)
-
-```bash
-npx unified-tracking-setup
-```
-
-This will guide you through provider setup, generate configuration files, and create usage examples.
-
-### Manual Installation
+### Installation
 
 ```bash
-# npm
 npm install unified-tracking
-
-# yarn
+# or
 yarn add unified-tracking
 ```
 
-## Basic Usage
-
-### Initialize
+### Basic Usage (No Providers Needed!)
 
 ```typescript
+// 1. Initialize once in your app (e.g., in index.tsx or App.tsx)
 import { UnifiedTracking } from 'unified-tracking';
 
-const config = {
-  analytics: [
-    {
-      id: 'google-analytics',
-      config: {
-        measurementId: 'G-XXXXXXXXXX',
-      },
-    },
-  ],
-  errorTracking: [
-    {
-      id: 'sentry',
-      config: {
-        dsn: 'https://your-dsn@sentry.io/project-id',
-      },
-    },
-  ],
-  debug: false,
-};
-
-await UnifiedTracking.initialize(config);
-```
-
-### Track Events
-
-```typescript
-// Track a custom event
-await UnifiedTracking.track('button_click', {
-  button_text: 'Sign Up',
-  page: '/landing',
-  category: 'conversion',
+await UnifiedTracking.initialize({
+  analytics: {
+    providers: ['google-analytics'], // Auto-loads if gtag is available
+    googleAnalytics: {
+      measurementId: 'G-XXXXXXXXXX'
+    }
+  }
 });
 
-// Track screen views
-await UnifiedTracking.logScreenView('dashboard', {
-  user_type: 'premium',
-  feature_flags: ['new_ui'],
-});
-
-// Track revenue
-await UnifiedTracking.logRevenue({
-  amount: 29.99,
-  currency: 'USD',
-  productId: 'premium-plan',
-});
-```
-
-### Identify Users
-
-```typescript
-await UnifiedTracking.identify('user-123', {
-  email: 'user@example.com',
-  name: 'John Doe',
-  plan: 'premium',
-});
-```
-
-### Error Tracking
-
-```typescript
-try {
-  // Some operation
-} catch (error) {
-  await UnifiedTracking.logError(error, {
-    severity: 'error',
-    tags: { component: 'checkout' },
-    extra: { orderId: '12345' },
-  });
-}
-```
-
-## React Integration
-
-### Provider Setup
-
-```tsx
-import { UnifiedTrackingProvider } from 'unified-tracking/react';
-
-function App() {
-  return (
-    <UnifiedTrackingProvider config={config}>
-      <YourApp />
-    </UnifiedTrackingProvider>
-  );
-}
-```
-
-### Using Hooks
-
-```tsx
-import { useTrackEvent, useIdentifyUser } from 'unified-tracking/react';
+// 2. Use anywhere - no providers or setup needed!
+import { useTrackEvent } from 'unified-tracking/react';
 
 function MyComponent() {
   const { trackEvent } = useTrackEvent();
-  const { identifyUser } = useIdentifyUser();
 
-  const handleClick = async () => {
-    await trackEvent('button_click', { button: 'header' });
+  const handleClick = () => {
+    trackEvent('button_clicked', {
+      button_name: 'Subscribe',
+      page: 'homepage'
+    });
   };
 
-  const handleLogin = async (user) => {
-    await identifyUser(user.id, { email: user.email });
-  };
-
-  return <button onClick={handleClick}>Track This Click</button>;
+  return <button onClick={handleClick}>Subscribe</button>;
 }
+
+// 3. Works in dynamically injected components!
+const DynamicWidget = () => {
+  const { track } = useUnifiedTracking();
+
+  React.useEffect(() => {
+    track('widget_loaded');
+  }, []);
+
+  return <div>I can be injected anywhere!</div>;
+};
 ```
 
-### Higher-Order Components
+## 📦 Installation Options
 
-```tsx
-import { withTracking } from 'unified-tracking/react';
+### Pure JavaScript/TypeScript
 
-const TrackedComponent = withTracking(MyComponent, {
-  enableScreenTracking: true,
-  enableEventTracking: true,
-  enableErrorTracking: true,
+```typescript
+import { UnifiedTracking } from 'unified-tracking';
+```
+
+### React Integration
+
+```typescript
+import { useTrackEvent, useUnifiedTracking } from 'unified-tracking/react';
+```
+
+### Capacitor Integration (Optional)
+
+```typescript
+import { UnifiedTracking } from 'unified-tracking/capacitor';
+```
+
+## 🔧 Configuration
+
+### Minimal Configuration
+
+```typescript
+// Auto-detects available SDKs
+await UnifiedTracking.initialize();
+```
+
+### With Provider Configuration
+
+```typescript
+await UnifiedTracking.initialize({
+  analytics: {
+    providers: ['google-analytics', 'mixpanel'],
+    googleAnalytics: {
+      measurementId: 'G-XXXXXXXXXX',
+    },
+    mixpanel: {
+      token: 'YOUR_MIXPANEL_TOKEN',
+    },
+  },
+  errorTracking: {
+    providers: ['sentry'],
+    sentry: {
+      dsn: 'YOUR_SENTRY_DSN',
+    },
+  },
 });
 ```
 
-## Supported Providers
+## 🎣 React Hooks (No Providers Required!)
+
+### useTrackEvent
+
+```typescript
+const { trackEvent, isTracking, lastError } = useTrackEvent();
+
+await trackEvent('purchase_completed', {
+  product_id: '123',
+  price: 99.99,
+});
+```
+
+### useUnifiedTracking
+
+```typescript
+const tracking = useUnifiedTracking();
+
+// All methods available
+await tracking.track('event_name', { properties });
+await tracking.identify('user123', { email: 'user@example.com' });
+await tracking.logError(new Error('Something went wrong'));
+await tracking.logRevenue({ amount: 99.99, currency: 'USD' });
+```
+
+## 📊 Supported Providers
 
 ### Analytics
 
-- **Google Analytics 4** - Web analytics and user behavior tracking
-- **Mixpanel** - Advanced product analytics and user segmentation
-- **Segment** - Customer data platform and event routing
-- **PostHog** - Product analytics with feature flags and session replay
-- **Amplitude** - Digital product analytics and user journey tracking
-- **Firebase Analytics** - Mobile and web app analytics
+- Google Analytics 4
+- Mixpanel
+- Segment
+- PostHog
+- Amplitude
+- Firebase Analytics
+- Heap
+- Matomo
 
 ### Error Tracking
 
-- **Sentry** - Error tracking and performance monitoring
-- **Bugsnag** - Error monitoring and stability management
-- **Rollbar** - Real-time error tracking and debugging
-- **DataDog RUM** - Full-stack observability and monitoring
-- **LogRocket** - Session replay and error tracking
+- Sentry
+- Bugsnag
+- Rollbar
+- LogRocket
+- Raygun
+- DataDog RUM
+- AppCenter
+- Firebase Crashlytics
 
-## Configuration Examples
+## 🔌 Dynamic Provider Loading
 
-### Multiple Analytics Providers
+Providers are loaded dynamically based on availability:
 
 ```typescript
-const config = {
-  analytics: [
-    {
-      id: 'google-analytics',
-      config: { measurementId: 'G-XXXXXXXXXX' },
-    },
-    {
-      id: 'mixpanel',
-      config: { token: 'your-mixpanel-token' },
-    },
-    {
-      id: 'posthog',
-      config: {
-        apiKey: 'your-posthog-key',
-        sessionRecording: { enabled: true },
-      },
-    },
-  ],
-  errorTracking: [
-    {
-      id: 'sentry',
-      config: {
-        dsn: 'your-sentry-dsn',
-        tracesSampleRate: 1.0,
-      },
-    },
-  ],
-};
+// The package detects which SDKs are available
+// and only initializes those providers
+
+// If you have gtag loaded, Google Analytics will work
+// If you have mixpanel loaded, Mixpanel will work
+// No errors if SDKs are missing - graceful degradation
 ```
 
-### Environment-Based Configuration
+## 🛡️ Privacy & Consent
+
+Built-in consent management:
 
 ```typescript
-const config = {
-  debug: process.env.NODE_ENV === 'development',
-  analytics: [
-    {
-      id: 'google-analytics',
-      config: {
-        measurementId: process.env.REACT_APP_GA_MEASUREMENT_ID,
-        debugMode: process.env.NODE_ENV === 'development',
-      },
-    },
-  ],
-  errorTracking: [
-    {
-      id: 'sentry',
-      config: {
-        dsn: process.env.REACT_APP_SENTRY_DSN,
-        environment: process.env.NODE_ENV,
-      },
-    },
-  ],
-};
-```
-
-## Privacy & Consent
-
-Built-in consent management for GDPR compliance:
-
-```typescript
-// Set consent preferences
 await UnifiedTracking.setConsent({
   analytics: true,
   errorTracking: true,
   marketing: false,
   personalization: false,
 });
-
-// Or use the React hook
-const { consent, updateConsent, acceptAll, rejectAll } = useConsent();
 ```
 
-## Migration
+## 📱 Platform Support
 
-### From Google Analytics
+- ✅ Web (all modern browsers)
+- ✅ React 16.8+
+- ✅ React Native (via Capacitor)
+- ✅ iOS (via Capacitor)
+- ✅ Android (via Capacitor)
+- ✅ Electron
+
+## 🤝 Migration
+
+### From React Context-based Analytics
+
+```typescript
+// Before (with providers)
+<AnalyticsProvider config={config}>
+  <App />
+</AnalyticsProvider>
+
+// After (no providers!)
+UnifiedTracking.initialize(config);
+// Use hooks anywhere!
+```
+
+### From Individual SDKs
 
 ```typescript
 // Before
-gtag('event', 'click', { button: 'header' });
+gtag('event', 'purchase', { value: 99.99 });
+mixpanel.track('purchase', { value: 99.99 });
 
 // After
-await UnifiedTracking.track('click', { button: 'header' });
+UnifiedTracking.track('purchase', { value: 99.99 });
+// Automatically sent to all configured providers
 ```
 
-### From Mixpanel
+## 📚 Documentation
+
+- [API Reference](./docs/api/README.md) - Complete API documentation
+- [React Hooks Guide](./docs/react-integration.md) - All available React hooks
+- [Provider Configuration](./docs/api/interfaces/provider-interfaces.md) - Provider-specific settings
+- [Migration Guide](./docs/migration-guide.md) - Migrate from other solutions
+- [Examples](./examples) - Complete examples for various use cases
+
+## 🏗️ Advanced Usage
+
+### Custom Providers
 
 ```typescript
-// Before
-mixpanel.track('Page View', { page: 'dashboard' });
+import { ProviderRegistry, BaseAnalyticsProvider } from 'unified-tracking';
 
-// After
-await UnifiedTracking.logScreenView('dashboard');
+@RegisterProvider({
+  id: 'my-analytics',
+  name: 'My Analytics',
+  type: 'analytics',
+})
+class MyAnalyticsProvider extends BaseAnalyticsProvider {
+  // Implementation
+}
 ```
 
-### From Sentry
+### Direct SDK Access
 
 ```typescript
-// Before
-Sentry.captureException(error);
-
-// After
-await UnifiedTracking.logError(error);
+// Access underlying provider instances
+const providers = await UnifiedTracking.getActiveProviders();
 ```
 
-## Documentation
+## 📄 License
 
-### Getting Started
+MIT © [Your Name]
 
-- [Setup Guide](./docs/setup-guide.md) - Detailed installation and configuration
-- [Quick Start](./docs/quick-start.md) - Get up and running in minutes
-- [Configuration](./docs/configuration.md) - Configuration options
+## 🤝 Contributing
 
-### API Reference
+Contributions are welcome! Please read our [contributing guidelines](./CONTRIBUTING.md) first.
 
-- [Plugin Methods](./docs/api/plugin-methods.md) - Core plugin API methods
-- [Interfaces](./docs/api/interfaces/core-interfaces.md) - TypeScript interfaces
-- [Classes](./docs/api/classes/base-provider.md) - Exported classes
-- [React Hooks](./docs/api/react/hooks.md) - React integration hooks
-- [Constants](./docs/api/constants/events.md) - Predefined constants
+## 🐛 Found a Bug?
 
-### Providers
-
-- [Analytics Providers](./docs/providers/analytics/README.md) - Analytics provider setup
-- [Error Tracking](./docs/providers/error-handling/README.md) - Error tracking setup
-- [Provider Configuration](./docs/api/interfaces/provider-interfaces.md) - Provider configs
-
-### Advanced
-
-- [Migration Guide](./docs/migration-guide.md) - Migrate from existing solutions
-- [React Integration](./docs/react-integration.md) - React-specific features
-- [Performance](./docs/advanced/performance.md) - Optimization tips
-- [Custom Providers](./docs/advanced/custom-providers.md) - Build custom providers
-
-## Contributing
-
-We welcome contributions! Please see our [Contributing Guide](./CONTRIBUTING.md) for details.
-
-## License
-
-MIT License - see [LICENSE](./LICENSE) for details.
-
-## Support
-
-- 🐛 [Bug Reports](https://github.com/your-org/unified-tracking/issues)
-- 💡 [Feature Requests](https://github.com/your-org/unified-tracking/issues)
-- 📚 [Documentation](https://docs.unified-tracking.dev)
-- 💬 [Discussions](https://github.com/your-org/unified-tracking/discussions)
+Please [open an issue](https://github.com/yourusername/unified-tracking/issues) with reproduction steps.

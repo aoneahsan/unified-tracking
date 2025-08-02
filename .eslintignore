@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Test files
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+vitest.config.ts
+
+# Examples
+examples/
+
+# Config files
+rollup.config.js
+
+# iOS/Android
+ios/
+android/
+
+# Other
+*.ignore.*
+bin/

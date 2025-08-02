@@ -1,0 +1,59 @@
+# Source files
+src/
+*.ts
+!*.d.ts
+
+# Config files
+tsconfig.json
+rollup.config.js
+vitest.config.ts
+.eslintrc*
+.prettierrc*
+.swiftlint.yml
+.editorconfig
+
+# Development files
+examples/
+docs/
+*.test.js
+*.spec.js
+*.test.d.ts
+*.spec.d.ts
+
+# Build artifacts
+*.map
+
+# iOS/Android source (only include built files)
+ios/Sources/
+ios/Tests/
+android/src/test/
+android/src/androidTest/
+
+# Git and CI
+.git/
+.github/
+.gitignore
+.husky/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependencies
+node_modules/
+
+# Misc
+CONTRIBUTING.md
+*.ignore.*

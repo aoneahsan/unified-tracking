@@ -1,17 +1,15 @@
-import { registerPlugin } from '@capacitor/core';
-
+import { getUnifiedTracking } from './core/unified-tracking-core';
 import type { UnifiedTrackingPlugin } from './definitions';
 
-const UnifiedTracking = registerPlugin<UnifiedTrackingPlugin>('UnifiedTracking', {
-  web: () => import('./web').then((m) => new m.UnifiedTrackingWeb()),
-});
+// Export the core instance as default
+export const UnifiedTracking = getUnifiedTracking();
 
+// Export all types and definitions
 export * from './definitions';
-export { UnifiedTracking };
 export type { UnifiedTrackingPlugin };
 
-// Export React integration
-export * from './react';
+// Note: React integration is available via 'unified-tracking/react'
+// This avoids circular dependencies
 
 // Export utilities for advanced usage
 export { Logger } from './utils/logger';
@@ -27,5 +25,8 @@ export { BaseErrorTrackingProvider } from './providers/base-error-tracking-provi
 export { ProviderRegistry } from './providers/registry';
 export { RegisterProvider } from './decorators/register-provider';
 
-// Export types (exclude ConsentSettings as it's already exported from definitions)
+// Export types
 export type { ProviderType, ProviderConfig, ProviderState } from './types/provider';
+
+// Export core class for advanced usage
+export { UnifiedTrackingCore } from './core/unified-tracking-core';
