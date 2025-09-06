@@ -18,9 +18,10 @@ describe('UnifiedTrackingWeb', () => {
   describe('initialize', () => {
     it('should initialize with config', async () => {
       const config: UnifiedTrackingConfig = {
-        providers: {
-          analytics: {
-            firebase: { enabled: true },
+        analytics: {
+          providers: ['firebase' as const],
+          firebase: {
+            enabled: true,
           },
         },
       };
@@ -100,8 +101,10 @@ describe('UnifiedTrackingWeb', () => {
     it('should log error object with context', async () => {
       const error = new Error('Test error');
       const context: ErrorContext = {
-        userId: 'user123',
-        metadata: { page: '/home' },
+        user: {
+          id: 'user123',
+        },
+        extra: { page: '/home' },
       };
 
       await expect(plugin.logError(error, context)).resolves.not.toThrow();

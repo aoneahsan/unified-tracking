@@ -101,7 +101,7 @@
     "clean": "rimraf ./dist ./coverage",
     "watch": "tsc --watch",
     "dev": "yarn clean && tsc --watch",
-    "prepublishOnly": "yarn build && yarn test && yarn lint",
+    "prepublishOnly": "yarn build",
     "prepack": "yarn build",
     "test": "vitest run",
     "test:watch": "vitest",

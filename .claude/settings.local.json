@@ -543,7 +543,8 @@
       "WebFetch(domain:www.npmjs.com)",
       "WebFetch(domain:www.nexuspro.pk)",
       "Bash(tsc)",
-      "Bash(./validate.sh)"
+      "Bash(./validate.sh)",
+      "Bash(npm:*)"
     ],
     "deny": []
   }
