@@ -3,7 +3,7 @@ import esbuild from 'rollup-plugin-esbuild';
 
 export default [
   {
-    input: 'dist/esm/index.js',
+    input: 'dist/esm/src/index.js',
     output: {
       file: 'dist/plugin.js',
       format: 'es',

@@ -1,0 +1,191 @@
+name: 🐛 Bug Report
+description: Create a report to help us improve
+title: '[Bug]: '
+labels: ['bug', 'triage']
+assignees: ['aoneahsan']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting a bug! Please fill out the form below with as much detail as possible.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 🐛 Bug Description
+      description: A clear and concise description of what the bug is.
+      placeholder: Describe the bug...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 🔄 Steps to Reproduce
+      description: Steps to reproduce the behavior
+      placeholder: |
+        1. Go to '...'
+        2. Click on '....'
+        3. Scroll down to '....'
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: ✅ Expected Behavior
+      description: A clear and concise description of what you expected to happen.
+      placeholder: What should happen...
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: ❌ Actual Behavior
+      description: A clear and concise description of what actually happens.
+      placeholder: What actually happens...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: 🛠️ Platform
+      description: Which platform(s) are you experiencing this issue on?
+      multiple: true
+      options:
+        - Web
+        - iOS
+        - Android
+        - React Native
+        - Electron
+    validations:
+      required: true
+
+  - type: dropdown
+    id: providers
+    attributes:
+      label: 📊 Providers
+      description: Which providers are you using? (Select all that apply)
+      multiple: true
+      options:
+        - Google Analytics
+        - Mixpanel
+        - Segment
+        - PostHog
+        - Amplitude
+        - Firebase Analytics
+        - Heap
+        - Matomo
+        - Sentry
+        - Bugsnag
+        - Rollbar
+        - LogRocket
+        - Raygun
+        - DataDog
+        - AppCenter
+        - Firebase Crashlytics
+
+  - type: input
+    id: version
+    attributes:
+      label: 📦 Plugin Version
+      description: What version of unified-tracking are you using?
+      placeholder: e.g., 3.0.0
+    validations:
+      required: true
+
+  - type: input
+    id: capacitor-version
+    attributes:
+      label: ⚡ Capacitor Version
+      description: What version of Capacitor are you using? (if applicable)
+      placeholder: e.g., 7.4.3
+
+  - type: input
+    id: react-version
+    attributes:
+      label: ⚛️ React Version
+      description: What version of React are you using? (if applicable)
+      placeholder: e.g., 19.0.0
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: 🌍 Environment Details
+      description: |
+        Please provide details about your environment:
+        - OS (e.g., macOS 14.0, Windows 11, Ubuntu 22.04)
+        - Node.js version
+        - Browser (if web)
+        - Device/Simulator (if mobile)
+      placeholder: |
+        - OS: macOS 14.0
+        - Node: 24.2.0
+        - Browser: Chrome 120.0
+        - Device: iPhone 15 Pro (iOS 17.1)
+    validations:
+      required: true
+
+  - type: textarea
+    id: config
+    attributes:
+      label: ⚙️ Configuration
+      description: |
+        Please share your unified-tracking configuration (remove any sensitive keys):
+      render: typescript
+      placeholder: |
+        await UnifiedTracking.initialize({
+          analytics: {
+            providers: ['google-analytics'],
+            googleAnalytics: {
+              measurementId: 'G-XXXXXXXXXX'
+            }
+          }
+        });
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 📝 Error Logs
+      description: |
+        Please include any relevant log output. If there are errors in the console, please include them here.
+      render: shell
+      placeholder: Paste any error messages or logs here...
+
+  - type: textarea
+    id: code
+    attributes:
+      label: 💻 Minimal Code Example
+      description: |
+        If possible, provide a minimal code example that reproduces the issue.
+      render: typescript
+      placeholder: |
+        import { UnifiedTracking } from 'unified-tracking';
+
+        // Minimal example that reproduces the issue
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: '✅ Checklist'
+      description: 'Please confirm the following:'
+      options:
+        - label: I have searched the existing issues to make sure this bug hasn't been reported already
+          required: true
+        - label: I have read the documentation and troubleshooting guides
+          required: true
+        - label: I am using a supported version of the plugin
+          required: true
+        - label: I have provided all the requested information above
+          required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 📎 Additional Context
+      description: |
+        Add any other context about the problem here. Screenshots, videos, or other files can be helpful.
+      placeholder: Any additional information that might be helpful...

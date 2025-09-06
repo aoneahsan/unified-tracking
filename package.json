@@ -3,9 +3,9 @@
   "version": "3.0.0",
   "description": "Unified analytics and error tracking plugin for React + Capacitor Apps",
   "type": "module",
-  "main": "dist/esm/index.js",
-  "module": "dist/esm/index.js",
-  "types": "dist/esm/index.d.ts",
+  "main": "dist/esm/src/index.js",
+  "module": "dist/esm/src/index.js",
+  "types": "dist/esm/src/index.d.ts",
   "files": [
     "android/src/main/",
     "android/build.gradle",
@@ -31,6 +31,11 @@
   "bugs": {
     "url": "https://github.com/aoneahsan/unified-tracking/issues"
   },
+  "homepage": "https://github.com/aoneahsan/unified-tracking#readme",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/aoneahsan"
+  },
   "keywords": [
     "capacitor",
     "plugin",
@@ -38,45 +43,82 @@
     "analytics",
     "tracking",
     "error-tracking",
+    "unified-analytics",
+    "cross-platform",
+    "react",
+    "typescript",
     "firebase",
     "google-analytics",
     "sentry",
     "amplitude",
-    "mixpanel"
+    "mixpanel",
+    "segment",
+    "posthog",
+    "heap",
+    "matomo",
+    "bugsnag",
+    "rollbar",
+    "datadog",
+    "logrocket",
+    "raygun",
+    "appcenter",
+    "ios",
+    "android",
+    "web",
+    "mobile-analytics",
+    "crash-reporting",
+    "user-tracking",
+    "event-tracking",
+    "privacy-compliant"
   ],
   "exports": {
     ".": {
-      "import": "./dist/esm/index.js",
-      "types": "./dist/esm/index.d.ts"
+      "import": "./dist/esm/src/index.js",
+      "types": "./dist/esm/src/index.d.ts"
     },
     "./react": {
-      "import": "./dist/esm/react/index.js",
-      "types": "./dist/esm/react/index.d.ts"
+      "import": "./dist/esm/src/react/index.js",
+      "types": "./dist/esm/src/react/index.d.ts"
     },
     "./capacitor": {
-      "import": "./dist/esm/capacitor/index.js",
-      "types": "./dist/esm/capacitor/index.d.ts"
+      "import": "./dist/esm/src/capacitor/index.js",
+      "types": "./dist/esm/src/capacitor/index.d.ts"
     },
     "./package.json": "./package.json"
   },
   "scripts": {
-    "verify": "npm run verify:ios && npm run verify:android && npm run verify:web",
+    "verify": "yarn verify:ios && yarn verify:android && yarn verify:web",
     "verify:ios": "cd ios && pod install && xcodebuild -workspace Plugin.xcworkspace -scheme Plugin -configuration Debug CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO",
     "verify:android": "cd android && ./gradlew clean build test",
-    "verify:web": "npm run build",
-    "lint": "npm run eslint && npm run prettier -- --check",
-    "fmt": "npm run eslint -- --fix && npm run prettier -- --write",
+    "verify:web": "yarn build",
+    "lint": "yarn eslint && yarn prettier --check",
+    "fmt": "yarn eslint --fix && yarn prettier --write",
     "eslint": "eslint . --ext ts",
-    "prettier": "prettier \"**/*.{css,html,ts,js,java}\"",
+    "prettier": "prettier \"**/*.{css,html,ts,js,java,swift,md,json,yml,yaml}\"",
     "docgen": "docgen --api UnifiedTrackingPlugin --output-json dist/docs.json",
     "build": "npm run clean && (npm run docgen || echo 'Warning: docgen failed, continuing build...') && tsc && (rollup -c rollup.config.js || echo 'Warning: rollup failed, continuing build...')",
-    "build:nodoc": "npm run clean && tsc && rollup -c rollup.config.js",
-    "clean": "rimraf ./dist",
+    "build:nodoc": "yarn clean && tsc && rollup -c rollup.config.js",
+    "clean": "rimraf ./dist ./coverage",
     "watch": "tsc --watch",
-    "prepublishOnly": "npm run build",
+    "dev": "yarn clean && tsc --watch",
+    "prepublishOnly": "yarn build && yarn test && yarn lint",
+    "prepack": "yarn build",
     "test": "vitest run",
     "test:watch": "vitest",
-    "prepare": "husky"
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui",
+    "type-check": "tsc --noEmit",
+    "prepare": "husky || true",
+    "postinstall": "yarn build || true",
+    "release": "yarn build && yarn test && yarn lint && npm publish",
+    "release:dry": "yarn build && yarn test && yarn lint && npm publish --dry-run",
+    "size-check": "yarn build && bundlesize",
+    "audit:fix": "yarn audit --fix",
+    "deps:check": "yarn outdated",
+    "deps:update": "yarn upgrade --latest",
+    "example:install": "cd examples/react-app && yarn install",
+    "example:dev": "cd examples/react-app && yarn dev",
+    "example:build": "cd examples/react-app && yarn build"
   },
   "capacitor": {
     "ios": {

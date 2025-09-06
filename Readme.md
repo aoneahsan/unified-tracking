@@ -1,6 +1,14 @@
 # Unified Tracking
 
-A zero-dependency, provider-less analytics and error tracking solution for React and web applications. Track events, identify users, and monitor errors with a simple, unified API that works everywhere - no providers or wrappers needed!
+[![npm version](https://badge.fury.io/js/unified-tracking.svg)](https://badge.fury.io/js/unified-tracking)
+[![npm downloads](https://img.shields.io/npm/dm/unified-tracking.svg)](https://www.npmjs.com/package/unified-tracking)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
+[![Platform](https://img.shields.io/badge/platform-Web%20%7C%20iOS%20%7C%20Android-lightgrey.svg)](https://capacitorjs.com/)
+[![CI Status](https://github.com/aoneahsan/unified-tracking/workflows/CI/badge.svg)](https://github.com/aoneahsan/unified-tracking/actions)
+[![Coverage](https://img.shields.io/codecov/c/github/aoneahsan/unified-tracking.svg)](https://codecov.io/gh/aoneahsan/unified-tracking)
+
+A comprehensive Capacitor plugin that provides a unified API for multiple analytics and error tracking providers. Track events, identify users, and monitor errors across all major platforms with a single, consistent interface.
 
 ## ✨ Features
 
@@ -14,58 +22,116 @@ A zero-dependency, provider-less analytics and error tracking solution for React
 - 📦 **Tree-Shakeable** - Only bundle what you use
 - 🎯 **TypeScript** - Full type safety and autocompletion
 
-## 🚀 Quick Start
+## 📦 Installation
 
-### Installation
+### For Capacitor Projects
 
 ```bash
+# Install the plugin
 npm install unified-tracking
-# or
-yarn add unified-tracking
+
+# For iOS
+npx cap add ios
+npx cap sync ios
+
+# For Android
+npx cap add android
+npx cap sync android
 ```
 
-### Basic Usage (No Providers Needed!)
+### For React Web Projects
+
+```bash
+# Install the plugin
+npm install unified-tracking
+
+# Install peer dependencies for React support
+npm install react@^19.0.0 @capacitor/core@^7.4.3
+```
+
+### Manual Setup (CLI Helper)
+
+The plugin includes a setup helper to guide you through configuration:
+
+```bash
+npx unified-tracking-setup
+```
+
+## 🚀 Quick Start
+
+### 1. Initialize the Plugin
 
 ```typescript
-// 1. Initialize once in your app (e.g., in index.tsx or App.tsx)
 import { UnifiedTracking } from 'unified-tracking';
 
+// Initialize with your providers
 await UnifiedTracking.initialize({
   analytics: {
-    providers: ['google-analytics'], // Auto-loads if gtag is available
+    providers: ['google-analytics', 'mixpanel'],
     googleAnalytics: {
-      measurementId: 'G-XXXXXXXXXX'
-    }
-  }
+      measurementId: 'G-XXXXXXXXXX',
+    },
+    mixpanel: {
+      token: 'YOUR_MIXPANEL_TOKEN',
+    },
+  },
+  errorTracking: {
+    providers: ['sentry'],
+    sentry: {
+      dsn: 'YOUR_SENTRY_DSN',
+    },
+  },
+});
+```
+
+### 2. Track Events
+
+```typescript
+// Direct API usage
+await UnifiedTracking.trackEvent('purchase_completed', {
+  product_id: '123',
+  price: 99.99,
+  currency: 'USD'
 });
 
-// 2. Use anywhere - no providers or setup needed!
-import { useTrackEvent } from 'unified-tracking/react';
+// React Hook usage
+import { useUnifiedTracking } from 'unified-tracking/react';
 
 function MyComponent() {
-  const { trackEvent } = useTrackEvent();
+  const { trackEvent, identify, logError } = useUnifiedTracking();
 
-  const handleClick = () => {
-    trackEvent('button_clicked', {
-      button_name: 'Subscribe',
-      page: 'homepage'
+  const handlePurchase = async () => {
+    await trackEvent('purchase_completed', {
+      product_id: '123',
+      price: 99.99
     });
   };
 
-  return <button onClick={handleClick}>Subscribe</button>;
+  return <button onClick={handlePurchase}>Buy Now</button>;
 }
-
-// 3. Works in dynamically injected components!
-const DynamicWidget = () => {
-  const { track } = useUnifiedTracking();
-
-  React.useEffect(() => {
-    track('widget_loaded');
-  }, []);
-
-  return <div>I can be injected anywhere!</div>;
-};
 ```
+
+### 3. Identify Users
+
+```typescript
+await UnifiedTracking.identify('user-123', {
+  email: 'user@example.com',
+  name: 'John Doe',
+  plan: 'premium',
+});
+```
+
+### 4. Track Errors
+
+````typescript
+try {
+  // Your code
+} catch (error) {
+  await UnifiedTracking.logError(error, {
+    context: 'checkout_process',
+    userId: 'user-123'
+  });
+}
 
 ## 📦 Installation Options
 
@@ -73,7 +139,7 @@ const DynamicWidget = () => {
 
 ```typescript
 import { UnifiedTracking } from 'unified-tracking';
-```
+````
 
 ### React Integration
 
@@ -261,14 +327,75 @@ class MyAnalyticsProvider extends BaseAnalyticsProvider {
 const providers = await UnifiedTracking.getActiveProviders();
 ```
 
+## 📊 Analytics & Metrics
+
+This plugin provides comprehensive analytics tracking:
+
+- **Event Tracking**: Custom events with properties
+- **User Identification**: Associate events with users
+- **Revenue Tracking**: E-commerce and subscription revenue
+- **Screen/Page Views**: Automatic or manual page tracking
+- **User Properties**: Set custom user attributes
+- **Session Tracking**: Track user sessions across platforms
+
+## 🚨 Error Tracking
+
+Built-in error handling capabilities:
+
+- **Automatic Error Capture**: Unhandled exceptions
+- **Manual Error Logging**: Log custom errors with context
+- **User Context**: Associate errors with specific users
+- **Breadcrumbs**: Track user actions leading to errors
+- **Performance Monitoring**: Track performance metrics
+- **Custom Tags**: Add custom metadata to errors
+
+## 🔒 Privacy & Compliance
+
+- **GDPR Compliant**: Built-in consent management
+- **CCPA Support**: California Consumer Privacy Act compliance
+- **Data Minimization**: Only collect necessary data
+- **Anonymization**: Option to anonymize sensitive data
+- **User Control**: Users can opt-out of tracking
+
+## 🛠️ Development
+
+### Building from Source
+
+```bash
+# Clone the repository
+git clone https://github.com/aoneahsan/unified-tracking.git
+cd unified-tracking
+
+# Install dependencies
+yarn install
+
+# Build the plugin
+yarn build
+
+# Run tests
+yarn test
+
+# Run linting
+yarn lint
+```
+
+### Contributing
+
+We welcome contributions! Please see our [Contributing Guide](./CONTRIBUTING.md) for details.
+
 ## 📄 License
 
-MIT © [Your Name]
+MIT © [Ahsan Mahmood](https://github.com/aoneahsan)
 
-## 🤝 Contributing
+## 🤝 Support
 
-Contributions are welcome! Please read our [contributing guidelines](./CONTRIBUTING.md) first.
+- 📖 [Documentation](./docs/README.md)
+- 🐛 [Issues](https://github.com/aoneahsan/unified-tracking/issues)
+- 💬 [Discussions](https://github.com/aoneahsan/unified-tracking/discussions)
+- 📧 [Email Support](mailto:aoneahsan@gmail.com)
 
-## 🐛 Found a Bug?
+## 🌟 Show Your Support
 
-Please [open an issue](https://github.com/yourusername/unified-tracking/issues) with reproduction steps.
+Give a ⭐️ if this project helped you!
+
+[![Star History Chart](https://api.star-history.com/svg?repos=aoneahsan/unified-tracking&type=Date)](https://star-history.com/#aoneahsan/unified-tracking&Date)

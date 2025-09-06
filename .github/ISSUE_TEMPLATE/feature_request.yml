@@ -1,0 +1,168 @@
+name: 🚀 Feature Request
+description: Suggest an idea for this project
+title: '[Feature]: '
+labels: ['enhancement', 'triage']
+assignees: ['aoneahsan']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a feature! Please fill out the form below with as much detail as possible.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 🎯 Problem Statement
+      description: Is your feature request related to a problem? Please describe the problem you're trying to solve.
+      placeholder: I'm always frustrated when...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: 💡 Proposed Solution
+      description: Describe the solution you'd like to see implemented.
+      placeholder: I would like to see...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: 📋 Feature Category
+      description: What category does this feature request fall into?
+      options:
+        - Analytics Provider
+        - Error Tracking Provider
+        - React Integration
+        - Capacitor Integration
+        - Configuration
+        - API Enhancement
+        - Performance
+        - Documentation
+        - Developer Experience
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: 🛠️ Target Platform
+      description: Which platform(s) should this feature support?
+      multiple: true
+      options:
+        - Web
+        - iOS
+        - Android
+        - React Native
+        - Electron
+        - All Platforms
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 🔄 Alternatives Considered
+      description: Describe any alternative solutions or features you've considered.
+      placeholder: I have considered...
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: 🎬 Use Case & Examples
+      description: |
+        Provide specific use cases and examples of how this feature would be used.
+      placeholder: |
+        Use Case 1: As a developer, I want to...
+        Use Case 2: As a user, I need to...
+
+        Example usage:
+        ```typescript
+        // How the feature might be used
+        ```
+
+  - type: textarea
+    id: api-design
+    attributes:
+      label: 🔧 Proposed API Design
+      description: |
+        If you have ideas about how the API should look, please share them here.
+      render: typescript
+      placeholder: |
+        // Proposed API design
+        await UnifiedTracking.newFeature({
+          // configuration options
+        });
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 📈 Priority Level
+      description: How important is this feature to you?
+      options:
+        - Low - Nice to have
+        - Medium - Would be helpful
+        - High - Important for my use case
+        - Critical - Blocking my project
+    validations:
+      required: true
+
+  - type: dropdown
+    id: complexity
+    attributes:
+      label: 🧩 Estimated Complexity
+      description: How complex do you think this feature would be to implement?
+      options:
+        - Simple - Small change or addition
+        - Medium - Moderate development effort
+        - Complex - Significant development effort
+        - Major - Requires architectural changes
+        - Unknown - I'm not sure
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: 🤝 Contribution
+      description: Are you willing to help implement this feature?
+      options:
+        - label: I'm willing to submit a pull request for this feature
+        - label: I can help with testing this feature
+        - label: I can help with documentation for this feature
+        - label: I can provide feedback during development
+
+  - type: textarea
+    id: research
+    attributes:
+      label: 🔍 Research & References
+      description: |
+        Have you found any relevant documentation, similar implementations, or research that might help?
+      placeholder: |
+        - Link to similar feature in other libraries
+        - Documentation references
+        - Research papers or blog posts
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: '✅ Checklist'
+      description: 'Please confirm the following:'
+      options:
+        - label: I have searched the existing issues to make sure this feature hasn't been requested already
+          required: true
+        - label: I have read the project roadmap and documentation
+          required: true
+        - label: This feature request is within the scope of this project
+          required: true
+        - label: I have provided sufficient detail for the maintainers to understand the request
+          required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 📎 Additional Context
+      description: |
+        Add any other context, screenshots, mockups, or examples about the feature request here.
+      placeholder: Any additional information that might be helpful...

@@ -13,11 +13,13 @@ This is a Capacitor plugin project called "unified-tracking" that provides a uni
 ### Required Initialization Steps
 
 1. Initialize the Capacitor plugin structure:
+
    ```bash
    npm init @capacitor/plugin@latest unified-tracking
    ```
 
 2. Switch to Yarn (per user preferences):
+
    ```bash
    rm package-lock.json
    yarn install

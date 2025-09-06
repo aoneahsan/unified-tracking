@@ -1,59 +1,45 @@
 # Source files
 src/
 *.ts
+*.tsx
 !*.d.ts
 
-# Config files
+# Build configuration
 tsconfig.json
 rollup.config.js
 vitest.config.ts
-.eslintrc*
-.prettierrc*
-.swiftlint.yml
-.editorconfig
+eslint.config.js
 
 # Development files
+.github/
 examples/
 docs/
-*.test.js
-*.spec.js
-*.test.d.ts
-*.spec.d.ts
+bin/
+coverage/
+node_modules/
 
-# Build artifacts
-*.map
+# Test files
+**/*.test.ts
+**/*.spec.ts
+src/test-setup.ts
 
-# iOS/Android source (only include built files)
-ios/Sources/
-ios/Tests/
-android/src/test/
-android/src/androidTest/
-
-# Git and CI
-.git/
-.github/
-.gitignore
-.husky/
-
-# IDE
+# Development tools
 .vscode/
 .idea/
-*.swp
-*.swo
-
-# OS
+*.log
+yarn-error.log
+npm-debug.log*
 .DS_Store
 Thumbs.db
 
-# Logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# Environment files
+.env
+.env.local
+.env.*.local
 
-# Dependencies
-node_modules/
+# Lock files (keep yarn.lock for development)
+package-lock.json
 
-# Misc
-CONTRIBUTING.md
-*.ignore.*
+# Runtime files
+*.tgz
+*.tar.gz

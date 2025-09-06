@@ -40,7 +40,7 @@ export default [
       },
       parserOptions: {
         project: './tsconfig.json',
-        tsconfigRootDir: '.',
+        tsconfigRootDir: import.meta.dirname || process.cwd(),
       },
     },
     plugins: {

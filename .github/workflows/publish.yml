@@ -1,0 +1,104 @@
+name: Publish to NPM
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    name: Publish Package
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.x'
+          cache: 'yarn'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Run tests
+        run: yarn test
+
+      - name: Build package
+        run: yarn build
+
+      - name: Verify build
+        run: |
+          ls -la dist/
+          if [ ! -f "dist/esm/src/index.js" ]; then
+            echo "Build failed: index.js not found"
+            exit 1
+          fi
+
+      - name: Update version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          npm version $VERSION --no-git-tag-version
+          echo "Updated package.json to version $VERSION"
+
+      - name: Publish to NPM
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub release notes
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            // Read CHANGELOG.md to get release notes
+            let changelog = '';
+            try {
+              changelog = fs.readFileSync('CHANGELOG.md', 'utf8');
+            } catch (error) {
+              changelog = 'No changelog available';
+            }
+
+            // Extract version from tag
+            const version = context.ref.replace('refs/tags/', '');
+
+            // Update the release with changelog content
+            await github.rest.repos.updateRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: context.payload.release.id,
+              body: `## What's Changed\n\n${changelog.split('##')[1] || 'See CHANGELOG.md for details'}`
+            });
+
+  publish-docs:
+    name: Update Documentation
+    runs-on: ubuntu-latest
+    needs: publish
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.x'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build documentation
+        run: yarn docgen || echo "Documentation generation failed, continuing..."
+
+      - name: Deploy documentation
+        uses: peaceiris/actions-gh-pages@v3
+        if: success()
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          destination_dir: docs

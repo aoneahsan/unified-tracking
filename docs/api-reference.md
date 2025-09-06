@@ -37,6 +37,7 @@ const result = await UnifiedTracking.initialize({
 ```
 
 **Parameters:**
+
 - `config`: Configuration object containing provider settings
 
 **Returns:** Promise resolving to initialization result with active providers
@@ -54,6 +55,7 @@ await UnifiedTracking.track('button_click', {
 ```
 
 **Parameters:**
+
 - `event`: Event name (string)
 - `properties`: Optional event properties (object)
 
@@ -70,6 +72,7 @@ await UnifiedTracking.identify('user-123', {
 ```
 
 **Parameters:**
+
 - `userId`: Unique user identifier
 - `traits`: Optional user traits/properties
 
@@ -85,6 +88,7 @@ await UnifiedTracking.setUserProperties({
 ```
 
 **Parameters:**
+
 - `properties`: User properties to set
 
 ##### `logError(error: Error | string, context?: ErrorContext): Promise<void>`
@@ -104,6 +108,7 @@ try {
 ```
 
 **Parameters:**
+
 - `error`: Error object or string
 - `context`: Optional error context
 
@@ -125,6 +130,7 @@ await UnifiedTracking.logRevenue({
 ```
 
 **Parameters:**
+
 - `revenue`: Revenue data object
 
 ##### `logScreenView(screenName: string, properties?: Record<string, any>): Promise<void>`
@@ -139,6 +145,7 @@ await UnifiedTracking.logScreenView('home', {
 ```
 
 **Parameters:**
+
 - `screenName`: Name of the screen/page
 - `properties`: Optional screen properties
 
@@ -156,6 +163,7 @@ await UnifiedTracking.setConsent({
 ```
 
 **Parameters:**
+
 - `consent`: Consent settings object
 
 ##### `reset(): Promise<void>`
@@ -175,6 +183,7 @@ await UnifiedTracking.enableDebugMode(true);
 ```
 
 **Parameters:**
+
 - `enabled`: Whether to enable debug mode
 
 ##### `getActiveProviders(): Promise<ActiveProvidersResult>`
@@ -200,7 +209,7 @@ import { UnifiedTrackingProvider } from 'unified-tracking/react';
 
 function App() {
   return (
-    <UnifiedTrackingProvider 
+    <UnifiedTrackingProvider
       config={trackingConfig}
       autoInitialize={true}
       onError={(error) => console.error('Tracking error:', error)}
@@ -214,6 +223,7 @@ function App() {
 ```
 
 **Props:**
+
 - `config`: Unified tracking configuration
 - `autoInitialize`: Whether to auto-initialize (default: true)
 - `onError`: Error callback
@@ -227,13 +237,7 @@ function App() {
 Access the unified tracking context.
 
 ```typescript
-const {
-  track,
-  identify,
-  logError,
-  isInitialized,
-  activeProviders,
-} = useUnifiedTracking();
+const { track, identify, logError, isInitialized, activeProviders } = useUnifiedTracking();
 ```
 
 #### `useTrackEvent()`
@@ -265,12 +269,16 @@ const handleLogin = async (user) => {
 Hook for automatic screen view tracking.
 
 ```typescript
-const { trackScreen, isTracking, lastError } = useScreenView('home', {
-  section: 'dashboard',
-}, {
-  trackOnMount: true,
-  trackOnUpdate: true,
-});
+const { trackScreen, isTracking, lastError } = useScreenView(
+  'home',
+  {
+    section: 'dashboard',
+  },
+  {
+    trackOnMount: true,
+    trackOnUpdate: true,
+  },
+);
 ```
 
 #### `useRevenueTracking()`
@@ -294,14 +302,7 @@ const handlePurchase = async (purchase) => {
 Hook for consent management.
 
 ```typescript
-const {
-  consent,
-  updateConsent,
-  acceptAll,
-  rejectAll,
-  acceptEssential,
-  isUpdating,
-} = useConsent();
+const { consent, updateConsent, acceptAll, rejectAll, acceptEssential, isUpdating } = useConsent();
 ```
 
 #### `useErrorTracking()`
@@ -324,13 +325,7 @@ const handleError = async (error) => {
 Hook for feature flags (PostHog integration).
 
 ```typescript
-const { 
-  flags, 
-  isFeatureEnabled, 
-  getFeatureFlag, 
-  refreshFlags, 
-  isLoading 
-} = useFeatureFlags();
+const { flags, isFeatureEnabled, getFeatureFlag, refreshFlags, isLoading } = useFeatureFlags();
 
 const showNewFeature = isFeatureEnabled('new_feature');
 ```
@@ -350,6 +345,7 @@ const TrackedComponent = withScreenTracking(MyComponent, {
 ```
 
 **Options:**
+
 - `screenName`: Static screen name
 - `getScreenName`: Function to get screen name from props
 - `getScreenProperties`: Function to get screen properties from props
@@ -375,6 +371,7 @@ const TrackedComponent = withEventTracking(MyComponent, {
 ```
 
 **Options:**
+
 - `trackClicks`: Auto-track click events
 - `trackHovers`: Auto-track hover events
 - `trackFocus`: Auto-track focus events
@@ -396,6 +393,7 @@ const TrackedComponent = withErrorTracking(MyComponent, {
 ```
 
 **Options:**
+
 - `fallbackComponent`: Custom error fallback component
 - `onError`: Error callback
 - `getErrorContext`: Function to get error context
@@ -413,6 +411,7 @@ const TrackedComponent = withPerformanceTracking(MyComponent, {
 ```
 
 **Options:**
+
 - `trackRenderTime`: Track render performance
 - `trackMountTime`: Track mount performance
 - `trackUpdateTime`: Track update performance
@@ -593,13 +592,13 @@ await UnifiedTracking.identify('user-123', {
 // Custom error context
 await UnifiedTracking.logError(new Error('Payment failed'), {
   severity: 'error',
-  tags: { 
+  tags: {
     component: 'checkout',
-    payment_method: 'stripe' 
+    payment_method: 'stripe',
   },
-  extra: { 
+  extra: {
     order_id: '12345',
-    amount: 29.99 
+    amount: 29.99,
   },
 });
 ```
@@ -647,14 +646,19 @@ Enable debug mode to see detailed logging:
 ```typescript
 const config = {
   debug: true,
-  analytics: [/*...*/],
-  errorTracking: [/*...*/],
+  analytics: [
+    /*...*/
+  ],
+  errorTracking: [
+    /*...*/
+  ],
 };
 
 await UnifiedTracking.initialize(config);
 ```
 
 Debug mode will log:
+
 - Provider initialization status
 - Event tracking calls
 - Error tracking calls

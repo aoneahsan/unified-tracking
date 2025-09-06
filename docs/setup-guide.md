@@ -118,7 +118,7 @@ import { unifiedTrackingConfig } from './unified-tracking.config';
 
 function App() {
   return (
-    <UnifiedTrackingProvider 
+    <UnifiedTrackingProvider
       config={unifiedTrackingConfig}
       onError={(error) => console.error('Tracking error:', error)}
       onInitialized={(providers) => console.log('Initialized providers:', providers)}
@@ -244,9 +244,9 @@ const config = {
   consent: {
     enabled: true,
     defaultConsent: {
-      analytics: false,      // Require opt-in for analytics
-      errorTracking: true,   // Allow error tracking by default
-      marketing: false,      // Require opt-in for marketing
+      analytics: false, // Require opt-in for analytics
+      errorTracking: true, // Allow error tracking by default
+      marketing: false, // Require opt-in for marketing
       personalization: false, // Require opt-in for personalization
     },
   },

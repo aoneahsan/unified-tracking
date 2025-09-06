@@ -27,6 +27,6 @@
     },
     "baseUrl": "."
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx", "examples"]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "vitest.config.ts", "rollup.config.js"],
+  "exclude": ["node_modules", "dist", "examples"]
 }

@@ -1,0 +1,114 @@
+name: ❓ Question
+description: Ask a question about the project
+title: '[Question]: '
+labels: ['question', 'triage']
+assignees: ['aoneahsan']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have a question? We're here to help! Please fill out the form below.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: ❓ Your Question
+      description: What would you like to know?
+      placeholder: I would like to understand...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: 📋 Question Category
+      description: What category does your question fall into?
+      options:
+        - Installation & Setup
+        - Configuration
+        - Usage & API
+        - Providers & Integrations
+        - Troubleshooting
+        - Best Practices
+        - Performance
+        - Platform-specific (iOS/Android/Web)
+        - React Integration
+        - Migration from other tools
+        - Contributing
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: 🛠️ Platform
+      description: Which platform(s) is your question about?
+      multiple: true
+      options:
+        - Web
+        - iOS
+        - Android
+        - React Native
+        - Electron
+        - General/All Platforms
+
+  - type: textarea
+    id: context
+    attributes:
+      label: 🌍 Context & Background
+      description: |
+        Please provide some context about what you're trying to achieve or the situation that led to this question.
+      placeholder: I'm trying to... and I encountered...
+
+  - type: textarea
+    id: tried
+    attributes:
+      label: 🔍 What I've Tried
+      description: |
+        What have you already tried or researched? This helps us avoid suggesting things you've already attempted.
+      placeholder: |
+        - I've read the documentation on...
+        - I tried following the guide for...
+        - I searched for similar questions...
+
+  - type: textarea
+    id: code
+    attributes:
+      label: 💻 Relevant Code
+      description: |
+        If your question involves code, please share the relevant parts (remove any sensitive information).
+      render: typescript
+      placeholder: |
+        // Your code here
+        import { UnifiedTracking } from 'unified-tracking';
+
+        // What you're trying to do...
+
+  - type: input
+    id: version
+    attributes:
+      label: 📦 Plugin Version
+      description: What version of unified-tracking are you using?
+      placeholder: e.g., 3.0.0
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: '✅ Checklist'
+      description: 'Please confirm the following:'
+      options:
+        - label: I have searched the existing issues and discussions for similar questions
+          required: true
+        - label: I have read the relevant documentation
+          required: true
+        - label: This question is specifically about unified-tracking
+          required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 📎 Additional Information
+      description: |
+        Any additional context, screenshots, or information that might help answer your question.
+      placeholder: Any other details that might be helpful...
