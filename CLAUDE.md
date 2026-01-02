@@ -18,16 +18,16 @@ This is a Capacitor plugin project called "unified-tracking" that provides a uni
    npm init @capacitor/plugin@latest unified-tracking
    ```
 
-2. Switch to Yarn (per user preferences):
+2. Switch to pnpm (MANDATORY):
 
    ```bash
    rm package-lock.json
-   yarn install
+   pnpm install
    ```
 
 3. Update all packages to latest versions:
    ```bash
-   yarn upgrade --latest
+   pnpm update --latest
    ```
 
 ## Development Commands
@@ -36,25 +36,25 @@ Once the project is initialized, use these commands:
 
 ```bash
 # Install dependencies
-yarn install
+pnpm install
 
 # Build the plugin
-yarn build
+pnpm build
 
 # Run tests
-yarn test
+pnpm test
 
 # Lint code
-yarn lint
+pnpm lint
 
 # Format code
-yarn format
+pnpm format
 
 # Run specific test file
-yarn test path/to/test.spec.ts
+pnpm test path/to/test.spec.ts
 
 # Watch mode for development
-yarn dev
+pnpm dev
 ```
 
 ## Architecture
@@ -76,7 +76,7 @@ The plugin follows a modular architecture with:
 
 ## Development Guidelines
 
-1. **Package Management**: Always use Yarn (not npm)
+1. **Package Management**: Always use pnpm (NEVER npm or yarn)
 2. **TypeScript**: Use strict typing throughout the codebase
 3. **Testing**: Use Vitest (not Jest) for testing per user preferences
 4. **Code Quality**: Run lint and type checks before committing
