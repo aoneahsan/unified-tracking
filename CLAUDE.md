@@ -109,16 +109,25 @@ When implementing a new provider:
 
 ---
 
+## Package Update History
+
+| Date       | Updated By | Notes                                                               |
+| ---------- | ---------- | ------------------------------------------------------------------- |
+| 2026-02-02 | Claude     | Full update to latest versions, build passes, lint has known issues |
+
+---
+
 ## Comprehensive Audit Record
 
-| Date       | Audit Type | Status             | Issues Found | Issues Resolved |
-| ---------- | ---------- | ------------------ | ------------ | --------------- |
-| 2026-01-23 | Full Audit | Passed with issues | 2            | 0               |
+| Date       | Audit Type     | Status             | Issues Found | Issues Resolved |
+| ---------- | -------------- | ------------------ | ------------ | --------------- |
+| 2026-02-02 | Package Update | Passed with issues | 2            | 0               |
+| 2026-01-23 | Full Audit     | Passed with issues | 2            | 0               |
 
 ### Last Audit Details
 
 - **Package Manager**: yarn confirmed
-- **Dependencies**: Updated to latest
+- **Dependencies**: Updated to latest (2026-02-02)
 - **Build**: Passes (docgen warning expected)
 - **Lint**: WARNINGS - 8 errors (example app files not in tsconfig), 636 warnings (no-explicit-any)
 - **Features**: Core features complete
@@ -131,4 +140,4 @@ When implementing a new provider:
 1. ESLint errors: examples/react-app files not included in tsconfig project
 2. 636 `no-explicit-any` warnings throughout codebase
 
-### Next Audit Due: 2026-01-30 (7 days from last)
+### Next Audit Due: 2026-02-09 (7 days from last)
