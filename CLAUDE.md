@@ -15,19 +15,19 @@ This is a Capacitor plugin project called "unified-tracking" that provides a uni
 1. Initialize the Capacitor plugin structure:
 
    ```bash
-   npm init @capacitor/plugin@latest unified-tracking
+   npx @capacitor/create-plugin@latest unified-tracking
    ```
 
-2. Switch to pnpm (MANDATORY):
+2. Use yarn (MANDATORY):
 
    ```bash
-   rm package-lock.json
-   pnpm install
+   rm package-lock.json pnpm-lock.yaml
+   yarn install
    ```
 
 3. Update all packages to latest versions:
    ```bash
-   pnpm update --latest
+   yarn upgrade --latest
    ```
 
 ## Development Commands
@@ -36,25 +36,25 @@ Once the project is initialized, use these commands:
 
 ```bash
 # Install dependencies
-pnpm install
+yarn install
 
 # Build the plugin
-pnpm build
+yarn build
 
 # Run tests
-pnpm test
+yarn test
 
 # Lint code
-pnpm lint
+yarn lint
 
 # Format code
-pnpm format
+yarn format
 
 # Run specific test file
-pnpm test path/to/test.spec.ts
+yarn test path/to/test.spec.ts
 
 # Watch mode for development
-pnpm dev
+yarn dev
 ```
 
 ## Architecture
@@ -76,7 +76,7 @@ The plugin follows a modular architecture with:
 
 ## Development Guidelines
 
-1. **Package Management**: Always use pnpm (NEVER npm or yarn)
+1. **Package Management**: Always use yarn (NEVER npm or pnpm)
 2. **TypeScript**: Use strict typing throughout the codebase
 3. **Testing**: Use Vitest (not Jest) for testing per user preferences
 4. **Code Quality**: Run lint and type checks before committing
@@ -106,3 +106,29 @@ When implementing a new provider:
 - Phase 1 focuses on core implementation and web providers
 - Native implementations come in Phase 2
 - Always ensure offline support and data privacy compliance
+
+---
+
+## Comprehensive Audit Record
+
+| Date       | Audit Type | Status             | Issues Found | Issues Resolved |
+| ---------- | ---------- | ------------------ | ------------ | --------------- |
+| 2026-01-23 | Full Audit | Passed with issues | 2            | 0               |
+
+### Last Audit Details
+
+- **Package Manager**: yarn confirmed
+- **Dependencies**: Updated to latest
+- **Build**: Passes (docgen warning expected)
+- **Lint**: WARNINGS - 8 errors (example app files not in tsconfig), 636 warnings (no-explicit-any)
+- **Features**: Core features complete
+- **TODOs**: None found
+- **SEO**: N/A (npm package)
+- **OG Assets**: N/A (npm package)
+
+### Outstanding Issues
+
+1. ESLint errors: examples/react-app files not included in tsconfig project
+2. 636 `no-explicit-any` warnings throughout codebase
+
+### Next Audit Due: 2026-01-30 (7 days from last)

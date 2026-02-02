@@ -11,4 +11,5 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: true,
   },
+  logLevel: process.env.NODE_ENV === 'production' ? 'error' : 'info',
 });

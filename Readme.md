@@ -1,5 +1,7 @@
 # Unified Tracking
 
+- **[AI Integration Guide](./AI-INTEGRATION-GUIDE.md)** - Quick reference for AI development agents (Claude, Cursor, Copilot)
+
 [![npm version](https://badge.fury.io/js/unified-tracking.svg)](https://badge.fury.io/js/unified-tracking)
 [![npm downloads](https://img.shields.io/npm/dm/unified-tracking.svg)](https://www.npmjs.com/package/unified-tracking)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)

@@ -1,6 +1,6 @@
 {
   "name": "unified-tracking",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "Unified analytics and error tracking plugin for React + Capacitor Apps",
   "type": "module",
   "main": "dist/esm/src/index.js",
@@ -16,7 +16,8 @@
     "ios/Tests/",
     "Package.swift",
     "UnifiedTracking.podspec",
-    "bin/"
+    "bin/",
+    "AI-INTEGRATION-GUIDE.md"
   ],
   "bin": {
     "unified-tracking-setup": "./bin/setup.js"
@@ -96,7 +97,7 @@
     "eslint": "eslint . --ext ts",
     "prettier": "prettier \"**/*.{css,html,ts,js,java,swift,md,json,yml,yaml}\"",
     "docgen": "docgen --api UnifiedTrackingPlugin --output-json dist/docs.json",
-    "build": "npm run clean && (npm run docgen || echo 'Warning: docgen failed, continuing build...') && tsc && (rollup -c rollup.config.js || echo 'Warning: rollup failed, continuing build...')",
+    "build": "yarn clean && (yarn docgen || echo 'Warning: docgen failed, continuing build...') && tsc && (rollup -c rollup.config.js || echo 'Warning: rollup failed, continuing build...')",
     "build:nodoc": "yarn clean && tsc && rollup -c rollup.config.js",
     "clean": "rimraf ./dist ./coverage",
     "watch": "tsc --watch",
@@ -134,7 +135,7 @@
     "extends": "@ionic/eslint-config/recommended"
   },
   "engines": {
-    "node": ">=24.2.0"
+    "node": ">=24.13.0"
   },
   "peerDependencies": {
     "@capacitor/core": "^7.4.3",
@@ -149,33 +150,33 @@
     }
   },
   "devDependencies": {
-    "@capacitor/android": "^7.4.3",
-    "@capacitor/core": "^7.4.3",
+    "@capacitor/android": "^8.0.1",
+    "@capacitor/core": "^8.0.1",
     "@capacitor/docgen": "^0.3.0",
-    "@capacitor/ios": "^7.4.3",
+    "@capacitor/ios": "^8.0.1",
     "@ionic/eslint-config": "^0.4.0",
     "@ionic/prettier-config": "^4.0.0",
     "@ionic/swiftlint-config": "^2.0.0",
     "@rollup/plugin-node-resolve": "^16.0.1",
-    "@types/jsdom": "^21.1.7",
-    "@types/node": "^24.3.1",
-    "@types/react": "^19.1.12",
-    "@typescript-eslint/eslint-plugin": "^8.42.0",
-    "@typescript-eslint/parser": "^8.42.0",
-    "@vitest/coverage-v8": "^3.2.4",
-    "esbuild": "^0.25.9",
+    "@types/jsdom": "^27.0.0",
+    "@types/node": "^25.0.10",
+    "@types/react": "^19.2.9",
+    "@typescript-eslint/eslint-plugin": "^8.53.1",
+    "@typescript-eslint/parser": "^8.53.1",
+    "@vitest/coverage-v8": "^4.0.18",
+    "esbuild": "^0.27.2",
     "eslint": "^9.35.0",
     "eslint-plugin-import": "^2.32.0",
     "husky": "^9.1.7",
-    "jsdom": "^26.1.0",
+    "jsdom": "^27.4.0",
     "lint-staged": "^16.1.6",
-    "prettier": "^3.6.2",
+    "prettier": "^3.8.1",
     "prettier-plugin-java": "^2.7.4",
     "rimraf": "^6.0.1",
-    "rollup": "^4.50.0",
+    "rollup": "^4.56.0",
     "rollup-plugin-esbuild": "^6.2.1",
     "tslib": "^2.8.1",
     "typescript": "^5.9.2",
-    "vitest": "^3.2.4"
+    "vitest": "^4.0.18"
   }
 }
