@@ -21,6 +21,7 @@ export default [
       '**/*.bundle.js',
       'android/**',
       'ios/**',
+      'examples/**',
       'Example/**',
       '*.ignore.*',
     ],

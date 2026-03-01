@@ -95,7 +95,7 @@
     "lint": "yarn eslint && yarn prettier --check",
     "fmt": "yarn eslint --fix && yarn prettier --write",
     "eslint": "eslint . --ext ts",
-    "prettier": "prettier \"**/*.{css,html,ts,js,java,swift,md,json,yml,yaml}\"",
+    "prettier": "prettier \"**/*.{css,html,ts,js,java,md,json,yml,yaml}\"",
     "docgen": "docgen --api UnifiedTrackingPlugin --output-json dist/docs.json",
     "build": "yarn clean && (yarn docgen || echo 'Warning: docgen failed, continuing build...') && tsc && (rollup -c rollup.config.js || echo 'Warning: rollup failed, continuing build...')",
     "build:nodoc": "yarn clean && tsc && rollup -c rollup.config.js",
