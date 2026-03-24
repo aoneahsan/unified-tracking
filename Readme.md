@@ -12,6 +12,21 @@
 
 A comprehensive Capacitor plugin that provides a unified API for multiple analytics and error tracking providers. Track events, identify users, and monitor errors across all major platforms with a single, consistent interface.
 
+## Current State
+
+- Package version reviewed: `3.0.2`
+- Portfolio profile: [`UNIFIED-TRACKING_portfolio-info_2026-03-24.md`](./UNIFIED-TRACKING_portfolio-info_2026-03-24.md)
+- Verified on: `2026-03-24`
+- `yarn build`: completed, with a handled `docgen` failure before TypeScript/Rollup finished successfully
+- `yarn type-check`: passed
+- `yarn test`: failed
+  - `232` tests passed
+  - `14` tests failed
+  - `2` tests skipped
+  - failures are concentrated in `src/web.test.ts`, `src/providers/provider-manager.test.ts`, and `src/providers/analytics/google-analytics/google-analytics.provider.test.ts`
+
+This README reflects the implemented package surface, but the verification snapshot above is the current truth and should be used when describing the package’s up-to-date engineering status.
+
 ## ✨ Features
 
 - 🚀 **Zero Dependencies** - Works out of the box, no required dependencies

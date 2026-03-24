@@ -1,143 +1,97 @@
-# CLAUDE.md
+# unified-tracking Package
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+**Package Name**: `unified-tracking`
+**Version**: `3.0.2`
+**NPM**: `https://www.npmjs.com/package/unified-tracking`
+**Last Updated**: `2026-03-24`
 
-## Project Overview
+Unified analytics and error tracking infrastructure for React, web, and Capacitor apps with provider-based integrations, consent controls, React hooks, and cross-platform delivery targets.
 
-This is a Capacitor plugin project called "unified-tracking" that provides a unified analytics and error tracking solution for mobile and web applications. The plugin supports multiple analytics providers (Google Analytics, Firebase, Mixpanel, etc.) and error handling services (Sentry, Bugsnag, Rollbar, etc.).
+## Current Verified State
 
-## Current Project Status
+- Reviewed on: `2026-03-24`
+- Build: `yarn build` completed, but `docgen` emitted a handled `TypeError` before the TypeScript/Rollup build finished successfully
+- Typecheck: `yarn type-check` passed
+- Tests: `yarn test` failed
+  - `232` tests passed
+  - `14` tests failed
+  - `2` tests skipped
+  - failing areas include `src/web.test.ts`, `src/providers/provider-manager.test.ts`, and `src/providers/analytics/google-analytics/google-analytics.provider.test.ts`
 
-**Important**: This project is currently in the planning phase. The codebase needs to be initialized before development can begin.
+## Implemented Feature Areas
 
-### Required Initialization Steps
+| Area                     | Scope                                                                                                           |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| Unified core API         | Event tracking, user identification, revenue logging, screen tracking, consent handling, provider orchestration |
+| Analytics providers      | Google Analytics, Mixpanel, Segment, PostHog, Amplitude, Firebase, Heap, Matomo                                 |
+| Error tracking providers | Sentry, Bugsnag, Rollbar, LogRocket, Raygun, DataDog RUM, AppCenter, Firebase Crashlytics                       |
+| React integration        | Hooks, context helpers, HOC support, provider-free usage patterns                                               |
+| Platform support         | Web entrypoint plus optional Capacitor integration for iOS and Android                                          |
+| Tooling                  | Setup CLI, generated distribution exports, package-level build/test/typecheck workflows                         |
 
-1. Initialize the Capacitor plugin structure:
+## Package Structure
 
-   ```bash
-   npx @capacitor/create-plugin@latest unified-tracking
-   ```
-
-2. Use yarn (MANDATORY):
-
-   ```bash
-   rm package-lock.json pnpm-lock.yaml
-   yarn install
-   ```
-
-3. Update all packages to latest versions:
-   ```bash
-   yarn upgrade --latest
-   ```
-
-## Development Commands
-
-Once the project is initialized, use these commands:
-
-```bash
-# Install dependencies
-yarn install
-
-# Build the plugin
-yarn build
-
-# Run tests
-yarn test
-
-# Lint code
-yarn lint
-
-# Format code
-yarn format
-
-# Run specific test file
-yarn test path/to/test.spec.ts
-
-# Watch mode for development
-yarn dev
+```text
+src/
+  core/
+  providers/
+    analytics/
+    error-tracking/
+  react/
+  capacitor/
+  utils/
+  web.ts
+android/
+ios/
+docs/
+bin/
 ```
 
-## Architecture
+## Working Rules
 
-The plugin follows a modular architecture with:
+- Keep docs aligned with the actual package version and verified repo state.
+- Use `yarn` as the default workflow for this package.
+- When providers, exports, supported surfaces, or operational status change, update `Readme.md`, this file, and the root portfolio file in the same pass.
+- Do not describe this package as uninitialized or in planning; it is implemented and published.
+- Document known build or test issues honestly in user-facing project docs until they are fixed.
 
-- **Core Plugin Interface**: Defined in `src/definitions.ts`
-- **Provider Pattern**: Each analytics/error service has its own provider implementation
-- **Platform-Specific Implementations**: Separate implementations for Web, iOS, and Android
-- **React Integration**: Hooks and context providers for React applications
+## Root Portfolio File Maintenance Rule
 
-### Key Directories
+- Maintain exactly one current root portfolio info file for this package.
+- File naming format: `UNIFIED-TRACKING_portfolio-info_YYYY-MM-DD.md`
+- Refresh the portfolio file only after at least 7 days have passed unless a major release or material capability change happens sooner.
+- Keep at most 10 update-history records inside the portfolio file.
+- When the portfolio file changes, update `Readme.md` and this `CLAUDE.md` in the same pass.
 
-- `src/providers/`: Contains all provider implementations
-- `src/react/`: React-specific integration (hooks, context)
-- `src/utils/`: Shared utilities and helpers
-- `android/`: Android native implementation
-- `ios/`: iOS native implementation
+## Documentation Surface
 
-## Development Guidelines
-
-1. **Package Management**: Always use yarn (NEVER npm or pnpm)
-2. **TypeScript**: Use strict typing throughout the codebase
-3. **Testing**: Use Vitest (not Jest) for testing per user preferences
-4. **Code Quality**: Run lint and type checks before committing
-5. **Imports**: Use absolute imports with aliases (`@/` for src directory)
-
-## Provider Implementation Pattern
-
-When implementing a new provider:
-
-1. Create provider directory in `src/providers/analytics/` or `src/providers/error-handling/`
-2. Implement the provider interface defined in `src/definitions.ts`
-3. Add provider to the factory in `src/providers/index.ts`
-4. Create unit tests for the provider
-5. Update documentation with configuration examples
-
-## Testing Strategy
-
-- Unit tests for all providers and utilities
-- Integration tests for provider initialization
-- E2E tests with example Capacitor applications
-- Performance benchmarks for tracking overhead
-- Bundle size monitoring
-
-## Important Reminders
-
-- The project follows a 12-week development plan as outlined in Readme.md
-- Phase 1 focuses on core implementation and web providers
-- Native implementations come in Phase 2
-- Always ensure offline support and data privacy compliance
-
----
+- Core README: `/Readme.md`
+- API and setup docs: `/docs`
+- AI agent usage guide: `/AI-INTEGRATION-GUIDE.md`
+- Release/readiness notes: `/IMPLEMENTATION_COMPLETE.md`, `/VALIDATION_COMPLETE.md`, `/RELEASE_READY.md`
 
 ## Package Update History
 
-| Date       | Updated By | Notes                                                               |
-| ---------- | ---------- | ------------------------------------------------------------------- |
-| 2026-02-02 | Claude     | Full update to latest versions, build passes, lint has known issues |
-
----
+| Date       | Version | Notes                                                                                       |
+| ---------- | ------- | ------------------------------------------------------------------------------------------- |
+| 2026-03-24 | 3.0.2   | Refreshed docs, recorded current verification status, added root portfolio maintenance rule |
+| 2026-02-02 | unknown | Full update to latest versions, build passed, lint had known issues                         |
 
 ## Comprehensive Audit Record
 
-| Date       | Audit Type     | Status             | Issues Found | Issues Resolved |
-| ---------- | -------------- | ------------------ | ------------ | --------------- |
-| 2026-02-02 | Package Update | Passed with issues | 2            | 0               |
-| 2026-01-23 | Full Audit     | Passed with issues | 2            | 0               |
+| Date       | Audit Type               | Status             | Issues Found | Issues Resolved |
+| ---------- | ------------------------ | ------------------ | ------------ | --------------- |
+| 2026-03-24 | Portfolio + Docs Refresh | Passed with issues | 3            | 0               |
+| 2026-02-02 | Package Update           | Passed with issues | 2            | 0               |
+| 2026-01-23 | Full Audit               | Passed with issues | 2            | 0               |
 
 ### Last Audit Details
 
-- **Package Manager**: yarn confirmed
-- **Dependencies**: Updated to latest (2026-02-02)
-- **Build**: Passes (docgen warning expected)
-- **Lint**: WARNINGS - 8 errors (example app files not in tsconfig), 636 warnings (no-explicit-any)
-- **Features**: Core features complete
-- **TODOs**: None found
-- **SEO**: N/A (npm package)
-- **OG Assets**: N/A (npm package)
+- Package Manager: yarn confirmed
+- Dependencies: no dependency upgrade was performed in this pass
+- Build: passes with a handled `docgen` failure and Node `DEP0169` warnings during Yarn execution
+- TypeScript: passes
+- Tests: failing in web import resolution, provider-manager behavior, and Google Analytics provider coverage
+- Features: implemented package surface is substantial and reflected in docs
 
-### Outstanding Issues
-
-1. ESLint errors: examples/react-app files not included in tsconfig project
-2. 636 `no-explicit-any` warnings throughout codebase
-
-### Next Audit Due: 2026-02-09 (7 days from last)
+### Next Audit Due: 2026-03-31
