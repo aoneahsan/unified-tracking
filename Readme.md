@@ -15,15 +15,14 @@ A comprehensive Capacitor plugin that provides a unified API for multiple analyt
 ## Current State
 
 - Package version reviewed: `3.0.2`
-- Portfolio profile: [`UNIFIED-TRACKING_portfolio-info_2026-03-24.md`](./UNIFIED-TRACKING_portfolio-info_2026-03-24.md)
-- Verified on: `2026-03-24`
-- `yarn build`: completed, with a handled `docgen` failure before TypeScript/Rollup finished successfully
+- Portfolio profile: [`UNIFIED-TRACKING_portfolio-info_2026-03-25.md`](./UNIFIED-TRACKING_portfolio-info_2026-03-25.md)
+- Verified on: `2026-03-25`
+- `yarn install`: passed
+- `yarn build`: passed cleanly
 - `yarn type-check`: passed
-- `yarn test`: failed
-  - `232` tests passed
-  - `14` tests failed
+- `yarn test`: passed
+  - `268` tests passed
   - `2` tests skipped
-  - failures are concentrated in `src/web.test.ts`, `src/providers/provider-manager.test.ts`, and `src/providers/analytics/google-analytics/google-analytics.provider.test.ts`
 
 This README reflects the implemented package surface, but the verification snapshot above is the current truth and should be used when describing the package’s up-to-date engineering status.
 
@@ -45,25 +44,25 @@ This README reflects the implemented package surface, but the verification snaps
 
 ```bash
 # Install the plugin
-npm install unified-tracking
+yarn add unified-tracking
 
 # For iOS
-npx cap add ios
-npx cap sync ios
+yarn cap add ios
+yarn cap sync ios
 
 # For Android
-npx cap add android
-npx cap sync android
+yarn cap add android
+yarn cap sync android
 ```
 
 ### For React Web Projects
 
 ```bash
 # Install the plugin
-npm install unified-tracking
+yarn add unified-tracking
 
 # Install peer dependencies for React support
-npm install react@^19.0.0 @capacitor/core@^7.4.3
+yarn add react@^19.0.0 @capacitor/core@^7.4.3
 ```
 
 ### Manual Setup (CLI Helper)
@@ -71,7 +70,7 @@ npm install react@^19.0.0 @capacitor/core@^7.4.3
 The plugin includes a setup helper to guide you through configuration:
 
 ```bash
-npx unified-tracking-setup
+yarn unified-tracking-setup
 ```
 
 ## 🚀 Quick Start

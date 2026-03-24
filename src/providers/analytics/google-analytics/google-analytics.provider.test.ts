@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GoogleAnalyticsProvider } from './google-analytics.provider';
 import type { ConsentSettings } from '../../../types/provider';
 
@@ -48,11 +48,8 @@ describe('GoogleAnalyticsProvider', () => {
 
     // Reset mocks
     vi.clearAllMocks();
-    mockGtag.mockClear();
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
+    mockGtag.mockReset();
+    mockGtag.mockImplementation(() => undefined);
   });
 
   describe('initialization', () => {

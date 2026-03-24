@@ -1,17 +1,93 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+const mockProviderManager = {
+  initialize: vi.fn().mockResolvedValue(undefined),
+  getActiveProviders: vi.fn((type?: string) => {
+    if (type === 'analytics') return [];
+    if (type === 'error-tracking') return [];
+    return [];
+  }),
+  trackEvent: vi.fn().mockResolvedValue(undefined),
+  identifyUser: vi.fn().mockResolvedValue(undefined),
+  setUserProperties: vi.fn().mockResolvedValue(undefined),
+  logError: vi.fn().mockResolvedValue(undefined),
+  logRevenue: vi.fn().mockResolvedValue(undefined),
+  logScreenView: vi.fn().mockResolvedValue(undefined),
+  handleConsentChange: vi.fn().mockResolvedValue(undefined),
+  reset: vi.fn().mockResolvedValue(undefined),
+  setDebugMode: vi.fn(),
+};
+
+const mockConfigManager = {
+  loadConfig: vi.fn(async (config?: any) => config ?? {}),
+  setConsent: vi.fn(),
+};
+
+const mockEventQueue = {
+  start: vi.fn(),
+  clear: vi.fn(),
+};
+
+const mockLogger = {
+  debug: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  setDebugMode: vi.fn(),
+};
+
+vi.mock('@capacitor/core', () => ({
+  WebPlugin: class {
+    async addListener() {
+      return { remove: vi.fn() };
+    }
+
+    notifyListeners() {
+      return Promise.resolve();
+    }
+  },
+}));
+
+vi.mock('./providers/provider-manager', () => ({
+  ProviderManager: class {
+    constructor() {
+      return mockProviderManager;
+    }
+  },
+}));
+
+vi.mock('./utils/config-manager', () => ({
+  ConfigManager: {
+    getInstance: vi.fn(() => mockConfigManager),
+  },
+}));
+
+vi.mock('./utils/event-queue', () => ({
+  EventQueue: {
+    getInstance: vi.fn(() => mockEventQueue),
+  },
+}));
+
+vi.mock('./utils/logger', () => ({
+  Logger: {
+    getInstance: vi.fn(() => mockLogger),
+  },
+}));
+
 import { UnifiedTrackingWeb } from './web';
 import type { UnifiedTrackingConfig, ErrorContext, RevenueData, ConsentSettings } from './definitions';
-
-// Mock the dependencies
-vi.mock('./providers/provider-manager');
-vi.mock('./utils/config-manager');
-vi.mock('./utils/event-queue');
-vi.mock('./utils/logger');
 
 describe('UnifiedTrackingWeb', () => {
   let plugin: UnifiedTrackingWeb;
 
   beforeEach(() => {
+    vi.clearAllMocks();
+    mockProviderManager.getActiveProviders.mockImplementation((type?: string) => {
+      if (type === 'analytics') return [];
+      if (type === 'error-tracking') return [];
+      return [];
+    });
+    mockConfigManager.loadConfig.mockImplementation(async (config?: any) => config ?? {});
     plugin = new UnifiedTrackingWeb();
   });
 

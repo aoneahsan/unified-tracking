@@ -47,7 +47,6 @@ export default defineConfig({
       '@utils': resolve(__dirname, './src/utils'),
       '@types': resolve(__dirname, './src/types'),
       '@react': resolve(__dirname, './src/react'),
-      '@capacitor': resolve(__dirname, './src/capacitor'),
     },
   },
   define: {

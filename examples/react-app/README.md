@@ -18,13 +18,13 @@ This is a comprehensive example React application that demonstrates how to use t
 
    ```bash
    # From the example directory
-   npm install
+   yarn install
    ```
 
 2. **Start the development server:**
 
    ```bash
-   npm run dev
+   yarn dev
    ```
 
 3. **Open your browser:**

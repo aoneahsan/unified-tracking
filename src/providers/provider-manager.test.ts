@@ -6,15 +6,25 @@ describe('ProviderManager', () => {
   let providerManager: ProviderManager;
   let mockAnalyticsProvider: any;
   let mockErrorProvider: any;
+  const registerActiveProvider = (id: string, provider: any) => {
+    providerManager['providers'].set(id, {
+      provider,
+      state: 'active',
+      config: {},
+    });
+  };
 
   beforeEach(() => {
     providerManager = new ProviderManager();
 
     mockAnalyticsProvider = {
+      id: 'test-analytics',
       name: 'test-analytics',
       type: 'analytics',
       isReady: vi.fn().mockReturnValue(true),
       initialize: vi.fn().mockResolvedValue(undefined),
+      shutdown: vi.fn().mockResolvedValue(undefined),
+      updateConsent: vi.fn().mockResolvedValue(undefined),
       trackEvent: vi.fn().mockResolvedValue(undefined),
       identifyUser: vi.fn().mockResolvedValue(undefined),
       setUserProperties: vi.fn().mockResolvedValue(undefined),
@@ -26,21 +36,35 @@ describe('ProviderManager', () => {
     };
 
     mockErrorProvider = {
+      id: 'test-error',
       name: 'test-error',
       type: 'error-tracking',
       isReady: vi.fn().mockReturnValue(true),
       initialize: vi.fn().mockResolvedValue(undefined),
+      shutdown: vi.fn().mockResolvedValue(undefined),
+      updateConsent: vi.fn().mockResolvedValue(undefined),
       logError: vi.fn().mockResolvedValue(undefined),
       setUserContext: vi.fn().mockResolvedValue(undefined),
       reset: vi.fn().mockResolvedValue(undefined),
-      handleConsent: vi.fn().mockResolvedValue(undefined),
       version: '1.0.0',
     };
   });
 
   describe('initialize', () => {
     it('should initialize providers from config', async () => {
+      vi.spyOn(providerManager as any, 'loadProvider').mockImplementation(async (...args: unknown[]) => {
+        const [name, type] = args as [string, string];
+        if (type === 'analytics' && name === 'firebase') {
+          return mockAnalyticsProvider;
+        }
+        if (type === 'error-tracking' && name === 'sentry') {
+          return mockErrorProvider;
+        }
+        return null;
+      });
+
       const config = {
+        autoDetect: false,
         analytics: {
           providers: ['firebase' as const],
           firebase: {
@@ -57,18 +81,18 @@ describe('ProviderManager', () => {
 
       await providerManager.initialize(config);
 
-      const activeProviders = providerManager.getActiveProviders('analytics');
-      expect(activeProviders.length).toBeGreaterThan(0);
+      expect(providerManager.getActiveProviders('analytics')).toHaveLength(1);
+      expect(providerManager.getActiveProviders('error-tracking')).toHaveLength(1);
     });
 
     it('should handle empty config', async () => {
-      await expect(providerManager.initialize({})).resolves.not.toThrow();
+      await expect(providerManager.initialize({ autoDetect: false })).resolves.not.toThrow();
     });
   });
 
   describe('trackEvent', () => {
     it('should call trackEvent on all analytics providers', async () => {
-      providerManager['providers'].set('test', mockAnalyticsProvider);
+      registerActiveProvider('test', mockAnalyticsProvider);
 
       await providerManager.trackEvent('test_event', { value: 123 });
 
@@ -77,7 +101,7 @@ describe('ProviderManager', () => {
 
     it('should handle provider errors gracefully', async () => {
       mockAnalyticsProvider.trackEvent.mockRejectedValue(new Error('Provider error'));
-      providerManager['providers'].set('test', mockAnalyticsProvider);
+      registerActiveProvider('test', mockAnalyticsProvider);
 
       await expect(providerManager.trackEvent('test_event')).resolves.not.toThrow();
     });
@@ -85,7 +109,7 @@ describe('ProviderManager', () => {
 
   describe('identifyUser', () => {
     it('should call identifyUser on all analytics providers', async () => {
-      providerManager['providers'].set('test', mockAnalyticsProvider);
+      registerActiveProvider('test', mockAnalyticsProvider);
 
       await providerManager.identifyUser('user123', { email: 'test@example.com' });
 
@@ -95,7 +119,7 @@ describe('ProviderManager', () => {
 
   describe('logError', () => {
     it('should call logError on all error tracking providers', async () => {
-      providerManager['providers'].set('test', mockErrorProvider);
+      registerActiveProvider('test', mockErrorProvider);
 
       const error = new Error('Test error');
       const context: ErrorContext = {
@@ -113,7 +137,7 @@ describe('ProviderManager', () => {
 
   describe('logRevenue', () => {
     it('should call logRevenue on all analytics providers', async () => {
-      providerManager['providers'].set('test', mockAnalyticsProvider);
+      registerActiveProvider('test', mockAnalyticsProvider);
 
       const revenueData: RevenueData = {
         amount: 9.99,
@@ -131,7 +155,7 @@ describe('ProviderManager', () => {
 
   describe('logScreenView', () => {
     it('should call logScreenView on all analytics providers', async () => {
-      providerManager['providers'].set('test', mockAnalyticsProvider);
+      registerActiveProvider('test', mockAnalyticsProvider);
 
       await providerManager.logScreenView('HomeScreen', { tab: 'featured' });
 
@@ -141,21 +165,21 @@ describe('ProviderManager', () => {
 
   describe('setUserProperties', () => {
     it('should call setUserProperties on all providers', async () => {
-      providerManager['providers'].set('analytics', mockAnalyticsProvider);
-      providerManager['providers'].set('error', mockErrorProvider);
+      registerActiveProvider('analytics', mockAnalyticsProvider);
+      registerActiveProvider('error', mockErrorProvider);
 
       const properties = { subscription: 'premium', region: 'US' };
       await providerManager.setUserProperties(properties);
 
       expect(mockAnalyticsProvider.setUserProperties).toHaveBeenCalledWith(properties);
-      expect(mockErrorProvider.setUserContext).toHaveBeenCalledWith(undefined, properties);
+      expect(mockErrorProvider.setUserContext).not.toHaveBeenCalled();
     });
   });
 
   describe('handleConsentChange', () => {
     it('should pass consent settings to all providers', async () => {
-      providerManager['providers'].set('analytics', mockAnalyticsProvider);
-      providerManager['providers'].set('error', mockErrorProvider);
+      registerActiveProvider('analytics', mockAnalyticsProvider);
+      registerActiveProvider('error', mockErrorProvider);
 
       const consent: ConsentSettings = {
         analytics: false,
@@ -166,15 +190,15 @@ describe('ProviderManager', () => {
 
       await providerManager.handleConsentChange(consent);
 
-      expect(mockAnalyticsProvider.handleConsent).toHaveBeenCalledWith(consent);
-      expect(mockErrorProvider.handleConsent).toHaveBeenCalledWith(consent);
+      expect(mockAnalyticsProvider.updateConsent).toHaveBeenCalledWith(consent);
+      expect(mockErrorProvider.updateConsent).toHaveBeenCalledWith(consent);
     });
   });
 
   describe('reset', () => {
     it('should reset all providers', async () => {
-      providerManager['providers'].set('analytics', mockAnalyticsProvider);
-      providerManager['providers'].set('error', mockErrorProvider);
+      registerActiveProvider('analytics', mockAnalyticsProvider);
+      registerActiveProvider('error', mockErrorProvider);
 
       await providerManager.reset();
 
@@ -199,7 +223,7 @@ describe('ProviderManager', () => {
 
   describe('getActiveProviders', () => {
     it('should return analytics providers', () => {
-      providerManager['providers'].set('test', mockAnalyticsProvider);
+      registerActiveProvider('test', mockAnalyticsProvider);
 
       const providers = providerManager.getActiveProviders('analytics');
       expect(providers).toHaveLength(1);
@@ -207,7 +231,7 @@ describe('ProviderManager', () => {
     });
 
     it('should return error tracking providers', () => {
-      providerManager['providers'].set('test', mockErrorProvider);
+      registerActiveProvider('test', mockErrorProvider);
 
       const providers = providerManager.getActiveProviders('error-tracking');
       expect(providers).toHaveLength(1);

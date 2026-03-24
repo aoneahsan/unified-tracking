@@ -6,8 +6,6 @@ Quick reference for AI development agents (Claude Code, Cursor, Copilot, etc.) t
 
 ```bash
 yarn add unified-tracking
-# or
-npm install unified-tracking
 ```
 
 ## Core Concepts

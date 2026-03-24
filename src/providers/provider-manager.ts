@@ -77,20 +77,23 @@ export class ProviderManager {
       // First check if provider is already registered
       const { ProviderRegistry } = await import('./registry');
       const registry = ProviderRegistry.getInstance();
+      const resolution = this.resolveProviderModule(name, type);
 
-      if (registry.has(name)) {
-        return registry.createProvider(name);
+      if (registry.has(resolution.registryId)) {
+        return registry.createProvider(resolution.registryId);
       }
 
       // Try dynamic import if not in registry
       const modulePath =
-        type === 'analytics' ? `./analytics/${name}/${name}.provider` : `./error-handling/${name}/${name}.provider`;
+        type === 'analytics'
+          ? `./analytics/${resolution.folder}/${resolution.file}.provider`
+          : `./error-handling/${resolution.folder}/${resolution.file}.provider`;
 
       await import(modulePath);
 
       // Check registry again after import
-      if (registry.has(name)) {
-        return registry.createProvider(name);
+      if (registry.has(resolution.registryId)) {
+        return registry.createProvider(resolution.registryId);
       }
 
       throw new Error(`Provider ${name} not found after import`);
@@ -98,6 +101,37 @@ export class ProviderManager {
       this.logger.error(`Failed to load provider ${name}`, error);
       return null;
     }
+  }
+
+  private resolveProviderModule(
+    name: string,
+    type: ProviderType,
+  ): { folder: string; file: string; registryId: string } {
+    if (type === 'analytics') {
+      if (name === 'google') {
+        return {
+          folder: 'google-analytics',
+          file: 'google-analytics',
+          registryId: 'google-analytics',
+        };
+      }
+    }
+
+    if (type === 'error-tracking') {
+      if (name === 'crashlytics') {
+        return {
+          folder: 'firebase-crashlytics',
+          file: 'firebase-crashlytics',
+          registryId: 'firebase-crashlytics',
+        };
+      }
+    }
+
+    return {
+      folder: name,
+      file: name,
+      registryId: name,
+    };
   }
 
   async registerProvider(id: string, provider: Provider, config: ProviderConfig): Promise<void> {
