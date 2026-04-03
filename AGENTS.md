@@ -129,6 +129,32 @@ import { CapacitorTracking } from 'unified-tracking/capacitor';
 npx unified-tracking-setup
 ```
 
+## Privacy & Compliance
+
+- GDPR compliant with consent management built in
+- Data minimization — only collect what providers are configured to track
+- Consent updates toggle providers dynamically via `updateConsent()`
+
+## Pre-Publish Testing Requirements
+
+Before publishing, ALL must pass:
+
+```bash
+yarn build        # Must pass
+yarn test         # Must pass
+yarn lint         # Must pass
+yarn type-check   # Must pass
+yarn verify       # All platforms must build
+```
+
+## Example App
+
+```bash
+yarn example:install  # Install example deps
+yarn example:dev      # Run example app
+yarn example:build    # Build example app
+```
+
 ## Nested Instruction Files
 
 Domain-specific rules live in nested `CLAUDE.md` + `AGENTS.md` files:
