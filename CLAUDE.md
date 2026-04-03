@@ -41,6 +41,23 @@ Unified analytics and error tracking infrastructure for React, web, and Capacito
 - Use Explore agent before making changes to unfamiliar code
 - Use Plan agent before implementing non-trivial features
 
+## Implemented Feature Areas
+
+| Area | Scope |
+|------|-------|
+| Unified core API | Event tracking, user identification, revenue logging, screen tracking, consent handling, provider orchestration |
+| Analytics providers | Google Analytics, Mixpanel, Segment, PostHog, Amplitude, Firebase, Heap, Matomo |
+| Error tracking providers | Sentry, Bugsnag, Rollbar, LogRocket, Raygun, DataDog RUM, AppCenter, Firebase Crashlytics |
+| React integration | Hooks, context helpers, HOC support, provider-free usage patterns |
+| Platform support | Web entrypoint plus optional Capacitor integration for iOS and Android |
+| Tooling | Setup CLI, generated distribution exports, package-level build/test/typecheck workflows |
+
+## Privacy & Compliance
+
+- GDPR compliant with consent management built into provider orchestration
+- Data minimization — only collect what providers are configured to track
+- Consent updates toggle providers on/off dynamically via `updateConsent()`
+
 ## Critical Working Rules
 
 - Use `yarn` exclusively. No `npm`, `pnpm`, or `package-lock.json`.
