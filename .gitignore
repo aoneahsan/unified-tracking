@@ -55,3 +55,5 @@ temp/
 # Lock files (keep only one)
 package-lock.json
 pnpm-lock.yaml
+# Firebase hosting cache (per 2026-04-22: untracked across all projects)
+.firebase/hosting.*
