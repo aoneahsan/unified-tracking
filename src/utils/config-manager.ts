@@ -1,4 +1,4 @@
-import type { UnifiedTrackingConfig, ConsentSettings } from '../definitions';
+import type { UnifiedTrackingConfig, ConsentSettings, AnalyticsProvider, ErrorProvider } from '../definitions';
 
 export class ConfigManager {
   private static instance: ConfigManager;
@@ -26,7 +26,10 @@ export class ConfigManager {
     const defaultConfig = this.getDefaultConfig();
 
     // Merge with user config
-    this.config = this.deepMerge(defaultConfig, userConfig || {});
+    this.config = this.deepMerge(
+      defaultConfig as Record<string, unknown>,
+      (userConfig || {}) as Record<string, unknown>,
+    ) as UnifiedTrackingConfig;
 
     // Auto-detect providers if enabled
     if (this.config.autoDetect !== false) {
@@ -83,8 +86,8 @@ export class ConfigManager {
   private async autoDetectProviders(): Promise<void> {
     // Check for installed packages
     const detectedProviders = {
-      analytics: [] as string[],
-      errorTracking: [] as string[],
+      analytics: [] as AnalyticsProvider[],
+      errorTracking: [] as ErrorProvider[],
     };
 
     // Check window object for global SDKs
@@ -156,21 +159,21 @@ export class ConfigManager {
       this.config.analytics = this.config.analytics || {};
       this.config.analytics.providers = [
         ...(this.config.analytics.providers || []),
-        ...detectedProviders.analytics.filter((p) => !this.config.analytics?.providers?.includes(p as any)),
-      ] as any;
+        ...detectedProviders.analytics.filter((p) => !this.config.analytics?.providers?.includes(p)),
+      ];
     }
 
     if (detectedProviders.errorTracking.length > 0) {
       this.config.errorTracking = this.config.errorTracking || {};
       this.config.errorTracking.providers = [
         ...(this.config.errorTracking.providers || []),
-        ...detectedProviders.errorTracking.filter((p) => !this.config.errorTracking?.providers?.includes(p as any)),
-      ] as any;
+        ...detectedProviders.errorTracking.filter((p) => !this.config.errorTracking?.providers?.includes(p)),
+      ];
     }
   }
 
-  private deepMerge(target: any, source: any): any {
-    const output = { ...target };
+  private deepMerge(target: Record<string, unknown>, source: Record<string, unknown>): Record<string, unknown> {
+    const output: Record<string, unknown> = { ...target };
 
     if (this.isObject(target) && this.isObject(source)) {
       Object.keys(source).forEach((key) => {
@@ -178,14 +181,12 @@ export class ConfigManager {
         if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
           return;
         }
-        if (this.isObject(source[key])) {
-          if (!(key in target)) {
-            output[key] = source[key];
-          } else {
-            output[key] = this.deepMerge(target[key], source[key]);
-          }
+        const sourceValue = source[key];
+        if (this.isObject(sourceValue)) {
+          output[key] =
+            key in target ? this.deepMerge(target[key] as Record<string, unknown>, sourceValue) : sourceValue;
         } else {
-          output[key] = source[key];
+          output[key] = sourceValue;
         }
       });
     }
@@ -193,7 +194,7 @@ export class ConfigManager {
     return output;
   }
 
-  private isObject(item: any): boolean {
-    return item && typeof item === 'object' && !Array.isArray(item);
+  private isObject(item: unknown): item is Record<string, unknown> {
+    return Boolean(item) && typeof item === 'object' && !Array.isArray(item);
   }
 }

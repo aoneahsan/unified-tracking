@@ -56,6 +56,7 @@ export default [
         {
           argsIgnorePattern: '^_',
           varsIgnorePattern: '^_',
+          ignoreRestSiblings: true,
         },
       ],
       '@typescript-eslint/no-empty-interface': 'off',
@@ -63,6 +64,18 @@ export default [
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       'prefer-const': 'warn',
       'no-undef': 'off', // TypeScript handles this
+    },
+  },
+
+  // Provider implementations wrap untyped third-party vendor SDK globals
+  // (window.gtag, window.mixpanel, Rollbar, LogRocket, etc.) and the Capacitor
+  // bridge marshals untyped cross-boundary event payloads. Explicit `any` is
+  // unavoidable at those boundaries, so no-explicit-any is relaxed there only —
+  // the public API surface (definitions.ts, types/provider.ts) stays strict.
+  {
+    files: ['src/providers/**/*.ts', 'src/capacitor/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
     },
   },
 
@@ -84,6 +97,7 @@ export default [
         {
           argsIgnorePattern: '^_',
           varsIgnorePattern: '^_',
+          ignoreRestSiblings: true,
         },
       ],
       'no-console': ['warn', { allow: ['warn', 'error'] }],
@@ -91,9 +105,17 @@ export default [
     },
   },
 
-  // Test files configuration
+  // CLI entry point — a setup tool whose job is to print to the console.
   {
-    files: ['**/*.test.ts', '**/*.spec.ts', '**/*.test.js', '**/*.spec.js'],
+    files: ['bin/**/*.js'],
+    rules: {
+      'no-console': 'off',
+    },
+  },
+
+  // Test files + test setup configuration
+  {
+    files: ['**/*.test.ts', '**/*.spec.ts', '**/*.test.js', '**/*.spec.js', 'src/test-setup.ts'],
     languageOptions: {
       globals: {
         ...globals.jest,

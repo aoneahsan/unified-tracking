@@ -2,7 +2,7 @@ export interface QueuedEvent {
   id: string;
   timestamp: number;
   type: 'track' | 'identify' | 'error' | 'revenue' | 'screenView' | 'userProperties';
-  data: any;
+  data: Record<string, unknown>;
   retryCount: number;
 }
 

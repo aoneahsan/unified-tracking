@@ -121,7 +121,7 @@ export class FirebaseCrashlyticsProvider extends BaseErrorTrackingProvider {
     // Check if app already exists
     try {
       this.firebaseApp = this.firebase!.getApp();
-    } catch (error) {
+    } catch {
       // App doesn't exist, initialize it
       this.firebaseApp = this.firebase!.initializeApp(firebaseConfig);
     }

@@ -9,17 +9,17 @@ export interface UnifiedTrackingPlugin {
   /**
    * Track a custom event
    */
-  track(event: string, properties?: Record<string, any>): Promise<void>;
+  track(event: string, properties?: Record<string, unknown>): Promise<void>;
 
   /**
    * Identify a user
    */
-  identify(userId: string, traits?: Record<string, any>): Promise<void>;
+  identify(userId: string, traits?: Record<string, unknown>): Promise<void>;
 
   /**
    * Set user properties
    */
-  setUserProperties(properties: Record<string, any>): Promise<void>;
+  setUserProperties(properties: Record<string, unknown>): Promise<void>;
 
   /**
    * Log an error
@@ -34,7 +34,7 @@ export interface UnifiedTrackingPlugin {
   /**
    * Log screen view
    */
-  logScreenView(screenName: string, properties?: Record<string, any>): Promise<void>;
+  logScreenView(screenName: string, properties?: Record<string, unknown>): Promise<void>;
 
   /**
    * Set user consent
@@ -61,7 +61,7 @@ export interface UnifiedTrackingPlugin {
    */
   addListener(
     eventName: 'trackingEvent' | 'error' | 'providerStatusChange',
-    listenerFunc: (event: any) => void,
+    listenerFunc: (event: unknown) => void,
   ): Promise<PluginListenerHandle>;
 }
 
@@ -218,7 +218,7 @@ export interface InitializeResult {
 export interface ErrorContext {
   severity?: 'debug' | 'info' | 'warning' | 'error' | 'fatal';
   tags?: Record<string, string>;
-  extra?: Record<string, any>;
+  extra?: Record<string, unknown>;
   user?: {
     id?: string;
     email?: string;
@@ -228,7 +228,7 @@ export interface ErrorContext {
     message: string;
     category?: string;
     timestamp?: number;
-    data?: Record<string, any>;
+    data?: Record<string, unknown>;
   }>;
   timestamp?: string;
   platform?: string;
@@ -252,7 +252,7 @@ export interface RevenueData {
     currency?: string;
     index?: number;
   }>;
-  properties?: Record<string, any>;
+  properties?: Record<string, unknown>;
 }
 
 export interface ActiveProvidersResult {
@@ -298,7 +298,7 @@ export interface GoogleAnalyticsConfig {
 
 export interface FirebaseAnalyticsConfig {
   enabled?: boolean;
-  customParameters?: Record<string, any>;
+  customParameters?: Record<string, unknown>;
 }
 
 export interface AmplitudeConfig {
@@ -328,7 +328,7 @@ export interface MixpanelConfig {
   batchSize?: number;
   batchFlushInterval?: number;
   disableNotifications?: boolean;
-  superProperties?: Record<string, any>;
+  superProperties?: Record<string, unknown>;
 }
 
 export interface SegmentConfig {
@@ -395,7 +395,7 @@ export interface LogRocketConfig {
   shouldCaptureIP?: boolean;
   network?: {
     isEnabled?: boolean;
-    requestSanitizer?: (request: any) => any;
+    requestSanitizer?: (request: unknown) => unknown;
   };
 }
 

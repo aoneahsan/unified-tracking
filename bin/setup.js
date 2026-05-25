@@ -255,7 +255,6 @@ class UnifiedTrackingSetup {
     try {
       // Detect package manager
       const hasYarn = fs.existsSync(path.join(this.projectRoot, 'yarn.lock'));
-      const hasNpm = fs.existsSync(path.join(this.projectRoot, 'package-lock.json'));
 
       const packageManager = hasYarn ? 'yarn' : 'npm';
       const installCommand = packageManager === 'yarn' ? 'yarn add' : 'npm install';

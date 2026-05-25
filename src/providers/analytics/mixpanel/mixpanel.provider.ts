@@ -265,25 +265,23 @@ export class MixpanelAnalyticsProvider extends BaseAnalyticsProvider {
       // Mixpanel snippet
       const loadScript = (_f: any, b: any) => {
         if (!(b as any).__SV) {
-          let a: any,
-            e: any,
-            d: any = function (c: string, ...args: any[]) {
-              if (d.push) {
-                d.push([c].concat(args));
-              } else {
-                d[c] = args[0];
-              }
-            };
+          const d: any = function (c: string, ...args: any[]) {
+            if (d.push) {
+              d.push([c].concat(args));
+            } else {
+              d[c] = args[0];
+            }
+          };
           (window as any).mixpanel = d;
           d.push = [];
           d.loaded = false;
           d.version = '2.0';
           d.queue = [];
-          a = b.createElement('script');
+          const a = b.createElement('script');
           a.type = 'text/javascript';
           a.async = true;
           a.src = 'https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js';
-          e = b.getElementsByTagName('script')[0];
+          const e = b.getElementsByTagName('script')[0];
           e.parentNode!.insertBefore(a, e);
 
           a.onload = () => {

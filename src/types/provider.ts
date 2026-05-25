@@ -9,7 +9,7 @@ export interface ProviderConfig {
   debug?: boolean;
   timeout?: number;
   maxRetries?: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface ConsentSettings {
@@ -44,5 +44,5 @@ export interface ProviderMetadata {
   type: ProviderType;
   version: string;
   supportedPlatforms: Array<'web' | 'ios' | 'android'>;
-  configSchema?: Record<string, any>;
+  configSchema?: Record<string, unknown>;
 }
