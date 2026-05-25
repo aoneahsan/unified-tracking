@@ -123,6 +123,17 @@ export class MatomoAnalyticsProvider extends BaseAnalyticsProvider {
       throw new Error('Matomo siteId and trackerUrl are required');
     }
 
+    // Validate trackerUrl before it is interpolated into a <script> src — it
+    // supplies the entire script origin, so reject non-http(s) / malformed URLs.
+    try {
+      const parsed = new URL(config.trackerUrl);
+      if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+        throw new Error('scheme');
+      }
+    } catch {
+      throw new Error(`Matomo trackerUrl must be a valid http(s) URL: ${String(config.trackerUrl)}`);
+    }
+
     this.matomoConfig = {
       enableLinkTracking: true,
       enableHeartBeatTimer: true,

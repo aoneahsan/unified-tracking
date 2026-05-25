@@ -111,7 +111,6 @@
     "test:ui": "vitest --ui",
     "type-check": "tsc --noEmit",
     "prepare": "husky || true",
-    "postinstall": "yarn build || true",
     "release": "yarn build && yarn test && yarn lint && npm publish",
     "release:dry": "yarn build && yarn test && yarn lint && npm publish --dry-run",
     "size-check": "yarn build && bundlesize",

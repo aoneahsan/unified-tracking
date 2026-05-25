@@ -44,8 +44,8 @@ async function loadAnalyticsProviders(): Promise<void> {
   for (const provider of providers) {
     try {
       await import(`./analytics/${provider.folder}/${provider.file}.provider`);
-    } catch (error) {
-      // Provider not implemented yet or not available
+    } catch {
+      // Provider module could not be loaded (e.g. its optional vendor SDK is absent).
       logger.debug(`Analytics provider ${provider.folder} not available`);
     }
   }
@@ -66,8 +66,8 @@ async function loadErrorTrackingProviders(): Promise<void> {
   for (const provider of providers) {
     try {
       await import(`./error-handling/${provider.folder}/${provider.file}.provider`);
-    } catch (error) {
-      // Provider not implemented yet or not available
+    } catch {
+      // Provider module could not be loaded (e.g. its optional vendor SDK is absent).
       logger.debug(`Error tracking provider ${provider.folder} not available`);
     }
   }

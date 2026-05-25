@@ -174,6 +174,10 @@ export class ConfigManager {
 
     if (this.isObject(target) && this.isObject(source)) {
       Object.keys(source).forEach((key) => {
+        // Guard against prototype pollution via crafted config keys.
+        if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+          return;
+        }
         if (this.isObject(source[key])) {
           if (!(key in target)) {
             output[key] = source[key];

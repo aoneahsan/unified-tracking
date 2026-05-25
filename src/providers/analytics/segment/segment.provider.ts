@@ -176,7 +176,8 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
             const script = document.createElement('script');
             script.type = 'text/javascript';
             script.async = true;
-            script.src = 'https://cdn.segment.com/analytics.js/v1/' + writeKey + '/analytics.min.js';
+            script.src =
+              'https://cdn.segment.com/analytics.js/v1/' + encodeURIComponent(writeKey) + '/analytics.min.js';
 
             script.onload = () => {
               this.scriptLoaded = true;

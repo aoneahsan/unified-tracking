@@ -133,17 +133,43 @@ export class HeapAnalyticsProvider extends BaseAnalyticsProvider {
     }
 
     return new Promise((resolve, reject) => {
-      // Create the Heap snippet
-      const heapScript = `
-        window.heap=window.heap||[],heap.load=function(e,t){window.heap.appid=e,window.heap.config=t=t||{};
-        var r=document.createElement("script");r.type="text/javascript",r.async=!0,r.src="https://cdn.heapanalytics.com/js/heap-"+e+".js";
-        var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(r,a);
-        for(var n=function(e){return function(){heap.push([e].concat(Array.prototype.slice.call(arguments,0)))}},p=["addEventProperties","addUserProperties","clearEventProperties","identify","resetUserId","removeEventProperty","setEventProperties","track","unsetEventProperty"],o=0;o<p.length;o++)heap[p[o]]=n(p[o])};
-      `;
-
-      // Execute the Heap snippet
+      // Heap's official bootstrap, rewritten as plain JS (no eval — eval would
+      // force the consuming app to allow 'unsafe-eval' in its CSP).
       try {
-        eval(heapScript);
+        const heap: any = ((window as any).heap = (window as any).heap || []);
+        heap.load = function (appId: string, heapConfig?: Record<string, unknown>): void {
+          heap.appid = appId;
+          heap.config = heapConfig = heapConfig || {};
+          const script = document.createElement('script');
+          script.type = 'text/javascript';
+          script.async = true;
+          // appId only ever lands in the path of a fixed Heap host; encode it.
+          script.src = `https://cdn.heapanalytics.com/js/heap-${encodeURIComponent(appId)}.js`;
+          const first = document.getElementsByTagName('script')[0];
+          if (first && first.parentNode) {
+            first.parentNode.insertBefore(script, first);
+          } else {
+            document.head.appendChild(script);
+          }
+          const methods = [
+            'addEventProperties',
+            'addUserProperties',
+            'clearEventProperties',
+            'identify',
+            'resetUserId',
+            'removeEventProperty',
+            'setEventProperties',
+            'track',
+            'unsetEventProperty',
+          ];
+          const createMethod = (method: string) =>
+            function (...args: unknown[]): void {
+              heap.push([method, ...args]);
+            };
+          for (const method of methods) {
+            heap[method] = createMethod(method);
+          }
+        };
         this.scriptLoaded = true;
         resolve();
       } catch (error) {

@@ -172,7 +172,8 @@
         {
           "id": "phase03.6",
           "title": "Security hardening: SCRIPT-01 URL/id validation; XSS-01 heap eval removal; VALID-02 proto-pollution; VALID-01 revenue/name guards",
-          "status": "pending"
+          "status": "complete",
+          "note": "VALID-02: deepMerge skips __proto__/constructor/prototype. VALID-01: core warn+no-op guards for event/userId/screenName (non-empty string) + revenue.amount (finite number). SCRIPT-01: matomo trackerUrl validated as http(s) URL; GA id + segment writeKey encodeURIComponent. XSS-01: heap eval() replaced with equivalent plain JS (+ encodeURIComponent appId)."
         },
         {
           "id": "phase03.7",
@@ -182,7 +183,8 @@
         {
           "id": "phase03.8",
           "title": "Cleanups: MIXPANEL-TIME, STALE-COMMENTS, CATCH-BINDINGS, QUEUE-IDS, BIN-01, POSTINSTALL, NPMIGNORE",
-          "status": "pending"
+          "status": "in_progress",
+          "note": "DONE: POSTINSTALL removed (harmful on consumer install); STALE-COMMENTS reworded + catch bindings fixed in providers/index.ts. REMAINING (next session): MIXPANEL-TIME (override startTimedEvent), .npmignore vs files reconcile, BIN-01 setup.js gitignore warning, event-queue CATCH-BINDINGS/QUEUE-IDS."
         },
         {
           "id": "phase03.9",
@@ -269,8 +271,14 @@
       "date": "2026-05-26",
       "phase": "phase03 (batches 3.1-3.4)",
       "summary": "Tier-1 fixes: logger to workspace std (default warn, redact(), eslint-disable) + SECRET-01 redaction; PRIVACY-01 excludedProperties stripping in dispatch; CONSENT-01 consent gate + opt-in non-essential defaults + scoped re-enable; TYPE-SENTRY removed from analytics union+autodetect; WARNINGS-INIT surfaced in InitializeResult. Gate: type-check+build+test(268/2skip)+eslint(0 err) green.",
+      "commit": "061098a"
+    },
+    {
+      "date": "2026-05-26",
+      "phase": "phase03 (batch 3.6 + partial 3.8)",
+      "summary": "Security hardening: VALID-02 (deepMerge proto-pollution guard), VALID-01 (core input guards warn+no-op), SCRIPT-01 (matomo trackerUrl http(s) validation; GA/segment id/key encodeURIComponent), XSS-01 (heap eval() -> plain JS). Cleanups: removed harmful postinstall; reworded stale comments + catch bindings in providers/index.ts. Gate green (268/2skip, 0 eslint errors). REMAINING phase03: 3.5 dead subsystems (web.ts/React/EventQueue), 3.7 Firebase-base, 3.8 rest, 3.9 type-tightening.",
       "commit": "pending"
     }
   ],
-  "resumeInstructions": "1) Read this tracker. 2) Find the first phase/sub-task with status 'pending' or 'in_progress' (currently phase03.1 — audit done, fixes in progress; read phase02-findings.md for the issue list). 3) Read that phase's spec .md. 4) Invoke matching skills per RULE #0. 5) Do the work, run the verification gate (yarn type-check && yarn build && yarn test && yarn eslint), mark sub-task 'complete', append a runHistory row, bump lastUpdated. 6) ONE commit per session per the commit rule. 7) NEVER redo complete work or restart planning."
+  "resumeInstructions": "1) Read this tracker. 2) Find the first phase/sub-task with status 'pending' or 'in_progress' (currently phase03.5 + remainder of 3.8; then 3.7, 3.9 -> phase04 docs -> phase05 release; read phase02-findings.md for the issue list). 3) Read that phase's spec .md. 4) Invoke matching skills per RULE #0. 5) Do the work, run the verification gate (yarn type-check && yarn build && yarn test && yarn eslint), mark sub-task 'complete', append a runHistory row, bump lastUpdated. 6) ONE commit per session per the commit rule. 7) NEVER redo complete work or restart planning."
 }

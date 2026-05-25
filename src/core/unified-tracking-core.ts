@@ -123,6 +123,11 @@ export class UnifiedTrackingCore implements UnifiedTrackingPlugin {
   async track(event: string, properties?: Record<string, unknown>): Promise<void> {
     this.ensureInitialized();
 
+    if (typeof event !== 'string' || event.trim() === '') {
+      this.logger.warn('track() called with an invalid event name; ignoring.', event);
+      return;
+    }
+
     this.logger.debug('Tracking event', { event, properties });
 
     await this.providerManager.trackEvent(event, properties);
@@ -132,6 +137,11 @@ export class UnifiedTrackingCore implements UnifiedTrackingPlugin {
 
   async identify(userId: string, traits?: Record<string, unknown>): Promise<void> {
     this.ensureInitialized();
+
+    if (typeof userId !== 'string' || userId.trim() === '') {
+      this.logger.warn('identify() called with an invalid userId; ignoring.');
+      return;
+    }
 
     this.logger.debug('Identifying user', { userId, traits });
 
@@ -163,6 +173,11 @@ export class UnifiedTrackingCore implements UnifiedTrackingPlugin {
   async logRevenue(revenue: RevenueData): Promise<void> {
     this.ensureInitialized();
 
+    if (!revenue || typeof revenue.amount !== 'number' || !Number.isFinite(revenue.amount)) {
+      this.logger.warn('logRevenue() called with an invalid amount; ignoring.', revenue?.amount);
+      return;
+    }
+
     this.logger.debug('Logging revenue', revenue);
 
     await this.providerManager.logRevenue(revenue);
@@ -170,6 +185,11 @@ export class UnifiedTrackingCore implements UnifiedTrackingPlugin {
 
   async logScreenView(screenName: string, properties?: Record<string, unknown>): Promise<void> {
     this.ensureInitialized();
+
+    if (typeof screenName !== 'string' || screenName.trim() === '') {
+      this.logger.warn('logScreenView() called with an invalid screenName; ignoring.');
+      return;
+    }
 
     this.logger.debug('Logging screen view', { screenName, properties });
 

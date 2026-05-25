@@ -126,7 +126,7 @@ export class GoogleAnalyticsProvider extends BaseAnalyticsProvider {
     return new Promise((resolve, reject) => {
       const script = document.createElement('script');
       script.async = true;
-      script.src = `https://www.googletagmanager.com/gtag/js?id=${this.measurementId}`;
+      script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(this.measurementId)}`;
 
       script.onload = () => {
         this.scriptLoaded = true;
