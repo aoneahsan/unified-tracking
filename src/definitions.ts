@@ -276,8 +276,7 @@ export type AnalyticsProvider =
   | 'segment'
   | 'posthog'
   | 'heap'
-  | 'matomo'
-  | 'sentry';
+  | 'matomo';
 
 export type ErrorProvider =
   | 'sentry'

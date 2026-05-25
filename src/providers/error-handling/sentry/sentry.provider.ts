@@ -141,7 +141,7 @@ export class SentryErrorTrackingProvider extends BaseErrorTrackingProvider {
     this.maxBreadcrumbs = config.maxBreadcrumbs ?? 100;
 
     this.logger.info('Sentry initialized successfully', {
-      dsn: config.dsn,
+      dsn: config.dsn ? '[REDACTED]' : undefined,
       environment: config.environment,
       release: config.release,
     });

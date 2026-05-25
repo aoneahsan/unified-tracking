@@ -142,23 +142,27 @@
       "subTasks": [
         {
           "id": "phase03.1",
-          "title": "Logger standard: default warn, redaction (SECRET-01), eslint-disable in logger.ts, segment vendor line",
-          "status": "pending"
+          "title": "Logger standard: default warn, redaction (SECRET-01), eslint-disable in logger.ts",
+          "status": "complete",
+          "note": "logger.ts: default warn, unknown[] args, file eslint-disable no-console, redact() helper, getLogLevel(), silent level. SECRET-01: core redacts config + stops logging tracked errors/PII at error level; sentry DSN redacted."
         },
         {
           "id": "phase03.2",
-          "title": "PRIVACY-01: enforce excludedProperties stripping + anonymizeIp propagation in dispatch + queue",
-          "status": "pending"
+          "title": "PRIVACY-01: enforce excludedProperties stripping in dispatch",
+          "status": "complete",
+          "note": "provider-manager.applyPrivacy() strips settings.privacy.excludedProperties from properties/traits/user-props/revenue.properties/error.extra before fan-out. Global anonymizeIp stays per-provider (GA) -> documented in phase04, not force-applied."
         },
         {
           "id": "phase03.3",
           "title": "CONSENT-01: consent gate at dispatch + non-essential opt-in defaults + scoped re-enable",
-          "status": "pending"
+          "status": "complete",
+          "note": "hasConsent() gate drops analytics/error events when the category is explicitly denied (covers pre-setConsent window + config defaultConsent). marketing/personalization now default false. updateConsent re-enable scoped to matching provider type."
         },
         {
           "id": "phase03.4",
-          "title": "Correctness: TYPE-SENTRY (drop sentry from analytics union+autodetect) + WARNINGS-INIT (populate warnings[])",
-          "status": "pending"
+          "title": "Correctness: TYPE-SENTRY + WARNINGS-INIT",
+          "status": "complete",
+          "note": "Removed 'sentry' from AnalyticsProvider union + autodetect. provider-manager collects initWarnings; core.initialize() surfaces them in InitializeResult.warnings + logs at warn. Also fixed processQueuedEvents to call trackEvent (was provider.track)."
         },
         {
           "id": "phase03.5",
@@ -259,6 +263,12 @@
       "date": "2026-05-26",
       "phase": "phase02",
       "summary": "Deep audit via 2 parallel agents (security; functionality/quality/gap) + verification. Wrote phase02-findings.md (~25 findings, FIX/DOC/DEFER). No CRIT/HIGH security vulns. Key: privacy controls inert (PRIVACY-01), no consent gate (CONSENT-01), dead EventQueue/React-API/web.ts, native iOS+Android are stubs+unbridged (DOC). Populated phase03 with 9 fix batches.",
+      "commit": "77e55f1"
+    },
+    {
+      "date": "2026-05-26",
+      "phase": "phase03 (batches 3.1-3.4)",
+      "summary": "Tier-1 fixes: logger to workspace std (default warn, redact(), eslint-disable) + SECRET-01 redaction; PRIVACY-01 excludedProperties stripping in dispatch; CONSENT-01 consent gate + opt-in non-essential defaults + scoped re-enable; TYPE-SENTRY removed from analytics union+autodetect; WARNINGS-INIT surfaced in InitializeResult. Gate: type-check+build+test(268/2skip)+eslint(0 err) green.",
       "commit": "pending"
     }
   ],

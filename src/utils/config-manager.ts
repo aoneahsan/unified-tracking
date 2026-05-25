@@ -3,11 +3,13 @@ import type { UnifiedTrackingConfig, ConsentSettings } from '../definitions';
 export class ConfigManager {
   private static instance: ConfigManager;
   private config: UnifiedTrackingConfig = {};
+  // Essential categories (analytics, errorTracking) default on so the SDK works
+  // out of the box; non-essential categories default OFF (opt-in) per GDPR.
   private consent: ConsentSettings = {
     analytics: true,
     errorTracking: true,
-    marketing: true,
-    personalization: true,
+    marketing: false,
+    personalization: false,
   };
 
   private constructor() {}
@@ -113,9 +115,8 @@ export class ConfigManager {
         detectedProviders.analytics.push('segment');
       }
 
-      // Sentry
+      // Sentry (error tracking only — there is no analytics/sentry provider)
       if ('Sentry' in window) {
-        detectedProviders.analytics.push('sentry');
         detectedProviders.errorTracking.push('sentry');
       }
 

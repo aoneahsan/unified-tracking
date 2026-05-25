@@ -64,7 +64,7 @@ export class UnifiedTrackingCore implements UnifiedTrackingPlugin {
 
   async initialize(options?: UnifiedTrackingConfig): Promise<InitializeResult> {
     try {
-      this.logger.debug('Initializing Unified Tracking', options);
+      this.logger.debug('Initializing Unified Tracking', Logger.redact(options));
 
       // Load and merge configuration
       const config = await this.configManager.loadConfig(options);
@@ -102,6 +102,14 @@ export class UnifiedTrackingCore implements UnifiedTrackingPlugin {
           })),
         },
       };
+
+      // Surface providers that failed to load/init so partial-success is visible
+      // to the caller instead of silently missing from activeProviders.
+      const warnings = this.providerManager.getInitWarnings();
+      if (warnings.length > 0) {
+        result.warnings = warnings;
+        warnings.forEach((warning) => this.logger.warn(warning));
+      }
 
       this.logger.info('Unified Tracking initialized successfully', result);
 
@@ -143,7 +151,9 @@ export class UnifiedTrackingCore implements UnifiedTrackingPlugin {
 
     const errorObj = typeof error === 'string' ? new Error(error) : error;
 
-    this.logger.error('Logging error', errorObj, context);
+    // Debug-level only: never print the consumer's tracked errors (or their PII
+    // context) to console.error by default — that is the host app's concern.
+    this.logger.debug('Logging error to providers', errorObj.message);
 
     await this.providerManager.logError(errorObj, context);
 

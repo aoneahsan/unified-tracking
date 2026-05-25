@@ -18,6 +18,7 @@ export class ProviderManager {
   private configManager: ConfigManager;
   private eventQueue: EventQueue;
   private initialized = false;
+  private initWarnings: string[] = [];
 
   constructor() {
     this.logger = Logger.getInstance();
@@ -36,6 +37,7 @@ export class ProviderManager {
     }
 
     this.logger.info('Initializing ProviderManager');
+    this.initWarnings = [];
 
     try {
       const config = this.configManager.getConfig();
@@ -58,16 +60,25 @@ export class ProviderManager {
     }
   }
 
+  /** Warnings collected during initialize() — providers that failed to load or init. */
+  getInitWarnings(): string[] {
+    return [...this.initWarnings];
+  }
+
   private async initializeProviders(providerNames: string[], type: ProviderType, config: any): Promise<void> {
     for (const name of providerNames) {
       try {
         const provider = await this.loadProvider(name, type);
         if (provider) {
           await this.registerProvider(name, provider, config[name] || {});
+        } else {
+          this.initWarnings.push(`Provider "${name}" could not be loaded and was skipped.`);
         }
       } catch (error) {
+        const reason = error instanceof Error ? error.message : String(error);
+        this.initWarnings.push(`Provider "${name}" failed to initialize: ${reason}`);
         this.logger.error(`Failed to initialize provider ${name}`, error);
-        // Continue with other providers
+        // Continue with other providers (fail-open)
       }
     }
   }
@@ -166,9 +177,9 @@ export class ProviderManager {
 
     for (const event of events) {
       try {
-        if (provider.type === 'analytics' && 'track' in provider) {
+        if (provider.type === 'analytics' && 'trackEvent' in provider) {
           const eventData = event.data as { eventName: string; properties?: Record<string, any> };
-          await (provider as AnalyticsProvider).track(eventData.eventName, eventData.properties);
+          await (provider as AnalyticsProvider).trackEvent(eventData.eventName, eventData.properties);
         } else if (provider.type === 'error-tracking' && 'logError' in provider) {
           const errorData = event.data as { error: Error | string; context?: ErrorContext };
           await (provider as ErrorTrackingProvider).logError(errorData.error, errorData.context);
@@ -236,12 +247,20 @@ export class ProviderManager {
       try {
         await instance.provider.updateConsent(consent);
 
-        // Update provider state based on consent
-        if (consent.analytics === false && instance.provider.type === 'analytics') {
+        // Update provider state based on consent — scoped to the matching
+        // provider type so toggling one category never resurrects a provider
+        // that was disabled for a different category (or a different reason).
+        const type = instance.provider.type;
+        let consented: boolean | undefined;
+        if (type === 'analytics') {
+          consented = consent.analytics;
+        } else if (type === 'error-tracking') {
+          consented = consent.errorTracking;
+        }
+
+        if (consented === false) {
           instance.state = 'disabled';
-        } else if (consent.errorTracking === false && instance.provider.type === 'error-tracking') {
-          instance.state = 'disabled';
-        } else if (instance.state === 'disabled') {
+        } else if (consented === true && instance.state === 'disabled') {
           instance.state = 'active';
         }
       } catch (error) {
@@ -284,11 +303,44 @@ export class ProviderManager {
     return states;
   }
 
+  /** False when the consumer has explicitly denied consent for this provider type. */
+  private hasConsent(type: ProviderType): boolean {
+    const consent = this.configManager.getConsent();
+    if (type === 'analytics') {
+      return consent.analytics !== false;
+    }
+    if (type === 'error-tracking') {
+      return consent.errorTracking !== false;
+    }
+    return true;
+  }
+
+  /**
+   * Removes any keys listed in settings.privacy.excludedProperties from an
+   * event payload before it is dispatched to providers (data minimization).
+   * Returns the input unchanged when there is nothing to strip.
+   */
+  private applyPrivacy<T extends Record<string, any> | undefined>(properties: T): T {
+    const excluded = this.configManager.getConfig().settings?.privacy?.excludedProperties;
+    if (!properties || !excluded || excluded.length === 0) {
+      return properties;
+    }
+    const sanitized = { ...properties };
+    for (const key of excluded) {
+      delete sanitized[key];
+    }
+    return sanitized as T;
+  }
+
   async trackEvent(eventName: string, properties?: Record<string, any>): Promise<void> {
+    if (!this.hasConsent('analytics')) {
+      return;
+    }
+    const sanitized = this.applyPrivacy(properties);
     const analyticsProviders = this.getActiveProviders('analytics') as AnalyticsProvider[];
 
     const promises = analyticsProviders.map((provider) =>
-      provider.trackEvent(eventName, properties).catch((error) => {
+      provider.trackEvent(eventName, sanitized).catch((error) => {
         this.logger.error(`Failed to track event with provider ${provider.id}`, error);
       }),
     );
@@ -297,10 +349,14 @@ export class ProviderManager {
   }
 
   async identifyUser(userId: string, traits?: Record<string, any>): Promise<void> {
+    if (!this.hasConsent('analytics')) {
+      return;
+    }
+    const sanitized = this.applyPrivacy(traits);
     const analyticsProviders = this.getActiveProviders('analytics') as AnalyticsProvider[];
 
     const promises = analyticsProviders.map((provider) =>
-      provider.identifyUser(userId, traits).catch((error) => {
+      provider.identifyUser(userId, sanitized).catch((error) => {
         this.logger.error(`Failed to identify user with provider ${provider.id}`, error);
       }),
     );
@@ -309,10 +365,14 @@ export class ProviderManager {
   }
 
   async setUserProperties(properties: Record<string, any>): Promise<void> {
+    if (!this.hasConsent('analytics')) {
+      return;
+    }
+    const sanitized = this.applyPrivacy(properties);
     const analyticsProviders = this.getActiveProviders('analytics') as AnalyticsProvider[];
 
     const promises = analyticsProviders.map((provider) =>
-      provider.setUserProperties(properties).catch((error) => {
+      provider.setUserProperties(sanitized).catch((error) => {
         this.logger.error(`Failed to set user properties with provider ${provider.id}`, error);
       }),
     );
@@ -321,10 +381,14 @@ export class ProviderManager {
   }
 
   async logError(error: Error | string, context?: ErrorContext): Promise<void> {
+    if (!this.hasConsent('error-tracking')) {
+      return;
+    }
+    const sanitized = context?.extra ? { ...context, extra: this.applyPrivacy(context.extra) } : context;
     const errorProviders = this.getActiveProviders('error-tracking') as ErrorTrackingProvider[];
 
     const promises = errorProviders.map((provider) =>
-      provider.logError(error, context).catch((err) => {
+      provider.logError(error, sanitized).catch((err) => {
         this.logger.error(`Failed to log error with provider ${provider.id}`, err);
       }),
     );
@@ -333,10 +397,14 @@ export class ProviderManager {
   }
 
   async logRevenue(revenue: RevenueData): Promise<void> {
+    if (!this.hasConsent('analytics')) {
+      return;
+    }
+    const sanitized = revenue.properties ? { ...revenue, properties: this.applyPrivacy(revenue.properties) } : revenue;
     const analyticsProviders = this.getActiveProviders('analytics') as AnalyticsProvider[];
 
     const promises = analyticsProviders.map((provider) =>
-      provider.logRevenue(revenue).catch((error) => {
+      provider.logRevenue(sanitized).catch((error) => {
         this.logger.error(`Failed to log revenue with provider ${provider.id}`, error);
       }),
     );
@@ -345,10 +413,14 @@ export class ProviderManager {
   }
 
   async logScreenView(screenName: string, properties?: Record<string, any>): Promise<void> {
+    if (!this.hasConsent('analytics')) {
+      return;
+    }
+    const sanitized = this.applyPrivacy(properties);
     const analyticsProviders = this.getActiveProviders('analytics') as AnalyticsProvider[];
 
     const promises = analyticsProviders.map((provider) =>
-      provider.logScreenView(screenName, properties).catch((error) => {
+      provider.logScreenView(screenName, sanitized).catch((error) => {
         this.logger.error(`Failed to log screen view with provider ${provider.id}`, error);
       }),
     );
