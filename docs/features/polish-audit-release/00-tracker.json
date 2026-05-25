@@ -99,46 +99,92 @@
     {
       "id": "phase02",
       "title": "Deep codebase audit -> phase02-findings.md",
-      "status": "pending",
-      "completedAt": null,
+      "status": "complete",
+      "completedAt": "2026-05-26",
       "spec": "docs/features/polish-audit-release/phase02-deep-audit.md",
+      "findings": "docs/features/polish-audit-release/phase02-findings.md",
+      "result": "Two parallel audit agents + verification. No CRITICAL/HIGH security vulns (deps clean, no hardcoded secrets, no user-data injection, fan-out error isolation correct). Real issues: privacy controls inert (excludedProperties/anonymizeIp), dead subsystems (EventQueue, most React API, web.ts), and native iOS/Android providers are stubs + unbridged (DOC honestly). ~25 findings catalogued with FIX/DOC/DEFER decisions.",
       "subTasks": [
         {
           "id": "phase02.1",
-          "title": "Security audit (deps CVE, secrets, script injection, localStorage, validation, consent)",
-          "status": "pending"
+          "title": "Security audit",
+          "status": "complete",
+          "note": "0 CVEs, 0 hardcoded secrets. Findings: PRIVACY-01, CONSENT-01, SCRIPT-01/02, XSS-01(heap eval), VALID-01/02, SECRET-01, STORAGE-01/02, BIN-01."
         },
         {
           "id": "phase02.2",
-          "title": "Functionality audit (logger, error handling, event flow, hooks, native bridge, skipped tests)",
-          "status": "pending"
+          "title": "Functionality audit",
+          "status": "complete",
+          "note": "Fan-out isolation OK. Findings: DEAD-QUEUE, DEAD-REACT, WARNINGS-INIT, LOGGER-COMPLIANCE, B2/B3."
         },
         {
           "id": "phase02.3",
-          "title": "Feature-gap audit (provider parity, documented-vs-implemented, type completeness)",
-          "status": "pending"
+          "title": "Feature-gap audit",
+          "status": "complete",
+          "note": "NATIVE-01/02 (stubs+unbridged), TYPE-SENTRY (bad union), MIXPANEL-GROUPS/TIME, PATH-ALIAS-DOC."
         },
         {
           "id": "phase02.4",
-          "title": "Code-quality audit (dead code, duplication, naming, file size, TODOs)",
-          "status": "pending"
+          "title": "Code-quality audit",
+          "status": "complete",
+          "note": "DEAD-WEB, FIREBASE-BASE, DEAD-DECOR, ANY-* (614 any: ~430 shims/~24 public/~80 internal), FILESIZE (8>500L), STALE-COMMENTS, POSTINSTALL, NPMIGNORE."
         },
-        {
-          "id": "phase02.5",
-          "title": "Write prioritized phase02-findings.md + mirror into phase03 sub-tasks",
-          "status": "pending"
-        }
+        { "id": "phase02.5", "title": "Write phase02-findings.md + populate phase03", "status": "complete" }
       ]
     },
     {
       "id": "phase03",
-      "title": "Implement fixes from findings (CRITICAL->LOW)",
-      "status": "pending",
+      "title": "Implement fixes from findings (security/correctness first)",
+      "status": "in_progress",
       "completedAt": null,
       "spec": "docs/features/polish-audit-release/phase03-fixes.md",
-      "note": "Sub-tasks are populated from phase02-findings.md after the audit completes.",
+      "note": "Batches from phase02-findings.md execution order. Run full gate after each batch. Minor release: NO breaking public API changes.",
       "subTasks": [
-        { "id": "phase03.0", "title": "Populate fix sub-tasks from phase02-findings.md", "status": "pending" }
+        {
+          "id": "phase03.1",
+          "title": "Logger standard: default warn, redaction (SECRET-01), eslint-disable in logger.ts, segment vendor line",
+          "status": "pending"
+        },
+        {
+          "id": "phase03.2",
+          "title": "PRIVACY-01: enforce excludedProperties stripping + anonymizeIp propagation in dispatch + queue",
+          "status": "pending"
+        },
+        {
+          "id": "phase03.3",
+          "title": "CONSENT-01: consent gate at dispatch + non-essential opt-in defaults + scoped re-enable",
+          "status": "pending"
+        },
+        {
+          "id": "phase03.4",
+          "title": "Correctness: TYPE-SENTRY (drop sentry from analytics union+autodetect) + WARNINGS-INIT (populate warnings[])",
+          "status": "pending"
+        },
+        {
+          "id": "phase03.5",
+          "title": "Dead subsystems: delete web.ts(+test); consolidate React exports+SSR guards; wire/fix EventQueue pre-init buffer+timer; STORAGE cap/redact/shape",
+          "status": "pending"
+        },
+        {
+          "id": "phase03.6",
+          "title": "Security hardening: SCRIPT-01 URL/id validation; XSS-01 heap eval removal; VALID-02 proto-pollution; VALID-01 revenue/name guards",
+          "status": "pending"
+        },
+        {
+          "id": "phase03.7",
+          "title": "Consistency: FIREBASE-BASE extend base; remove decorator re-export + dead getProviderManager; hoist getPlatform",
+          "status": "pending"
+        },
+        {
+          "id": "phase03.8",
+          "title": "Cleanups: MIXPANEL-TIME, STALE-COMMENTS, CATCH-BINDINGS, QUEUE-IDS, BIN-01, POSTINSTALL, NPMIGNORE",
+          "status": "pending"
+        },
+        {
+          "id": "phase03.9",
+          "title": "Type tightening to 0 lint warnings: ANY-PUBLIC+INTERNAL, provider shim override; FILESIZE extract segment snippet",
+          "status": "pending"
+        }
       ]
     },
     {
@@ -201,14 +247,20 @@
       "date": "2026-05-26",
       "phase": "phase00",
       "summary": "Explored codebase (65 ts files, 16 providers, web+native), ran npm outdated (17 pkgs incl 4 majors), invoked skills (analytics-tracking, nodejs-best-practices, security-review). Created plan folder, overview, 5 phase specs, and this tracker.",
-      "commit": "pending"
+      "commit": "a7d106b"
     },
     {
       "date": "2026-05-26",
       "phase": "phase01",
       "summary": "All deps -> latest stable. Fixed 3 real issues found en route: (1) missing experimentalDecorators broke 9 test files under new esbuild; (2) TS6 deprecated baseUrl removed; (3) ESLint 10 needed @eslint/js + --ext + dead @ionic/eslint-config + eslint-plugin-import removed, eslint-config-prettier+globals declared. peerDeps widened to Capacitor 8. Gate: type-check+build+test(268/2skip)+eslint all green; clean warning-free install.",
+      "commit": "a7d106b"
+    },
+    {
+      "date": "2026-05-26",
+      "phase": "phase02",
+      "summary": "Deep audit via 2 parallel agents (security; functionality/quality/gap) + verification. Wrote phase02-findings.md (~25 findings, FIX/DOC/DEFER). No CRIT/HIGH security vulns. Key: privacy controls inert (PRIVACY-01), no consent gate (CONSENT-01), dead EventQueue/React-API/web.ts, native iOS+Android are stubs+unbridged (DOC). Populated phase03 with 9 fix batches.",
       "commit": "pending"
     }
   ],
-  "resumeInstructions": "1) Read this tracker. 2) Find the first phase/sub-task with status 'pending' or 'in_progress' (currently phase01.0). 3) Read that phase's spec .md. 4) Invoke matching skills per RULE #0. 5) Do the work, run the verification gate, mark sub-task 'complete', append a runHistory row, bump lastUpdated. 6) ONE commit per session per the commit rule. 7) NEVER redo complete work or restart planning."
+  "resumeInstructions": "1) Read this tracker. 2) Find the first phase/sub-task with status 'pending' or 'in_progress' (currently phase03.1 — audit done, fixes in progress; read phase02-findings.md for the issue list). 3) Read that phase's spec .md. 4) Invoke matching skills per RULE #0. 5) Do the work, run the verification gate (yarn type-check && yarn build && yarn test && yarn eslint), mark sub-task 'complete', append a runHistory row, bump lastUpdated. 6) ONE commit per session per the commit rule. 7) NEVER redo complete work or restart planning."
 }
