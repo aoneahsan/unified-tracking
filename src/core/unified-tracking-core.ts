@@ -77,9 +77,6 @@ export class UnifiedTrackingCore implements UnifiedTrackingPlugin {
       // Initialize providers
       await this.providerManager.initialize(config);
 
-      // Start event queue processing
-      this.eventQueue.start();
-
       this.initialized = true;
 
       const analyticsProviders = this.providerManager.getActiveProviders('analytics');

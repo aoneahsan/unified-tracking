@@ -12,6 +12,7 @@ export class EventQueue {
   private processing = false;
   private maxRetries = 3;
   private batchSize = 10;
+  private maxQueueSize = 1000;
   private flushInterval = 5000; // 5 seconds
   private intervalId?: number;
   private listeners: Array<(events: QueuedEvent[]) => Promise<void>> = [];
@@ -30,14 +31,16 @@ export class EventQueue {
   }
 
   start(): void {
-    if (this.intervalId) return;
+    if (this.intervalId !== undefined || typeof window === 'undefined') {
+      return;
+    }
 
     this.intervalId = window.setInterval(() => {
-      this.flush();
+      void this.flush();
     }, this.flushInterval);
 
     // Process any queued events immediately
-    this.flush();
+    void this.flush();
   }
 
   stop(): void {
@@ -56,11 +59,17 @@ export class EventQueue {
     };
 
     this.queue.push(queuedEvent);
+
+    // Cap the queue so a long offline burst can't grow it toward the storage quota.
+    if (this.queue.length > this.maxQueueSize) {
+      this.queue.splice(0, this.queue.length - this.maxQueueSize);
+    }
+
     this.persistEvents();
 
     // If queue is getting large, flush immediately
     if (this.queue.length >= this.batchSize * 2) {
-      this.flush();
+      void this.flush();
     }
   }
 
@@ -126,7 +135,11 @@ export class EventQueue {
   }
 
   private generateId(): string {
-    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const cryptoObj = typeof globalThis !== 'undefined' ? globalThis.crypto : undefined;
+    if (cryptoObj?.randomUUID) {
+      return cryptoObj.randomUUID();
+    }
+    return `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
   }
 
   private persistEvents(): void {
@@ -134,8 +147,8 @@ export class EventQueue {
       if (typeof localStorage !== 'undefined') {
         localStorage.setItem('unified_tracking_queue', JSON.stringify(this.queue));
       }
-    } catch (error) {
-      // Ignore storage errors
+    } catch {
+      // Ignore storage errors (quota, disabled storage, private mode, etc.)
     }
   }
 
@@ -144,11 +157,13 @@ export class EventQueue {
       if (typeof localStorage !== 'undefined') {
         const stored = localStorage.getItem('unified_tracking_queue');
         if (stored) {
-          this.queue = JSON.parse(stored);
+          const parsed = JSON.parse(stored);
+          // Trust nothing read back from storage — keep only well-shaped entries.
+          this.queue = Array.isArray(parsed) ? parsed.filter((e) => e && typeof e === 'object') : [];
         }
       }
-    } catch (error) {
-      // Ignore storage errors
+    } catch {
+      // Ignore storage errors (quota, disabled storage, private mode, etc.)
     }
   }
 
@@ -157,8 +172,8 @@ export class EventQueue {
       if (typeof localStorage !== 'undefined') {
         localStorage.removeItem('unified_tracking_queue');
       }
-    } catch (error) {
-      // Ignore storage errors
+    } catch {
+      // Ignore storage errors (quota, disabled storage, private mode, etc.)
     }
   }
 
