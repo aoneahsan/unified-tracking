@@ -1,6 +1,6 @@
 # src/core/ - Core Engine
 
-**Last Updated**: `2026-04-03`
+**Last Updated**: `2026-05-26`
 
 ## Overview
 
@@ -10,15 +10,15 @@
 
 ```
 UnifiedTrackingCore (unified-tracking-core.ts)
-  ├── ProviderManager   → manages all registered providers
-  ├── ConfigManager     → singleton config store
-  ├── EventQueue        → buffers events before providers are ready
-  └── Logger            → unified logging
+  ├── ProviderManager   → manages providers; consent gate + privacy stripping at dispatch
+  ├── ConfigManager     → singleton config + consent state
+  ├── EventQueue        → standalone buffering utility (exported; NOT auto-started by core)
+  └── Logger            → centralized logging (default level: warn)
 ```
 
 ## Key Behaviors
 
-- **Initialization**: `initialize(config)` loads config, initializes ProviderManager, flushes queued events
+- **Initialization**: `initialize(config)` loads config and initializes ProviderManager; provider load/init failures are collected into `InitializeResult.warnings` (not thrown)
 - **Event routing**: `track()`, `logError()`, etc. delegate to ProviderManager which fans out to all active providers of the correct type
 - **Consent**: `updateConsent()` toggles provider activation based on user consent settings
 - **Event listeners**: Supports `addListener()` / `removeAllListeners()` for tracking events and provider status changes

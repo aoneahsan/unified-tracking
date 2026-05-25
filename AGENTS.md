@@ -2,19 +2,19 @@
 
 > AI Agent Instructions for Unified Tracking Plugin Development
 
-**Last Updated**: `2026-04-03`
+**Last Updated**: `2026-05-26`
 
 ## Project Overview
 
-| Property | Value |
-|----------|-------|
-| Package Name | `unified-tracking` |
-| Version | 3.0.2 |
-| License | MIT |
-| Repository | Public |
-| NPM | https://www.npmjs.com/package/unified-tracking |
+| Property     | Value                                          |
+| ------------ | ---------------------------------------------- |
+| Package Name | `unified-tracking`                             |
+| Version      | 3.1.0                                          |
+| License      | MIT                                            |
+| Repository   | Public                                         |
+| NPM          | https://www.npmjs.com/package/unified-tracking |
 
-Unified analytics and error tracking plugin for React + Capacitor apps with native iOS and Android support.
+Unified analytics and error tracking plugin for React + Capacitor apps. Tracking runs through the web/JS layer (including inside the Capacitor WebView); native iOS/Android SDK bridges are scaffolded but not yet implemented (see "Native Providers").
 
 ### Supported Services
 
@@ -22,11 +22,12 @@ Firebase Analytics, Google Analytics, Sentry, Amplitude, Mixpanel, Segment, Post
 
 ### Platforms
 
-Web (browser), iOS (native), Android (native)
+Web (browser) + Capacitor WebView (iOS/Android). Native-SDK delivery: planned, not yet implemented.
 
 ## CLAUDE.md + AGENTS.md Sync Rule (IRON-SOLID)
 
 **Every important rule MUST exist in BOTH `CLAUDE.md` AND `AGENTS.md` at each level.**
+
 - When adding or updating a rule in one file, ALWAYS update the other
 - This applies to root and ALL nested files in every folder
 - Never add a rule to just one file — always both
@@ -34,6 +35,7 @@ Web (browser), iOS (native), Android (native)
 ## CLAUDE.md + AGENTS.md Update Frequency (IRON-SOLID)
 
 **ALL `CLAUDE.md` and `AGENTS.md` files MUST be reviewed and updated at least once every 3 days.**
+
 - On every session start, check `Last Updated` dates across all project files
 - If any file is >3 days stale, update it BEFORE proceeding with other work
 - Every file must have a `Last Updated` date field
@@ -41,6 +43,7 @@ Web (browser), iOS (native), Android (native)
 ## Claude Code Agents (MANDATORY - IRON-SOLID)
 
 **For EVERY prompt and task, Claude Code MUST use agents (Task tool) to deliver the best possible experience.**
+
 - Use **Explore agent** for codebase search, file discovery, understanding architecture
 - Use **Plan agent** for implementation planning, architecture decisions
 - Use **general-purpose agent** for complex multi-step tasks, parallel processing
@@ -48,10 +51,10 @@ Web (browser), iOS (native), Android (native)
 
 ## Agent Responsibilities
 
-| Agent | Role |
-|-------|------|
-| **Claude Code** | Primary implementation. Writes code, runs tests, publishes. |
-| **Codex** | Reviews, provides specs. Does NOT implement unless explicitly requested. |
+| Agent           | Role                                                                     |
+| --------------- | ------------------------------------------------------------------------ |
+| **Claude Code** | Primary implementation. Writes code, runs tests, publishes.              |
+| **Codex**       | Reviews, provides specs. Does NOT implement unless explicitly requested. |
 
 ## Setup Instructions
 
@@ -71,18 +74,18 @@ yarn install
 
 ## Build & Test Commands
 
-| Command | Purpose |
-|---------|---------|
-| `yarn build` | Clean + tsc + rollup |
-| `yarn build:docgen` | Build with API docs |
-| `yarn dev` | Watch mode |
-| `yarn clean` | Remove dist |
-| `yarn lint` | ESLint + Prettier check |
-| `yarn fmt` | Auto-fix lint + format |
-| `yarn test` | Run Vitest |
-| `yarn test:watch` | Watch mode |
-| `yarn test:coverage` | Coverage report |
-| `yarn type-check` | TypeScript check |
+| Command              | Purpose                 |
+| -------------------- | ----------------------- |
+| `yarn build`         | Clean + tsc + rollup    |
+| `yarn build:docgen`  | Build with API docs     |
+| `yarn dev`           | Watch mode              |
+| `yarn clean`         | Remove dist             |
+| `yarn lint`          | ESLint + Prettier check |
+| `yarn fmt`           | Auto-fix lint + format  |
+| `yarn test`          | Run Vitest              |
+| `yarn test:watch`    | Watch mode              |
+| `yarn test:coverage` | Coverage report         |
+| `yarn type-check`    | TypeScript check        |
 
 ### Platform Verification
 
@@ -103,6 +106,7 @@ yarn release:dry  # Dry run
 ## Project-Specific Rules
 
 ### Critical DOs
+
 1. Test all platforms before release
 2. Maintain privacy compliance (GDPR, consent management)
 3. Update docs when adding providers
@@ -110,6 +114,7 @@ yarn release:dry  # Dry run
 5. Use yarn exclusively (NEVER npm/pnpm)
 
 ### Critical DON'Ts
+
 1. NEVER break cross-platform compatibility
 2. NEVER expose user data insecurely
 3. NEVER break existing adapter interfaces
@@ -119,8 +124,8 @@ yarn release:dry  # Dry run
 
 ```typescript
 import { UnifiedTracking } from 'unified-tracking';
-import { useTracking } from 'unified-tracking/react';
-import { CapacitorTracking } from 'unified-tracking/capacitor';
+import { useUnifiedTracking, useTrackEvent } from 'unified-tracking/react';
+import { registerCapacitorPlugin } from 'unified-tracking/capacitor';
 ```
 
 ### CLI Tool
@@ -131,9 +136,15 @@ npx unified-tracking-setup
 
 ## Privacy & Compliance
 
-- GDPR compliant with consent management built in
-- Data minimization — only collect what providers are configured to track
-- Consent updates toggle providers dynamically via `updateConsent()`
+- Consent gate at dispatch — analytics/error events are dropped when the matching consent category is denied. `marketing`/`personalization` default to `false` (opt-in) as of 3.1.0.
+- Data minimization — `settings.privacy.excludedProperties` keys are stripped from every event/trait/context before providers receive them (enforced as of 3.1.0).
+- Secrets are redacted from logs; provider keys/DSNs never reach the console.
+
+## Native Providers (Record — verified 2026-05-26)
+
+- Decision: **web-first, native planned**. Tracking is delivered by the web/JS layer (runs in the Capacitor WebView on iOS/Android) — all 16 providers work there.
+- The `ios/` (Swift) + `android/` (Kotlin) provider classes are stubs (log + return; ~69 TODOs); `registerCapacitorPlugin` registers only the `web` implementation. Native SDK bridges are NOT yet implemented.
+- Do NOT claim full native-SDK delivery in docs/store listings until implemented.
 
 ## Pre-Publish Testing Requirements
 
@@ -159,12 +170,12 @@ yarn example:build    # Build example app
 
 Domain-specific rules live in nested `CLAUDE.md` + `AGENTS.md` files:
 
-| Location | Scope |
-|----------|-------|
-| `src/` | Source conventions, imports, path aliases, TypeScript rules |
-| `src/core/` | Core engine architecture, event flow, singletons |
-| `src/providers/` | Provider architecture, base classes, adding/testing providers |
-| `src/react/` | React hooks, context, HOC patterns |
-| `docs/` | Documentation structure, update rules, API docs |
-| `android/` | Android native build, Kotlin/Java patterns |
-| `ios/` | iOS native build, Swift patterns, CocoaPods/SPM |
+| Location         | Scope                                                                              |
+| ---------------- | ---------------------------------------------------------------------------------- |
+| `src/`           | Source conventions, imports, path aliases, TypeScript rules                        |
+| `src/core/`      | Core engine architecture, event flow, singletons                                   |
+| `src/providers/` | Provider architecture, base classes, adding/testing providers                      |
+| `src/react/`     | Provider-free React hooks (`useUnifiedTracking`, `useTrackEvent`) — no context/HOC |
+| `docs/`          | Documentation structure, update rules, API docs                                    |
+| `android/`       | Android native build, Kotlin/Java patterns                                         |
+| `ios/`           | iOS native build, Swift patterns, CocoaPods/SPM                                    |

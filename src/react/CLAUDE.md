@@ -1,50 +1,47 @@
 # src/react/ - React Integration
 
-**Last Updated**: `2026-04-03`
+**Last Updated**: `2026-05-26`
 
 ## Overview
 
-React integration layer providing hooks, context, and HOC patterns for unified-tracking.
+Provider-free React hooks for unified-tracking. No React Context or `<Provider>` is required — the hooks call the core singleton directly, so they work in dynamically injected components.
 
 ## File Structure
 
-| File | Purpose |
-|------|---------|
-| `context.tsx` | `UnifiedTrackingProvider` context + `useUnifiedTracking` hook |
-| `hooks.ts` | Main hooks: `useTrackEvent`, `useUnifiedTracking`, etc. |
-| `hooks-new.ts` | Extended hooks (newer API surface) |
-| `hoc.tsx` | Higher-order component wrappers |
-| `index.ts` | Barrel exports for `unified-tracking/react` |
+| File           | Purpose                                             |
+| -------------- | --------------------------------------------------- |
+| `hooks-new.ts` | The hooks: `useUnifiedTracking` and `useTrackEvent` |
+| `index.ts`     | Barrel export for `unified-tracking/react`          |
 
-## Consumer Import
+> A previous provider/context/HOC layer (`context.tsx`, `hooks.ts`, `hoc.tsx`) was removed in `3.1.0` — it was never re-exported from `index.ts`, so it was dead code (~1,142 LOC). Do not reintroduce a context-based API without exporting it and updating these docs + the root README.
+
+## Public API (`unified-tracking/react`)
 
 ```typescript
-import { useTracking } from 'unified-tracking/react';
+import { useUnifiedTracking, useTrackEvent } from 'unified-tracking/react';
+
+// useUnifiedTracking() returns the bound core methods (no provider needed):
+//   track, identify, setUserProperties, logError, logRevenue, logScreenView,
+//   setConsent, reset, getActiveProviders, enableDebugMode
+const { track, identify, logError } = useUnifiedTracking();
+
+// useTrackEvent() wraps track() with local loading/error state:
+const { trackEvent, isTracking, lastError } = useTrackEvent();
 ```
-
-This maps to `dist/esm/src/react/index.js` via package.json `exports` field.
-
-## Hook Patterns
-
-- All hooks use `useUnifiedTracking()` context internally
-- Hooks provide loading state (`isTracking`) and error state (`lastError`)
-- Error handling: hooks catch tracking errors and optionally forward them to error tracking providers
-- Hooks use `useCallback` for stable references — follow this pattern for new hooks
 
 ## Rules
 
-- React is an **optional peer dependency** — all react code must be tree-shakeable
-- Never import React internals outside `src/react/`
-- All hooks must handle the case where the provider context is not available (graceful degradation)
-- Test hooks with Vitest (mock the context provider)
-- Export everything through `index.ts` — consumers only import from `unified-tracking/react`
+- React is an **optional peer dependency** — keep this layer tree-shakeable.
+- Hooks must be SSR-safe — never touch `window`/`document` at module top level.
+- `useTrackEvent` uses `useCallback` for a stable reference — follow this for new hooks.
+- Export everything through `index.ts`; consumers only import from `unified-tracking/react`.
+- The core must be initialized (`UnifiedTracking.initialize(...)`) before hooks dispatch events.
 
 ## Adding New Hooks
 
-1. Add hook to `hooks.ts` or `hooks-new.ts`
-2. Export from `index.ts`
-3. Add Vitest tests
-4. Update `docs/react-integration.md`
+1. Add the hook to `hooks-new.ts`.
+2. Export it from `index.ts`.
+3. Update `docs/react-integration.md` and the root `Readme.md` React section.
 
 ## CLAUDE.md + AGENTS.md Sync Rule
 

@@ -201,9 +201,10 @@
     {
       "id": "phase04",
       "title": "Documentation update to v3.1.0",
-      "status": "pending",
-      "completedAt": null,
+      "status": "complete",
+      "completedAt": "2026-05-26",
       "spec": "docs/features/polish-audit-release/phase04-documentation.md",
+      "result": "Updated shipped docs accurately: Readme.md (version/state, provider-name + config-key fixes, trackEvent->track, native-honesty note, privacy/consent, fixed broken markdown fence), CHANGELOG 3.1.0 entry, AI-INTEGRATION-GUIDE.md (rewritten — removed non-existent trackEvent/trackPageView/useIdentify/useLogError, correct provider names/keys/hooks). Root CLAUDE.md+AGENTS.md (version, verified state, native record). react/ + src/ + core/ nested CLAUDE+AGENTS (deleted-file refs, path-alias reality, EventQueue behavior). Version bumped to 3.1.0 in package.json + podspec + android gradle. DEFERRED (non-shipping, non-blocking): portfolio refresh, providers/+docs/ nested date bumps, status .md files.",
       "subTasks": [
         {
           "id": "phase04.1",

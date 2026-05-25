@@ -1,23 +1,25 @@
 # unified-tracking Package
 
 **Package Name**: `unified-tracking`
-**Version**: `3.0.2`
+**Version**: `3.1.0`
 **NPM**: `https://www.npmjs.com/package/unified-tracking`
-**Last Updated**: `2026-04-03`
+**Last Updated**: `2026-05-26`
 
 Unified analytics and error tracking infrastructure for React, web, and Capacitor apps with provider-based integrations, consent controls, React hooks, and cross-platform delivery targets.
 
 ## Current Verified State
 
-- Reviewed on: `2026-03-25`
-- Install: `yarn install` passed
+- Reviewed on: `2026-05-26`
+- Install: `yarn install` passed (all dependencies at latest stable)
+- Typecheck: `yarn type-check` passed (TypeScript 6)
 - Build: `yarn build` passed cleanly
-- Typecheck: `yarn type-check` passed
-- Tests: `yarn test` passed (`268` passed, `2` skipped)
+- Tests: `yarn test` passed (`246` passed, `2` skipped)
+- Lint: `yarn eslint` passed (`0` warnings, `0` errors)
 
 ## CLAUDE.md + AGENTS.md Sync Rule (IRON-SOLID)
 
 **Every important rule MUST exist in BOTH `CLAUDE.md` AND `AGENTS.md` at each level.**
+
 - When adding or updating a rule in one file, ALWAYS update the other
 - This applies to root and ALL nested files in every folder
 - Never add a rule to just `CLAUDE.md` or just `AGENTS.md` — always both
@@ -26,6 +28,7 @@ Unified analytics and error tracking infrastructure for React, web, and Capacito
 ## CLAUDE.md + AGENTS.md Update Frequency (IRON-SOLID)
 
 **ALL `CLAUDE.md` and `AGENTS.md` files MUST be reviewed and updated at least once every 3 days.**
+
 - On every session start, check `Last Updated` dates across all project files
 - If any file is >3 days stale, update it BEFORE proceeding with other work
 - Stale instruction files directly degrade development quality
@@ -34,6 +37,7 @@ Unified analytics and error tracking infrastructure for React, web, and Capacito
 ## Claude Code Agents (MANDATORY - IRON-SOLID)
 
 **For EVERY prompt and task, Claude Code MUST use agents (Task tool) to deliver the best possible experience.**
+
 - Use **Explore agent** for codebase search, file discovery, understanding architecture
 - Use **Plan agent** for implementation planning, architecture decisions
 - Use **general-purpose agent** for complex multi-step tasks, parallel processing
@@ -43,20 +47,26 @@ Unified analytics and error tracking infrastructure for React, web, and Capacito
 
 ## Implemented Feature Areas
 
-| Area | Scope |
-|------|-------|
-| Unified core API | Event tracking, user identification, revenue logging, screen tracking, consent handling, provider orchestration |
-| Analytics providers | Google Analytics, Mixpanel, Segment, PostHog, Amplitude, Firebase, Heap, Matomo |
-| Error tracking providers | Sentry, Bugsnag, Rollbar, LogRocket, Raygun, DataDog RUM, AppCenter, Firebase Crashlytics |
-| React integration | Hooks, context helpers, HOC support, provider-free usage patterns |
-| Platform support | Web entrypoint plus optional Capacitor integration for iOS and Android |
-| Tooling | Setup CLI, generated distribution exports, package-level build/test/typecheck workflows |
+| Area                     | Scope                                                                                                                                             |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unified core API         | Event tracking, user identification, revenue logging, screen tracking, consent handling, provider orchestration                                   |
+| Analytics providers      | Google Analytics, Mixpanel, Segment, PostHog, Amplitude, Firebase, Heap, Matomo                                                                   |
+| Error tracking providers | Sentry, Bugsnag, Rollbar, LogRocket, Raygun, DataDog RUM, AppCenter, Firebase Crashlytics                                                         |
+| React integration        | Provider-free hooks (`useUnifiedTracking`, `useTrackEvent`) from `unified-tracking/react`                                                         |
+| Platform support         | Web/JS layer (browsers + Capacitor WebView). Native iOS/Android SDK bridges are scaffolded but not yet implemented — see "Native Providers" below |
+| Tooling                  | Setup CLI, generated distribution exports, package-level build/test/typecheck workflows                                                           |
 
 ## Privacy & Compliance
 
-- GDPR compliant with consent management built into provider orchestration
-- Data minimization — only collect what providers are configured to track
-- Consent updates toggle providers on/off dynamically via `updateConsent()`
+- Consent gate at dispatch — analytics/error events are dropped when the matching consent category is denied (`setConsent` / `settings.defaultConsent`). `marketing`/`personalization` default to `false` (opt-in) as of 3.1.0.
+- Data minimization — `settings.privacy.excludedProperties` keys are stripped from every event/trait/context before providers receive them (enforced as of 3.1.0; previously declared but inert).
+- Secrets are redacted from logs; provider keys/DSNs never reach the console. Default log level is `warn`.
+
+## Native Providers (Record — verified 2026-05-26)
+
+- Decision: **web-first, native planned**. Tracking is delivered by the web/JS layer, which runs inside the Capacitor WebView on iOS/Android — all 16 providers work there.
+- The `ios/` (Swift) and `android/` (Kotlin) provider classes are **stubs** (log + return; ~69 TODOs) and `registerCapacitorPlugin` registers only the `web` implementation — native SDK bridges are NOT yet implemented.
+- Do NOT claim full native-SDK delivery in docs/store listings until implemented. Native bridges are a separate, future effort.
 
 ## Critical Working Rules
 
@@ -78,15 +88,15 @@ Unified analytics and error tracking infrastructure for React, web, and Capacito
 
 Domain-specific rules live in nested `CLAUDE.md` + `AGENTS.md` files to optimize context usage:
 
-| Location | Scope |
-|----------|-------|
-| `src/` | Source conventions, imports, path aliases, TypeScript rules |
-| `src/core/` | Core engine architecture, event flow, singletons |
-| `src/providers/` | Provider architecture, base classes, adding/testing providers |
-| `src/react/` | React hooks, context, HOC patterns |
-| `docs/` | Documentation structure, update rules, API docs |
-| `android/` | Android native build, Kotlin/Java patterns |
-| `ios/` | iOS native build, Swift patterns, CocoaPods/SPM |
+| Location         | Scope                                                                              |
+| ---------------- | ---------------------------------------------------------------------------------- |
+| `src/`           | Source conventions, imports, path aliases, TypeScript rules                        |
+| `src/core/`      | Core engine architecture, event flow, singletons                                   |
+| `src/providers/` | Provider architecture, base classes, adding/testing providers                      |
+| `src/react/`     | Provider-free React hooks (`useUnifiedTracking`, `useTrackEvent`) — no context/HOC |
+| `docs/`          | Documentation structure, update rules, API docs                                    |
+| `android/`       | Android native build, Kotlin/Java patterns                                         |
+| `ios/`           | iOS native build, Swift patterns, CocoaPods/SPM                                    |
 
 ## Documentation Surface
 
@@ -97,20 +107,22 @@ Domain-specific rules live in nested `CLAUDE.md` + `AGENTS.md` files to optimize
 
 ## Package Update History
 
-| Date | Version | Notes |
-|------|---------|-------|
-| 2026-03-25 | 3.0.2 | Fixed provider-manager/web/google-analytics test failures, removed fragile docgen from default build |
-| 2026-03-24 | 3.0.2 | Refreshed docs, recorded current verification status, added portfolio maintenance rule |
-| 2026-02-02 | unknown | Full update to latest versions, build passed, lint had known issues |
+| Date       | Version | Notes                                                                                                                                                                                                                                   |
+| ---------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-05-26 | 3.1.0   | Polish + hardening: deps → latest stable (TS6/ESLint10/jsdom29), full audit, enforced privacy controls + consent gate, script-src validation, removed eval + dead code (web.ts + React island), public types tightened, 0 lint warnings |
+| 2026-03-25 | 3.0.2   | Fixed provider-manager/web/google-analytics test failures, removed fragile docgen from default build                                                                                                                                    |
+| 2026-03-24 | 3.0.2   | Refreshed docs, recorded current verification status, added portfolio maintenance rule                                                                                                                                                  |
+| 2026-02-02 | unknown | Full update to latest versions, build passed, lint had known issues                                                                                                                                                                     |
 
 ## Comprehensive Audit Record
 
-| Date | Audit Type | Status | Issues Found | Resolved |
-|------|-----------|--------|-------------|----------|
-| 2026-03-25 | Issue Remediation | Passed with minor warning | 4 | 4 |
-| 2026-03-24 | Portfolio + Docs Refresh | Passed with issues | 3 | 0 |
-| 2026-02-02 | Package Update | Passed with issues | 2 | 0 |
-| 2026-01-23 | Full Audit | Passed with issues | 2 | 0 |
+| Date       | Audit Type                   | Status                    | Issues Found | Resolved                                                                            |
+| ---------- | ---------------------------- | ------------------------- | ------------ | ----------------------------------------------------------------------------------- |
+| 2026-05-26 | Deep audit + polish (v3.1.0) | Passed                    | ~25          | Most fixed; Firebase base-class refactor + native SDK bridges deferred (documented) |
+| 2026-03-25 | Issue Remediation            | Passed with minor warning | 4            | 4                                                                                   |
+| 2026-03-24 | Portfolio + Docs Refresh     | Passed with issues        | 3            | 0                                                                                   |
+| 2026-02-02 | Package Update               | Passed with issues        | 2            | 0                                                                                   |
+| 2026-01-23 | Full Audit                   | Passed with issues        | 2            | 0                                                                                   |
 
 ### Last Audit Details
 
@@ -120,4 +132,4 @@ Domain-specific rules live in nested `CLAUDE.md` + `AGENTS.md` files to optimize
 - Tests: passing
 - Features: implemented surface is substantial and reflected in docs
 
-### Next Audit Due: 2026-04-07
+### Next Audit Due: 2026-06-26

@@ -1,17 +1,17 @@
 # src/ - Source Code Conventions
 
-**Last Updated**: `2026-04-03`
+**Last Updated**: `2026-05-26`
 
-## Path Aliases (tsconfig.json)
+## Imports
 
-| Alias | Maps To |
-|-------|---------|
-| `@/*` | `./src/*` |
-| `@providers/*` | `./src/providers/*` |
-| `@utils/*` | `./src/utils/*` |
-| `@types/*` | `./src/types/*` |
+Source modules use **relative imports** (e.g. `../../base-analytics-provider`). The path aliases below are declared in `tsconfig.json` + `vitest.config.ts` but are **not used in source** — relative imports are the convention here. To adopt aliases, also configure the Rollup build to resolve them, then migrate consistently.
 
-Always use path aliases for imports. Never use relative paths that go up more than one level (e.g., `../../`).
+| Alias (declared, unused) | Maps To             |
+| ------------------------ | ------------------- |
+| `@/*`                    | `./src/*`           |
+| `@providers/*`           | `./src/providers/*` |
+| `@utils/*`               | `./src/utils/*`     |
+| `@types/*`               | `./src/types/*`     |
 
 ## TypeScript Rules
 

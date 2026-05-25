@@ -14,17 +14,19 @@ A comprehensive Capacitor plugin that provides a unified API for multiple analyt
 
 ## Current State
 
-- Package version reviewed: `3.0.2`
-- Portfolio profile: [`UNIFIED-TRACKING_portfolio-info_2026-03-25.md`](./UNIFIED-TRACKING_portfolio-info_2026-03-25.md)
-- Verified on: `2026-03-25`
-- `yarn install`: passed
+- Package version: `3.1.0`
+- Verified on: `2026-05-26`
+- `yarn install`: passed (all dependencies at latest stable)
+- `yarn type-check`: passed (TypeScript 6)
 - `yarn build`: passed cleanly
-- `yarn type-check`: passed
-- `yarn test`: passed
-  - `268` tests passed
-  - `2` tests skipped
+- `yarn test`: passed — `246` passed, `2` skipped
+- `yarn lint`: passed — `0` warnings, `0` errors
 
-This README reflects the implemented package surface, but the verification snapshot above is the current truth and should be used when describing the package’s up-to-date engineering status.
+`3.1.0` is a polish and hardening release: every dependency updated to its latest
+stable version, a full security/privacy/quality audit, and the fixes that audit
+produced — enforced privacy controls (`excludedProperties` stripping), a consent
+gate at dispatch, script-source validation, removal of dead subsystems, and stricter
+public TypeScript types. The verification snapshot above is the current engineering truth.
 
 ## ✨ Features
 
@@ -62,7 +64,7 @@ yarn cap sync android
 yarn add unified-tracking
 
 # Install peer dependencies for React support
-yarn add react@^19.0.0 @capacitor/core@^7.4.3
+yarn add react@^19.0.0 @capacitor/core@^8.0.0
 ```
 
 ### Manual Setup (CLI Helper)
@@ -83,8 +85,8 @@ import { UnifiedTracking } from 'unified-tracking';
 // Initialize with your providers
 await UnifiedTracking.initialize({
   analytics: {
-    providers: ['google-analytics', 'mixpanel'],
-    googleAnalytics: {
+    providers: ['google', 'mixpanel'],
+    google: {
       measurementId: 'G-XXXXXXXXXX',
     },
     mixpanel: {
@@ -104,7 +106,7 @@ await UnifiedTracking.initialize({
 
 ```typescript
 // Direct API usage
-await UnifiedTracking.trackEvent('purchase_completed', {
+await UnifiedTracking.track('purchase_completed', {
   product_id: '123',
   price: 99.99,
   currency: 'USD'
@@ -114,10 +116,10 @@ await UnifiedTracking.trackEvent('purchase_completed', {
 import { useUnifiedTracking } from 'unified-tracking/react';
 
 function MyComponent() {
-  const { trackEvent, identify, logError } = useUnifiedTracking();
+  const { track, identify, logError } = useUnifiedTracking();
 
   const handlePurchase = async () => {
-    await trackEvent('purchase_completed', {
+    await track('purchase_completed', {
       product_id: '123',
       price: 99.99
     });
@@ -139,15 +141,16 @@ await UnifiedTracking.identify('user-123', {
 
 ### 4. Track Errors
 
-````typescript
+```typescript
 try {
   // Your code
 } catch (error) {
   await UnifiedTracking.logError(error, {
-    context: 'checkout_process',
-    userId: 'user-123'
+    tags: { context: 'checkout_process' },
+    user: { id: 'user-123' },
   });
 }
+```
 
 ## 📦 Installation Options
 
@@ -155,7 +158,7 @@ try {
 
 ```typescript
 import { UnifiedTracking } from 'unified-tracking';
-````
+```
 
 ### React Integration
 
@@ -183,8 +186,8 @@ await UnifiedTracking.initialize();
 ```typescript
 await UnifiedTracking.initialize({
   analytics: {
-    providers: ['google-analytics', 'mixpanel'],
-    googleAnalytics: {
+    providers: ['google', 'mixpanel'],
+    google: {
       measurementId: 'G-XXXXXXXXXX',
     },
     mixpanel: {
@@ -264,7 +267,9 @@ Providers are loaded dynamically based on availability:
 
 ## 🛡️ Privacy & Consent
 
-Built-in consent management:
+Consent is enforced at dispatch: when a category is denied, matching events are
+dropped before any provider is called. `analytics` and `errorTracking` default to
+`true`; `marketing` and `personalization` default to `false` (opt-in).
 
 ```typescript
 await UnifiedTracking.setConsent({
@@ -273,16 +278,27 @@ await UnifiedTracking.setConsent({
   marketing: false,
   personalization: false,
 });
+
+// Strip sensitive keys from every event before it reaches a provider:
+await UnifiedTracking.initialize({
+  settings: { privacy: { excludedProperties: ['email', 'ssn', 'creditCard'] } },
+});
 ```
 
 ## 📱 Platform Support
 
-- ✅ Web (all modern browsers)
-- ✅ React 16.8+
-- ✅ React Native (via Capacitor)
-- ✅ iOS (via Capacitor)
-- ✅ Android (via Capacitor)
-- ✅ Electron
+- ✅ Web — all modern browsers
+- ✅ React 19+ (optional peer dependency)
+- ✅ Capacitor 7.4.3+ / 8.x (optional peer dependency)
+- ✅ Electron / any JS runtime with a DOM
+- 🚧 iOS / Android **native SDK bridges** — see the note below
+
+> **Native (iOS / Android):** In a Capacitor app, all 16 providers run through the
+> web/JS layer inside the WebView — that path is fully implemented and is what
+> delivers tracking today. Dedicated **native-SDK bridges** (invoking the platform
+> Firebase / Sentry / etc. SDKs directly from Swift/Kotlin) are on the roadmap; the
+> `ios/` and `android/` plugin scaffolding ships as the foundation for that work and
+> does not yet forward events to native SDKs.
 
 ## 🤝 Migration
 
@@ -367,11 +383,11 @@ Built-in error handling capabilities:
 
 ## 🔒 Privacy & Compliance
 
-- **GDPR Compliant**: Built-in consent management
-- **CCPA Support**: California Consumer Privacy Act compliance
-- **Data Minimization**: Only collect necessary data
-- **Anonymization**: Option to anonymize sensitive data
-- **User Control**: Users can opt-out of tracking
+- **Consent gating**: analytics and error events are dropped at dispatch when the matching consent category is denied (via `setConsent` or `settings.defaultConsent`).
+- **Data minimization**: keys listed in `settings.privacy.excludedProperties` are stripped from event properties, identify traits, user properties, revenue properties, and error context before any provider receives them.
+- **No secrets in logs**: provider API keys/DSNs are redacted and never written to the console.
+- **IP anonymization**: applied per provider where the vendor supports it (e.g. Google Analytics `anonymizeIp`).
+- **User control**: consent can be revoked at any time; revoked providers stop receiving events.
 
 ## 🛠️ Development
 

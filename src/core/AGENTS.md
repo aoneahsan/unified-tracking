@@ -1,6 +1,6 @@
 # src/core/ - Core Engine Agent Instructions
 
-**Last Updated**: `2026-04-03`
+**Last Updated**: `2026-05-26`
 
 ## Overview
 
@@ -10,15 +10,15 @@
 
 ```
 UnifiedTrackingCore
-  ├── ProviderManager   → manages providers
-  ├── ConfigManager     → singleton config
-  ├── EventQueue        → buffers pre-init events
-  └── Logger            → unified logging
+  ├── ProviderManager   → manages providers; consent gate + privacy stripping at dispatch
+  ├── ConfigManager     → singleton config + consent state
+  ├── EventQueue        → standalone buffering utility (exported; NOT auto-started by core)
+  └── Logger            → centralized logging (default level: warn)
 ```
 
 ## Key Behaviors
 
-- `initialize(config)` → loads config, inits ProviderManager, flushes queue
+- `initialize(config)` → loads config, inits ProviderManager; collects failed providers into `InitializeResult.warnings`
 - `track()`, `logError()` → delegate to ProviderManager
 - `updateConsent()` → toggles providers based on consent
 - `addListener()` → subscribe to tracking/provider events
