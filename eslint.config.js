@@ -1,12 +1,11 @@
-import js from '@eslint/js';
 import typescript from '@typescript-eslint/eslint-plugin';
 import typescriptParser from '@typescript-eslint/parser';
 import prettier from 'eslint-config-prettier';
 import globals from 'globals';
 
 export default [
-  // Base configuration
-  js.configs.recommended,
+  // Base configuration (typescript-eslint recommended is applied per-file below;
+  // eslint-config-prettier disables stylistic rules that conflict with Prettier)
   prettier,
 
   // Global ignores

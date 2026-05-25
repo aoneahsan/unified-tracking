@@ -3,6 +3,7 @@
     "allowUnreachableCode": false,
     "declaration": true,
     "esModuleInterop": true,
+    "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
     "lib": ["dom", "es2023"],
     "module": "esnext",
@@ -24,8 +25,7 @@
       "@providers/*": ["./src/providers/*"],
       "@utils/*": ["./src/utils/*"],
       "@types/*": ["./src/types/*"]
-    },
-    "baseUrl": "."
+    }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "vitest.config.ts", "rollup.config.js"],
   "exclude": ["node_modules", "dist", "examples"]

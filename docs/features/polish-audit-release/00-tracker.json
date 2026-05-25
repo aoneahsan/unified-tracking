@@ -1,0 +1,214 @@
+{
+  "$schema": "polish-audit-release-tracker",
+  "description": "Resumable tracker for polishing unified-tracking and shipping v3.1.0. The FIRST phase/sub-task with status 'pending' or 'in_progress' is the next thing to work on. Never restart from scratch; never redo 'complete' work.",
+  "module": "polish-audit-release",
+  "package": "unified-tracking",
+  "createdAt": "2026-05-26",
+  "lastUpdated": "2026-05-26",
+  "currentVersion": "3.0.2",
+  "targetVersion": "3.1.0",
+  "overview": "docs/features/polish-audit-release/00-overview.md",
+  "userDecisions": {
+    "dependencyScope": "Update ALL deps to latest STABLE (patch+minor+major incl. TypeScript 6, ESLint 10, jsdom 29, lint-staged 17). Hold a package back ONLY with a documented blocker in runHistory.",
+    "versionBump": "minor: 3.0.2 -> 3.1.0 (no breaking public API changes).",
+    "release": "User pre-authorized NPM publish ('release that on NPM and let me know'). Do npm publish --dry-run + report contents BEFORE the real publish. Publish is the final phase 05 step.",
+    "tests": "No NEW automated tests (global rule). Running existing tests = gate; fixing tests broken by our changes = allowed; un-skipping/expanding coverage only if it fixes a real source bug.",
+    "packageManager": "yarn only for installs; npm only for the publish step.",
+    "logger": "No direct console.* in src/ outside src/utils/logger.ts.",
+    "commits": "ONE commit per session/phase; push after commit."
+  },
+  "knownRisks": [
+    "ESLint 10 vs @ionic/eslint-config@0.4.0 peer compatibility — may block; mitigation in phase01.4.",
+    "TypeScript 6.0 new strictness / removed deprecated flags may surface type errors / tsconfig changes.",
+    "esbuild 0.28 (0.x minor = breaking-ish) may affect Rollup TS transform.",
+    "jsdom 29 may change test DOM behavior (localStorage/matchMedia mocks).",
+    "Publishing is irreversible — gate behind full verification + dry-run."
+  ],
+  "verificationGate": "yarn type-check && yarn build && yarn test && yarn lint  (all must be clean)",
+  "baseline": {
+    "tsFiles": 65,
+    "testFiles": 11,
+    "coverageThreshold": "60%",
+    "analyticsProviders": ["google", "firebase", "amplitude", "mixpanel", "segment", "posthog", "heap", "matomo"],
+    "errorProviders": ["sentry", "crashlytics", "datadog", "bugsnag", "rollbar", "logrocket", "raygun", "appcenter"],
+    "buildVerifiedAtKickoff": true,
+    "kickoffGate": "type-check PASS, build PASS, test 268 pass/2 skip (after experimentalDecorators fix), lint 0 err / 636 warn + prettier drift",
+    "baselineBugFixed": "tsconfig.json was missing experimentalDecorators:true. Code uses legacy class decorators (@RegisterProvider). A recent in-range tooling bump made vitest's esbuild transform emit bare @decorator syntax that Node can't parse -> 9 of 11 test files failed with 'Invalid or unexpected token'. Added experimentalDecorators:true -> esbuild now downlevels to __decorate -> 268 tests pass."
+  },
+  "phases": [
+    {
+      "id": "phase00",
+      "title": "Plan + resumable tracker scaffolding",
+      "status": "complete",
+      "completedAt": "2026-05-26",
+      "subTasks": [
+        { "id": "phase00.1", "title": "Create feature folder + 00-overview.md", "status": "complete" },
+        { "id": "phase00.2", "title": "Write phase01-05 .md specs", "status": "complete" },
+        { "id": "phase00.3", "title": "Write 00-tracker.json", "status": "complete" }
+      ]
+    },
+    {
+      "id": "phase01",
+      "title": "Dependency updates -> latest stable + fix breakage + peerDeps",
+      "status": "complete",
+      "completedAt": "2026-05-26",
+      "spec": "docs/features/polish-audit-release/phase01-dependency-updates.md",
+      "result": "ALL deps at latest stable (npm outdated empty). type-check+build+test(268/2skip)+eslint all green. Clean install, zero peer warnings. No packages held back.",
+      "subTasks": [
+        {
+          "id": "phase01.0",
+          "title": "Establish baseline + fix experimentalDecorators",
+          "status": "complete",
+          "note": "tsconfig missing experimentalDecorators -> esbuild emitted bare @decorator -> 9 test files broke. Added flag -> 268 pass."
+        },
+        {
+          "id": "phase01.1",
+          "title": "Safe batch (patch+minor) update + verify",
+          "status": "complete",
+          "note": "@capacitor/* 8.3.4, @types/node 25.9.1, @types/react 19.2.15, @typescript-eslint 8.60.0, @vitest/coverage-v8 4.1.7, vitest 4.1.7, rollup 4.60.4, prettier-plugin-java 2.9.5."
+        },
+        { "id": "phase01.2", "title": "esbuild 0.28 + verify build", "status": "complete" },
+        {
+          "id": "phase01.3",
+          "title": "TypeScript 6.0 + fix deprecations + verify",
+          "status": "complete",
+          "note": "TS 6.0.3. Removed deprecated baseUrl (paths resolve relative to tsconfig in TS5+; aliases unused in src anyway)."
+        },
+        {
+          "id": "phase01.4",
+          "title": "ESLint 10 + config compat + verify",
+          "status": "complete",
+          "note": "eslint 10.4.0. Removed @eslint/js (per user rule) + dead @ionic/eslint-config + eslintConfig block + --ext flag. Added direct eslint-config-prettier 10.1.8 + globals 17.6.0."
+        },
+        { "id": "phase01.5", "title": "jsdom 29 + @types/jsdom 28 + verify tests", "status": "complete" },
+        { "id": "phase01.6", "title": "lint-staged 17 + verify", "status": "complete" },
+        {
+          "id": "phase01.7",
+          "title": "Fix peerDependencies (@capacitor/core range)",
+          "status": "complete",
+          "note": "^7.4.3 -> ^7.4.3 || ^8.0.0 (built/tested on Capacitor 8)."
+        },
+        {
+          "id": "phase01.8",
+          "title": "Final gate green + remove dead eslint-plugin-import",
+          "status": "complete",
+          "note": "Removed unused eslint-plugin-import (had no ESLint-10 peer). Install now warning-free."
+        }
+      ]
+    },
+    {
+      "id": "phase02",
+      "title": "Deep codebase audit -> phase02-findings.md",
+      "status": "pending",
+      "completedAt": null,
+      "spec": "docs/features/polish-audit-release/phase02-deep-audit.md",
+      "subTasks": [
+        {
+          "id": "phase02.1",
+          "title": "Security audit (deps CVE, secrets, script injection, localStorage, validation, consent)",
+          "status": "pending"
+        },
+        {
+          "id": "phase02.2",
+          "title": "Functionality audit (logger, error handling, event flow, hooks, native bridge, skipped tests)",
+          "status": "pending"
+        },
+        {
+          "id": "phase02.3",
+          "title": "Feature-gap audit (provider parity, documented-vs-implemented, type completeness)",
+          "status": "pending"
+        },
+        {
+          "id": "phase02.4",
+          "title": "Code-quality audit (dead code, duplication, naming, file size, TODOs)",
+          "status": "pending"
+        },
+        {
+          "id": "phase02.5",
+          "title": "Write prioritized phase02-findings.md + mirror into phase03 sub-tasks",
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": "phase03",
+      "title": "Implement fixes from findings (CRITICAL->LOW)",
+      "status": "pending",
+      "completedAt": null,
+      "spec": "docs/features/polish-audit-release/phase03-fixes.md",
+      "note": "Sub-tasks are populated from phase02-findings.md after the audit completes.",
+      "subTasks": [
+        { "id": "phase03.0", "title": "Populate fix sub-tasks from phase02-findings.md", "status": "pending" }
+      ]
+    },
+    {
+      "id": "phase04",
+      "title": "Documentation update to v3.1.0",
+      "status": "pending",
+      "completedAt": null,
+      "spec": "docs/features/polish-audit-release/phase04-documentation.md",
+      "subTasks": [
+        {
+          "id": "phase04.1",
+          "title": "Readme.md (provider matrix, examples, consent/privacy, hardening)",
+          "status": "pending"
+        },
+        {
+          "id": "phase04.2",
+          "title": "Root CLAUDE.md + AGENTS.md (version, verified state, history)",
+          "status": "pending"
+        },
+        { "id": "phase04.3", "title": "Nested CLAUDE/AGENTS (src, core, providers, react, docs)", "status": "pending" },
+        { "id": "phase04.4", "title": "AI-INTEGRATION-GUIDE.md + /docs accuracy pass", "status": "pending" },
+        { "id": "phase04.5", "title": "Portfolio file refresh", "status": "pending" }
+      ]
+    },
+    {
+      "id": "phase05",
+      "title": "Version bump 3.1.0 + CHANGELOG + dry-run + NPM publish + git push",
+      "status": "pending",
+      "completedAt": null,
+      "spec": "docs/features/polish-audit-release/phase05-version-release.md",
+      "subTasks": [
+        {
+          "id": "phase05.1",
+          "title": "Bump version everywhere (package.json, native, docs) + CHANGELOG 3.1.0",
+          "status": "pending"
+        },
+        {
+          "id": "phase05.2",
+          "title": "Pre-publish gate (install/type-check/build/test/lint) + npm pack --dry-run review",
+          "status": "pending"
+        },
+        {
+          "id": "phase05.3",
+          "title": "npm publish --dry-run -> report contents",
+          "status": "pending",
+          "awaitingUser": false
+        },
+        {
+          "id": "phase05.4",
+          "title": "npm publish (real) + verify npm view version",
+          "status": "pending",
+          "awaitingUser": false
+        },
+        { "id": "phase05.5", "title": "git commit + pull --rebase + push; confirm sync", "status": "pending" }
+      ]
+    }
+  ],
+  "runHistory": [
+    {
+      "date": "2026-05-26",
+      "phase": "phase00",
+      "summary": "Explored codebase (65 ts files, 16 providers, web+native), ran npm outdated (17 pkgs incl 4 majors), invoked skills (analytics-tracking, nodejs-best-practices, security-review). Created plan folder, overview, 5 phase specs, and this tracker.",
+      "commit": "pending"
+    },
+    {
+      "date": "2026-05-26",
+      "phase": "phase01",
+      "summary": "All deps -> latest stable. Fixed 3 real issues found en route: (1) missing experimentalDecorators broke 9 test files under new esbuild; (2) TS6 deprecated baseUrl removed; (3) ESLint 10 needed @eslint/js + --ext + dead @ionic/eslint-config + eslint-plugin-import removed, eslint-config-prettier+globals declared. peerDeps widened to Capacitor 8. Gate: type-check+build+test(268/2skip)+eslint all green; clean warning-free install.",
+      "commit": "pending"
+    }
+  ],
+  "resumeInstructions": "1) Read this tracker. 2) Find the first phase/sub-task with status 'pending' or 'in_progress' (currently phase01.0). 3) Read that phase's spec .md. 4) Invoke matching skills per RULE #0. 5) Do the work, run the verification gate, mark sub-task 'complete', append a runHistory row, bump lastUpdated. 6) ONE commit per session per the commit rule. 7) NEVER redo complete work or restart planning."
+}
