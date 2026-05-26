@@ -6,6 +6,8 @@ import type { RevenueData } from '../../../definitions.js';
 interface PostHogConfig extends ProviderConfig {
   apiKey: string;
   apiHost?: string;
+  /** @deprecated Documented alias for `apiHost`. */
+  host?: string;
   loaded?: (posthog: any) => void;
   autocapture?: boolean;
   capturePageview?: boolean;
@@ -132,7 +134,7 @@ export class PostHogAnalyticsProvider extends BaseAnalyticsProvider {
 
     // Configure PostHog
     const posthogOptions: any = {
-      api_host: config.apiHost || 'https://app.posthog.com',
+      api_host: config.apiHost || config.host || 'https://app.posthog.com',
       autocapture: config.autocapture !== false,
       capture_pageview: config.capturePageview !== false,
       capture_pageleave: config.capturePageleave !== false,

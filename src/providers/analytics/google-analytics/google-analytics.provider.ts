@@ -1,5 +1,6 @@
 import { BaseAnalyticsProvider } from '../../base-analytics-provider.js';
 import { RegisterProvider } from '../../registry.js';
+import { ConfigManager } from '../../../utils/config-manager.js';
 import type { ProviderConfig, ConsentSettings } from '../../../types/provider.js';
 import type { RevenueData } from '../../../definitions.js';
 
@@ -73,10 +74,13 @@ export class GoogleAnalyticsProvider extends BaseAnalyticsProvider {
     // Load GA4 script first
     await this.loadScript();
 
-    // Set default consent
+    // Set GA Consent Mode defaults from the unified consent state, so a consumer
+    // who sets defaultConsent.analytics=false (GDPR-first) starts denied instead of
+    // granting analytics storage before consent is known.
+    const consent = ConfigManager.getInstance().getConsent();
     window.gtag('consent', 'default', {
-      analytics_storage: 'granted',
-      ad_storage: config.allowAdFeatures ? 'granted' : 'denied',
+      analytics_storage: consent.analytics === false ? 'denied' : 'granted',
+      ad_storage: config.allowAdFeatures && consent.marketing !== false ? 'granted' : 'denied',
     });
 
     // Configure gtag

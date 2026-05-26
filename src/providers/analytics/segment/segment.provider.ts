@@ -9,6 +9,8 @@ interface SegmentConfig extends ProviderConfig {
   flushAt?: number;
   flushInterval?: number;
   enabledIntegrations?: Record<string, boolean>;
+  /** @deprecated Documented alias for `enabledIntegrations`. */
+  integrations?: Record<string, boolean>;
   defaultIntegrations?: boolean;
   anonymousId?: string;
   timeout?: number;
@@ -93,8 +95,9 @@ export class SegmentAnalyticsProvider extends BaseAnalyticsProvider {
       apiHost: config.apiHost,
     };
 
-    if (config.enabledIntegrations) {
-      segmentOptions.integrations = config.enabledIntegrations;
+    const enabledIntegrations = config.enabledIntegrations ?? config.integrations;
+    if (enabledIntegrations) {
+      segmentOptions.integrations = enabledIntegrations;
     }
 
     if (config.anonymousId) {

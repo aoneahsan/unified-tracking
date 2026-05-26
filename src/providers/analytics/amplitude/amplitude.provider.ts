@@ -293,12 +293,12 @@ export class AmplitudeAnalyticsProvider implements AnalyticsProvider {
       script.async = true;
 
       script.onload = () => {
-        // Initialize amplitude global
-        if ((window as any).amplitudeAnalytics) {
-          window.amplitude = (window as any).amplitudeAnalytics;
+        // The Amplitude Browser SDK 2.x UMD bundle attaches to window.amplitude
+        // (not window.amplitudeAnalytics, which previously always failed here).
+        if (window.amplitude) {
           resolve();
         } else {
-          reject(new Error('Amplitude SDK loaded but not available'));
+          reject(new Error('Amplitude SDK loaded but window.amplitude is not available'));
         }
       };
 

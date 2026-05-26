@@ -334,14 +334,30 @@ export interface MixpanelConfig {
 export interface SegmentConfig {
   writeKey: string;
   defaultIntegrations?: boolean;
+  /** Per-integration enable/disable map forwarded to analytics.js. */
+  enabledIntegrations?: Record<string, boolean>;
+  /** @deprecated Use `enabledIntegrations`. Still accepted as a runtime alias. */
   integrations?: Record<string, boolean>;
 }
 
 export interface PostHogConfig {
   apiKey: string;
+  /** PostHog API host, e.g. https://app.posthog.com or your self-hosted URL. */
+  apiHost?: string;
+  /** @deprecated Use `apiHost`. Still accepted as a runtime alias. */
   host?: string;
-  featureFlags?: boolean;
-  sessionRecording?: boolean;
+  /** Enable feature flags (boolean) or provide bootstrap flag values. */
+  featureFlags?: boolean | Record<string, unknown>;
+  /** Enable session recording (true) or pass a recording-options object. */
+  sessionRecording?:
+    | boolean
+    | {
+        enabled?: boolean;
+        maskAllInputs?: boolean;
+        maskInputOptions?: Record<string, boolean>;
+        sampleRate?: number;
+        minimumDuration?: number;
+      };
 }
 
 export interface HeapConfig {
@@ -350,8 +366,12 @@ export interface HeapConfig {
 }
 
 export interface MatomoConfig {
-  siteId: string;
-  url: string;
+  /** Matomo site id (string or number both accepted). */
+  siteId: string | number;
+  /** Matomo tracker base URL, e.g. https://analytics.example.com. */
+  trackerUrl: string;
+  /** @deprecated Use `trackerUrl`. Still accepted as a runtime alias. */
+  url?: string;
   customDimensions?: Record<number, string>;
 }
 
@@ -391,7 +411,10 @@ export interface RollbarConfig {
 }
 
 export interface LogRocketConfig {
+  /** LogRocket app id, e.g. "org/app". */
   appId: string;
+  /** @deprecated Casing alias for `appId`. Still accepted as a runtime alias. */
+  appID?: string;
   shouldCaptureIP?: boolean;
   network?: {
     isEnabled?: boolean;

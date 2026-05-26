@@ -119,19 +119,24 @@ export class MatomoAnalyticsProvider extends BaseAnalyticsProvider {
   private scriptLoaded = false;
 
   protected async doInitialize(config: MatomoConfig): Promise<void> {
-    if (!config.siteId || !config.trackerUrl) {
+    // Back-compat: accept the documented `url` alias for `trackerUrl`, and a
+    // string siteId (definitions.ts historically typed siteId as a string).
+    const raw = config as Partial<MatomoConfig> & { url?: string; siteId?: number | string };
+    const trackerUrl = raw.trackerUrl ?? raw.url ?? '';
+    const siteId = Number(raw.siteId);
+    if (!siteId || Number.isNaN(siteId) || !trackerUrl) {
       throw new Error('Matomo siteId and trackerUrl are required');
     }
 
     // Validate trackerUrl before it is interpolated into a <script> src — it
     // supplies the entire script origin, so reject non-http(s) / malformed URLs.
     try {
-      const parsed = new URL(config.trackerUrl);
+      const parsed = new URL(trackerUrl);
       if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
         throw new Error('scheme');
       }
     } catch {
-      throw new Error(`Matomo trackerUrl must be a valid http(s) URL: ${String(config.trackerUrl)}`);
+      throw new Error(`Matomo trackerUrl must be a valid http(s) URL: ${String(trackerUrl)}`);
     }
 
     this.matomoConfig = {
@@ -144,6 +149,8 @@ export class MatomoAnalyticsProvider extends BaseAnalyticsProvider {
       cookieSameSite: 'Lax',
       respectDoNotTrack: true,
       ...config,
+      trackerUrl,
+      siteId,
     };
 
     // Initialize _paq array for tracking queue

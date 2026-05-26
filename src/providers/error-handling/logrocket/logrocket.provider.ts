@@ -4,7 +4,9 @@ import type { ProviderConfig, ProviderType, ConsentSettings } from '../../../typ
 import type { ErrorContext } from '../../../definitions.js';
 
 interface LogRocketConfig extends ProviderConfig {
-  appID: string;
+  appID?: string;
+  /** @deprecated Documented lowercase alias for `appID`. */
+  appId?: string;
   release?: string;
   serverURL?: string;
   shouldCaptureIP?: boolean;
@@ -125,7 +127,9 @@ export class LogRocketErrorTrackingProvider extends BaseErrorTrackingProvider {
   private scriptLoaded = false;
 
   protected async doInitialize(config: LogRocketConfig): Promise<void> {
-    if (!config.appID) {
+    // Back-compat: accept the documented lowercase `appId` alias for `appID`.
+    const appId = config.appID ?? config.appId;
+    if (!appId) {
       throw new Error('LogRocket app ID is required');
     }
 
@@ -184,10 +188,10 @@ export class LogRocketErrorTrackingProvider extends BaseErrorTrackingProvider {
     };
 
     // Initialize LogRocket
-    this.logRocket.init(config.appID, logRocketOptions);
+    this.logRocket.init(appId, logRocketOptions);
 
     this.logger.info('LogRocket initialized successfully', {
-      appID: config.appID,
+      appID: appId,
       release: config.release,
       serverURL: config.serverURL,
     });
