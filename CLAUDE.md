@@ -77,7 +77,7 @@ Unified analytics and error tracking infrastructure for React, web, and Capacito
 - Do not describe this package as uninitialized or in planning; it is implemented and published.
 - Document known build or test issues honestly until fixed.
 - When providers, exports, or operational status change, update `Readme.md`, this file, and the portfolio file in the same pass.
-- Test framework: **Vitest** (NEVER Jest). Build: **Rollup + tsc**. Lint: **ESLint + Prettier**.
+- Test framework: **Vitest** (NEVER Jest). Build: **tsc** (NodeNext module resolution; the orphan Rollup step + deps were removed in 3.2.0). Lint: **ESLint + Prettier**.
 
 ## Root Portfolio File Maintenance Rule
 
