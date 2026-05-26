@@ -1,10 +1,16 @@
 {
   "$schema": "polish-audit-release-tracker",
-  "description": "Resumable tracker for polishing unified-tracking and shipping v3.1.0. The FIRST phase/sub-task with status 'pending' or 'in_progress' is the next thing to work on. Never restart from scratch; never redo 'complete' work.",
+  "description": "Resumable tracker for polishing unified-tracking. ROUND 01 shipped v3.1.0 (phases 00-05, all complete). ROUND 02 is a fresh independent re-audit (phases 06+) the user requested when re-running the prompt. The next thing to work on is the FIRST phase/sub-task with status 'pending' or 'in_progress' IN THE HIGHEST ROUND. Never restart a completed round; v3.1.0 is published and immutable.",
   "module": "polish-audit-release",
   "package": "unified-tracking",
   "createdAt": "2026-05-26",
   "lastUpdated": "2026-05-26",
+  "round": 2,
+  "currentRound": "round02-fresh-reaudit",
+  "round02Overview": "docs/features/polish-audit-release/round02-overview.md",
+  "round01Result": "COMPLETE - v3.1.0 published to npm 2026-05-26 (deps->latest stable, ~25-finding audit, all security/correctness/dead-code fixes, docs, minor bump). Immutable.",
+  "publishedVersion": "3.1.0",
+  "round02TargetVersion": "3.2.0 only if Round 02 produces real fixes; else hold at 3.1.0 (confirm before any publish - irreversible).",
   "currentVersion": "3.0.2",
   "targetVersion": "3.1.0",
   "overview": "docs/features/polish-audit-release/00-overview.md",
@@ -255,6 +261,46 @@
           "note": "All phase commits pushed to o/main through 1b07d0e + this tracker finalization."
         }
       ]
+    },
+    {
+      "id": "phase06",
+      "title": "ROUND 02: fresh independent deep re-audit (security + functionality + provider/gap/docs)",
+      "status": "in_progress",
+      "completedAt": null,
+      "spec": "docs/features/polish-audit-release/round02-overview.md",
+      "findings": "docs/features/polish-audit-release/round02-findings.md",
+      "note": "User chose 'fresh independent re-audit' - trust nothing from Round 01. 3 parallel agents told NOT to read phase02-findings.md. Plus independent baseline gate re-run.",
+      "subTasks": [
+        { "id": "phase06.1", "title": "Security audit (deps/secrets/injection/proto-pollution/validation/leakage/consent+privacy enforcement/storage/randomness/native)", "status": "in_progress" },
+        { "id": "phase06.2", "title": "Functionality & correctness audit (API end-to-end, fan-out isolation, async/init, queue, hooks, consent timing, dead code, error handling, cleanup)", "status": "in_progress" },
+        { "id": "phase06.3", "title": "Provider-completeness + feature-gap + API/type + docs-vs-reality audit (16-provider matrix, native stubs, type leaks, config-vs-reality)", "status": "in_progress" },
+        { "id": "phase06.4", "title": "Independent baseline gate re-run (type-check+build+test+eslint+prettier)", "status": "complete", "note": "Gate exit 0 - see runHistory." },
+        { "id": "phase06.5", "title": "Synthesize -> round02-findings.md (dedup, FIX/DOC/DEFER, severity, confidence) + populate phase07", "status": "pending" }
+      ]
+    },
+    {
+      "id": "phase07",
+      "title": "ROUND 02: implement fixes from round02-findings.md (security/correctness first)",
+      "status": "pending",
+      "completedAt": null,
+      "note": "Sub-tasks populated after phase06.5. No NEW automated tests (global rule). Minor release: no breaking public API changes.",
+      "subTasks": []
+    },
+    {
+      "id": "phase08",
+      "title": "ROUND 02: documentation refresh for anything changed (README, AI-guide, nested CLAUDE/AGENTS, portfolio)",
+      "status": "pending",
+      "completedAt": null,
+      "subTasks": []
+    },
+    {
+      "id": "phase09",
+      "title": "ROUND 02: release decision - bump 3.2.0 + CHANGELOG + dry-run + npm publish + push (ONLY if real fixes; confirm intent first)",
+      "status": "pending",
+      "completedAt": null,
+      "awaitingUser": true,
+      "note": "If Round 02 yields only cosmetic/docs changes, recommend holding at 3.1.0 (no npm churn). If real fixes land, ship 3.2.0. Confirm 3.2.0 intent before the irreversible publish.",
+      "subTasks": []
     }
   ],
   "runHistory": [
@@ -311,7 +357,13 @@
       "phase": "phase05 (release)",
       "summary": "RELEASED unified-tracking@3.1.0 to npm (latest, 228 files / 196.4 kB). npm auth token set in ~/.npmrc. Pre-publish gate green; npm pack reviewed. Verified npm view -> 3.1.0. All commits pushed to o/main. TASK COMPLETE.",
       "commit": "pending (tracker finalization)"
+    },
+    {
+      "date": "2026-05-26",
+      "phase": "phase06 (round 02 kickoff + baseline gate)",
+      "summary": "User re-ran the prompt; chose 'fresh independent re-audit'. Confirmed 3.1.0 live on npm, git in sync with o/main, deps still at latest stable. Invoked skills (security-review, analytics-tracking, nodejs-best-practices). Launched 3 independent audit agents (told NOT to read prior findings) + background baseline gate. GATE RESULT: type-check PASS, build PASS, test PASS (246/2 skip), eslint PASS (0/0), but `yarn prettier --check` FAILS on 2 committed files (src/providers/AGENTS.md, src/providers/CLAUDE.md) -> real LOW finding: shipped tree fails the full `yarn lint`. Wrote round02-overview.md, opened phases 06-09.",
+      "commit": "pending"
     }
   ],
-  "resumeInstructions": "TASK COMPLETE — unified-tracking@3.1.0 published to npm (latest) on 2026-05-26 and all commits pushed to o/main. All phases 00-05 are 'complete'. Intentionally DEFERRED (non-blocking, documented; pick up in a future release if desired): phase03.7 Firebase base-class refactor + decorator/getProviderManager/getPlatform cleanups (consistency-only); a few phase03.8 items (mixpanel native time_event, setup.js gitignore warning, .npmignore vs files reconcile); FILESIZE segment-snippet extraction; portfolio file refresh; providers/+docs nested CLAUDE/AGENTS date bumps. If re-run: there is nothing left for the core polish/release; only the deferred niceties above remain."
+  "resumeInstructions": "ROUND 01 (v3.1.0) is COMPLETE and published to npm - immutable, never redo. ACTIVE WORK IS ROUND 02 (phases 06+). On resume: (1) read this tracker; (2) the next thing to do is the first 'pending'/'in_progress' sub-task in the HIGHEST phase number - currently phase06 (fresh independent re-audit) in_progress; (3) once the 3 audit agents produced round02-findings.md, do phase06.5 synthesis then populate + execute phase07 fixes; (4) invoke matching skills per RULE #0 before any edit; (5) ONE commit per session; (6) do NOT publish 3.2.0 without confirming intent (publish is irreversible) - if round02-findings.md shows only cosmetic items, recommend holding at 3.1.0. Known baseline issue already found: shipped tree fails `yarn prettier --check` on src/providers/AGENTS.md + CLAUDE.md."
 }
