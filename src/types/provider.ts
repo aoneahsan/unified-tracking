@@ -44,6 +44,11 @@ export interface Provider {
 
   isReady(): boolean;
   getConfig(): ProviderConfig;
+
+  /** Optional: clear user-scoped state (invoked by ProviderManager.reset()). */
+  reset?(): void | Promise<void>;
+  /** Optional: toggle provider-level debug logging. */
+  setDebugMode?(enabled: boolean): void;
 }
 
 export interface ProviderMetadata {

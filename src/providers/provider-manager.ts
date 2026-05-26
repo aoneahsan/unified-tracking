@@ -454,8 +454,8 @@ export class ProviderManager {
   async reset(): Promise<void> {
     for (const [id, instance] of this.providers) {
       try {
-        if ('reset' in instance.provider) {
-          await (instance.provider as any).reset();
+        if (instance.provider.reset) {
+          await instance.provider.reset();
         }
       } catch (error) {
         this.logger.error(`Failed to reset provider ${id}`, error);
@@ -468,8 +468,8 @@ export class ProviderManager {
 
     for (const [id, instance] of this.providers) {
       try {
-        if ('setDebugMode' in instance.provider) {
-          (instance.provider as any).setDebugMode(enabled);
+        if (instance.provider.setDebugMode) {
+          instance.provider.setDebugMode(enabled);
         }
       } catch (error) {
         this.logger.error(`Failed to set debug mode for provider ${id}`, error);
