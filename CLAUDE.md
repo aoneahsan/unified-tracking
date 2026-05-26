@@ -1,22 +1,23 @@
 # unified-tracking Package
 
 **Package Name**: `unified-tracking`
-**Version**: `3.2.0`
+**Version**: `3.3.0`
 **NPM**: `https://www.npmjs.com/package/unified-tracking`
-**Last Updated**: `2026-05-26`
+**Last Updated**: `2026-05-27`
 
 Unified analytics and error tracking infrastructure for React, web, and Capacitor apps with provider-based integrations, consent controls, React hooks, and cross-platform delivery targets.
 
 ## Current Verified State
 
-- Reviewed on: `2026-05-26` (Round 02 — fresh independent re-audit)
+- Reviewed on: `2026-05-27` (Round 03 — completed the Round-02 deferral backlog)
 - Install: `yarn install` passed (all dependencies at latest stable)
 - Typecheck: `yarn type-check` passed (TypeScript 6, NodeNext module resolution)
 - Build: `yarn build` passed cleanly
 - Tests: `yarn test` passed (`246` passed, `2` skipped)
 - Lint: `yarn lint` passed (eslint `0`/`0` + prettier clean)
-- Node ESM import smoke check: passed (`import('dist/esm/src/index.js')` resolves — was broken before 3.2.0)
-- Round 02 fixed 2 CRITICAL (Node-ESM unimportable; providers could silently fail to register) + 8 HIGH + 11 MEDIUM; see `docs/features/polish-audit-release/round02-findings.md`. Deliberate documented deferrals: native SDK bridges; Firebase/Amplitude base-class refactor (M7); a few LOW type/cleanup items; full `bin/setup.js` config-shape rework.
+- Node ESM import smoke check: passed (`import('dist/esm/src/index.js')` resolves)
+- Round 03 (3.3.0) completed the deferred polish: unified `flush()`, typed event listeners, Firebase/Amplitude now extend `BaseAnalyticsProvider` (M7), single SSR guard, public-surface `any`→`unknown` (L11), `getProviderManager` deprecated, and the `bin/setup.js` config-shape rework. Round 02 (3.2.0) fixed 2 CRITICAL + 8 HIGH + 11 MEDIUM (see `docs/features/polish-audit-release/round02-findings.md`).
+- STILL DEFERRED (separate effort): native iOS/Android SDK bridges — require a native toolchain (Xcode/Gradle) + real vendor SDK deps + device/simulator build verification not available in this environment. Tracking runs via the web layer (incl. the Capacitor WebView).
 
 ## CLAUDE.md + AGENTS.md Sync Rule (IRON-SOLID)
 
@@ -111,6 +112,7 @@ Domain-specific rules live in nested `CLAUDE.md` + `AGENTS.md` files to optimize
 
 | Date       | Version | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | ---------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-05-27 | 3.3.0   | Round 03 — completed the Round-02 deferral backlog (all additive): unified `flush()`, typed event listeners (`TrackingEventPayload`), Firebase/Amplitude now extend `BaseAnalyticsProvider` (M7 — gain super-properties + timed events), single SSR/non-browser guard, public-surface `any`→`unknown` (L11), `getProviderManager` deprecated, and `bin/setup.js` regenerates the correct object-shaped config. Native SDK bridges still deferred. No breaking API changes.                                            |
 | 2026-05-26 | 3.2.0   | Round 02 fresh independent re-audit: fixed 2 CRITICAL (Node-ESM unimportable → NodeNext + .js; providers could silently fail to register → static import map), HIGH secret-logging (redact in sink), config-key mismatches (aliases + types), breadcrumbs reach SDK, crashlytics honest error, EventQueue wired up (pre-init buffering), unified ConsentSettings, GA consent default, anonymizeIp honored, single core singleton, stable hooks, shutdown(); rewrote 3 fictional /docs files. No breaking API changes. |
 | 2026-05-26 | 3.1.0   | Polish + hardening: deps → latest stable (TS6/ESLint10/jsdom29), full audit, enforced privacy controls + consent gate, script-src validation, removed eval + dead code (web.ts + React island), public types tightened, 0 lint warnings                                                                                                                                                                                                                                                                               |
 | 2026-03-25 | 3.0.2   | Fixed provider-manager/web/google-analytics test failures, removed fragile docgen from default build                                                                                                                                                                                                                                                                                                                                                                                                                  |

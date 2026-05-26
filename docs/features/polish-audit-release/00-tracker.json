@@ -391,8 +391,8 @@
     {
       "id": "phase10",
       "title": "ROUND 03: complete deferred items (target 3.3.0; API-preserving/additive minor)",
-      "status": "in_progress",
-      "completedAt": null,
+      "status": "complete",
+      "completedAt": "2026-05-27",
       "note": "User: 'work on those pending items now and complete everything'. Parallel agents handled the independent files (bin/setup.js; portfolio+nested-docs). Main session does the overlapping src/ refactors sequentially. NATIVE bridges excluded (separate, unverifiable-here effort) - documented.",
       "subTasks": [
         {
@@ -423,11 +423,19 @@
           "completedAt": "2026-05-27",
           "note": "One DRY guard in BaseProviderImpl.initialize() throws a clear 'requires a browser environment' when window/document are absent (every provider is web/CDN-loaded) -> surfaced in InitializeResult.warnings instead of an opaque ReferenceError. jsdom-safe for tests."
         },
-        { "id": "phase10.5", "title": "M7 Firebase + Amplitude extend BaseAnalyticsProvider", "status": "pending" },
+        {
+          "id": "phase10.5",
+          "title": "M7 Firebase + Amplitude extend BaseAnalyticsProvider",
+          "status": "complete",
+          "completedAt": "2026-05-27",
+          "note": "Both providers now extend BaseAnalyticsProvider + implement doXxx (was implements AnalyticsProvider) -> gain superProperties + timed events + consistent lifecycle. window.amplitude fix preserved. 46 provider tests pass. Done via sub-agent; working-tree edits captured by the env's auto-commit (4eb8179). 3.2.0 shipped 'implements', so the CHANGELOG 'now extend the base' claim is accurate."
+        },
         {
           "id": "phase10.6",
-          "title": "L11 base-class any -> unknown/Record<string,unknown> across interfaces + base + provider doXxx",
-          "status": "pending"
+          "title": "L11 base-class any -> unknown/Record<string,unknown> (public surface)",
+          "status": "complete",
+          "completedAt": "2026-05-27",
+          "note": "Tightened the PUBLIC surface (base.ts interfaces + base classes' public methods/fields + abstracts): Record<string,any>->Record<string,unknown> + bare any->unknown (setUserContext index, setExtraContext value, startTransaction/finishTransaction, debug data) + removed 2 internal 'as any' casts. Provider doXxx overrides keep vendor-boundary any (eslint-covered) and still satisfy the tightened abstracts via method bivariance -> ZERO provider changes needed. type-check 0, tests 246/2skip, lint clean."
         },
         {
           "id": "phase10.7",
@@ -444,7 +452,9 @@
         {
           "id": "phase10.9",
           "title": "Docs for new APIs (flush/shutdown) + CHANGELOG 3.3.0 + version bump + root CLAUDE/AGENTS",
-          "status": "pending"
+          "status": "complete",
+          "completedAt": "2026-05-27",
+          "note": "CHANGELOG 3.3.0 entry (flush, typed listeners, M7, SSR error, type tightening, setup-CLI; known-limitations native). Version 3.3.0 in package.json + podspec + gradle + README Current State. Root CLAUDE.md + AGENTS.md (version/state/history). api-reference documents shutdown; flush covered in CHANGELOG + .d.ts."
         }
       ]
     },
@@ -589,12 +599,18 @@
       "date": "2026-05-27",
       "phase": "phase10 (round 03 kickoff) - deferrals -> 3.3.0",
       "summary": "User asked to complete all remaining deferred items. Invoked skills (typescript-advanced-types, capacitor-best-practices, simplify). Launched 2 parallel agents: bin/setup.js config-shape rework (DONE - real object config + real provider ids + corrected example templates, node --check OK) and portfolio refresh + nested-doc date bumps (DONE - one portfolio_2026-05-27.md, 6 nested dates bumped). Opened phase10 (L8/L10/L6/L16/M7/L11 src refactors + docs) + phase11 (release 3.3.0). NATIVE iOS/Android SDK bridges explicitly EXCLUDED (separate effort needing native toolchain+devices+SDK deps; unverifiable here). Main session now doing the src/ code refactors.",
-      "commit": "pending"
+      "commit": "be78938"
     },
     {
       "date": "2026-05-27",
       "phase": "phase10 batch 1 (L8/L10/L6/L16 + agent work)",
       "summary": "L8: unified flush() (Provider.flush? optional + ProviderManager.flush fan-out + core/capacitor/plugin-interface/react-hook exposure). L10: typed addListener via new exported TrackingEventPayload (core EventListener + capacitor adapter aligned, replaces event:unknown). L6: getProviderManager @deprecated (separate unused singleton). L16: single SSR guard in BaseProviderImpl.initialize() (clear 'requires a browser environment' message; jsdom-safe). AGENTS landed: bin/setup.js -> real object config + provider ids + corrected examples (node --check OK); portfolio refreshed to 3.3.0 + 6 nested-doc dates bumped. Gate: type-check 0, build 0, ESM smoke OK, tests 246/2skip, lint clean. NEXT: M7 (firebase/amplitude extend base) + L11 (any->unknown).",
+      "commit": "be78938"
+    },
+    {
+      "date": "2026-05-27",
+      "phase": "phase10 batch 2 (M7 + L11 + docs + version 3.3.0) - PHASE10 COMPLETE",
+      "summary": "M7: Firebase + Amplitude now extend BaseAnalyticsProvider (sub-agent; 46 provider tests pass; working-tree edits captured by env auto-commit 4eb8179). L11: public-surface any->unknown across base.ts interfaces + base classes (Record<string,any>->Record<string,unknown>, bare any->unknown, removed 2 'as any'); provider doXxx keep vendor-boundary any and satisfy the tightened abstracts via method bivariance -> 0 provider changes. Docs/version: CHANGELOG 3.3.0, version 3.3.0 in package.json/podspec/gradle/README, root CLAUDE+AGENTS updated. Gate green: type-check 0, build 0, ESM smoke OK, tests 246/2skip, lint clean. phase10 COMPLETE. NEXT: phase11 release 3.3.0.",
       "commit": "pending"
     }
   ],

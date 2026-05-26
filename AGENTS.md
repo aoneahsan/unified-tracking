@@ -2,14 +2,14 @@
 
 > AI Agent Instructions for Unified Tracking Plugin Development
 
-**Last Updated**: `2026-05-26`
+**Last Updated**: `2026-05-27`
 
 ## Project Overview
 
 | Property     | Value                                          |
 | ------------ | ---------------------------------------------- |
 | Package Name | `unified-tracking`                             |
-| Version      | 3.2.0                                          |
+| Version      | 3.3.0                                          |
 | License      | MIT                                            |
 | Repository   | Public                                         |
 | NPM          | https://www.npmjs.com/package/unified-tracking |

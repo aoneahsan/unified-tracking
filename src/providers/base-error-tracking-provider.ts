@@ -7,7 +7,7 @@ interface Breadcrumb {
   message: string;
   category?: string;
   timestamp: number;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
 }
 
 /**
@@ -16,8 +16,8 @@ interface Breadcrumb {
 export abstract class BaseErrorTrackingProvider extends BaseProviderImpl implements ErrorTrackingProvider {
   readonly type: ProviderType = 'error-tracking';
 
-  protected userContext: Record<string, any> = {};
-  protected extraContext: Record<string, any> = {};
+  protected userContext: Record<string, unknown> = {};
+  protected extraContext: Record<string, unknown> = {};
   protected tags: Record<string, string> = {};
   protected breadcrumbs: Breadcrumb[] = [];
   protected maxBreadcrumbs = 100;
@@ -65,7 +65,7 @@ export abstract class BaseErrorTrackingProvider extends BaseProviderImpl impleme
     this.addBreadcrumb(message, 'log', { level });
   }
 
-  addBreadcrumb(message: string, category?: string, data?: Record<string, any>): void {
+  addBreadcrumb(message: string, category?: string, data?: Record<string, unknown>): void {
     const breadcrumb: Breadcrumb = {
       message,
       category,
@@ -84,7 +84,7 @@ export abstract class BaseErrorTrackingProvider extends BaseProviderImpl impleme
     // breadcrumb actually reaches the provider and is attached to subsequent errors.
     // Previously breadcrumbs were only buffered locally and never sent to any SDK.
     // Providers without a native breadcrumb concept simply omit `doAddBreadcrumb`.
-    const forward = (this as { doAddBreadcrumb?: (m: string, c?: string, d?: Record<string, any>) => void })
+    const forward = (this as { doAddBreadcrumb?: (m: string, c?: string, d?: Record<string, unknown>) => void })
       .doAddBreadcrumb;
     if (typeof forward === 'function') {
       try {
@@ -97,7 +97,7 @@ export abstract class BaseErrorTrackingProvider extends BaseProviderImpl impleme
     this.debug('Added breadcrumb', breadcrumb);
   }
 
-  setUserContext(user: { id?: string; email?: string; username?: string; [key: string]: any }): void {
+  setUserContext(user: { id?: string; email?: string; username?: string; [key: string]: unknown }): void {
     this.debug('Setting user context', user);
     this.userContext = { ...user };
     this.doSetUserContext(user);
@@ -106,9 +106,9 @@ export abstract class BaseErrorTrackingProvider extends BaseProviderImpl impleme
   /**
    * Provider-specific user context logic
    */
-  protected abstract doSetUserContext(user: Record<string, any>): void;
+  protected abstract doSetUserContext(user: Record<string, unknown>): void;
 
-  setExtraContext(key: string, value: any): void {
+  setExtraContext(key: string, value: unknown): void {
     this.debug(`Setting extra context: ${key}`, value);
     this.extraContext[key] = value;
     this.doSetExtraContext(key, value);
@@ -117,7 +117,7 @@ export abstract class BaseErrorTrackingProvider extends BaseProviderImpl impleme
   /**
    * Provider-specific extra context logic
    */
-  protected abstract doSetExtraContext(key: string, value: any): void;
+  protected abstract doSetExtraContext(key: string, value: unknown): void;
 
   setTags(tags: Record<string, string>): void {
     this.debug('Setting tags', tags);
@@ -134,7 +134,7 @@ export abstract class BaseErrorTrackingProvider extends BaseProviderImpl impleme
     this.checkReady();
 
     const enrichedContext = this.enrichContext(context);
-    (enrichedContext as any).isException = true;
+    (enrichedContext as ErrorContext & { isException?: boolean }).isException = true;
 
     this.debug('Capturing exception', { exception, context: enrichedContext });
 
@@ -151,7 +151,7 @@ export abstract class BaseErrorTrackingProvider extends BaseProviderImpl impleme
    */
   protected abstract doCaptureException(exception: Error, context: ErrorContext): Promise<void>;
 
-  startTransaction(name: string, operation?: string): any {
+  startTransaction(name: string, operation?: string): unknown {
     this.debug(`Starting transaction: ${name}`, { operation });
     return this.doStartTransaction?.(name, operation);
   }
@@ -160,9 +160,9 @@ export abstract class BaseErrorTrackingProvider extends BaseProviderImpl impleme
    * Provider-specific transaction start logic
    * Override if provider supports this feature
    */
-  protected doStartTransaction?(name: string, operation?: string): any;
+  protected doStartTransaction?(name: string, operation?: string): unknown;
 
-  finishTransaction(transaction: any): void {
+  finishTransaction(transaction: unknown): void {
     this.debug('Finishing transaction', transaction);
     this.doFinishTransaction?.(transaction);
   }
@@ -171,7 +171,7 @@ export abstract class BaseErrorTrackingProvider extends BaseProviderImpl impleme
    * Provider-specific transaction finish logic
    * Override if provider supports this feature
    */
-  protected doFinishTransaction?(transaction: any): void;
+  protected doFinishTransaction?(transaction: unknown): void;
 
   protected async doReset(): Promise<void> {
     this.userContext = {};
@@ -219,7 +219,7 @@ export abstract class BaseErrorTrackingProvider extends BaseProviderImpl impleme
   /**
    * Format error for logging
    */
-  protected formatError(error: Error): Record<string, any> {
+  protected formatError(error: Error): Record<string, unknown> {
     return {
       name: error.name,
       message: error.message,
@@ -231,14 +231,14 @@ export abstract class BaseErrorTrackingProvider extends BaseProviderImpl impleme
   /**
    * Extract additional properties from error object
    */
-  protected extractErrorProperties(error: Error): Record<string, any> {
-    const properties: Record<string, any> = {};
+  protected extractErrorProperties(error: Error): Record<string, unknown> {
+    const properties: Record<string, unknown> = {};
 
     // Extract non-standard properties
     for (const key in error) {
       if (key !== 'name' && key !== 'message' && key !== 'stack') {
         try {
-          properties[key] = (error as any)[key];
+          properties[key] = (error as unknown as Record<string, unknown>)[key];
         } catch {
           // Ignore properties that can't be accessed
         }

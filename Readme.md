@@ -14,23 +14,25 @@ A comprehensive Capacitor plugin that provides a unified API for multiple analyt
 
 ## Current State
 
-- Package version: `3.2.0`
-- Verified on: `2026-05-26`
+- Package version: `3.3.0`
+- Verified on: `2026-05-27`
 - `yarn install`: passed (all dependencies at latest stable)
-- `yarn type-check`: passed (TypeScript 6)
+- `yarn type-check`: passed (TypeScript 6, NodeNext)
 - `yarn build`: passed cleanly
 - `yarn test`: passed — `246` passed, `2` skipped
 - `yarn lint`: passed — `0` warnings, `0` errors
 - Node ESM import smoke check: passed
 
-`3.2.0` follows a second, independent deep-audit pass that fixed defects the same-day
-`3.1.0` audit missed — most importantly making the package importable in **Node ESM** and
-ensuring providers **actually register** (a runtime-variable dynamic import previously
-could drop every event), plus secret-safe logging, deep `excludedProperties` stripping,
-**pre-init event buffering**, breadcrumbs that reach the SDK, a `shutdown()` teardown,
-corrected public config keys (with back-compat aliases), and documentation rewritten to
-match the real API. See [`CHANGELOG.md`](./CHANGELOG.md) for the full list. No breaking
-public API changes.
+`3.3.0` completes the polish backlog deferred from `3.2.0` (all additive, no breaking
+changes): a unified **`flush()`**, **typed event listeners**, the Firebase & Amplitude
+providers now **extend the shared base** (so `setSuperProperties()` + timed events work
+there too), a clear non-browser/SSR error, stronger public types (`any` → `unknown` on the
+base classes/interfaces), and a corrected `unified-tracking-setup` CLI. `3.2.0` before it
+fixed two CRITICAL packaging/loader defects (Node-ESM import + reliable provider
+registration) plus secret-safe logging and an honest API docs rewrite. See
+[`CHANGELOG.md`](./CHANGELOG.md) for the full history. Native iOS/Android SDK bridges
+remain scaffolding (not yet wired) — tracking runs via the web layer (incl. the Capacitor
+WebView).
 
 ## ✨ Features
 

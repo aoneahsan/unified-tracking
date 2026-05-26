@@ -88,27 +88,27 @@ export interface AnalyticsProvider extends BaseProvider {
   /**
    * Track a custom event
    */
-  track(eventName: string, properties?: Record<string, any>): Promise<void>;
+  track(eventName: string, properties?: Record<string, unknown>): Promise<void>;
 
   /**
    * Track a custom event (alias for track)
    */
-  trackEvent(eventName: string, properties?: Record<string, any>): Promise<void>;
+  trackEvent(eventName: string, properties?: Record<string, unknown>): Promise<void>;
 
   /**
    * Identify a user
    */
-  identifyUser(userId: string, traits?: Record<string, any>): Promise<void>;
+  identifyUser(userId: string, traits?: Record<string, unknown>): Promise<void>;
 
   /**
    * Set user properties
    */
-  setUserProperties(properties: Record<string, any>): Promise<void>;
+  setUserProperties(properties: Record<string, unknown>): Promise<void>;
 
   /**
    * Log a screen view
    */
-  logScreenView(screenName: string, properties?: Record<string, any>): Promise<void>;
+  logScreenView(screenName: string, properties?: Record<string, unknown>): Promise<void>;
 
   /**
    * Log revenue
@@ -123,12 +123,12 @@ export interface AnalyticsProvider extends BaseProvider {
   /**
    * End a timed event
    */
-  endTimedEvent?(eventName: string, properties?: Record<string, any>): Promise<void>;
+  endTimedEvent?(eventName: string, properties?: Record<string, unknown>): Promise<void>;
 
   /**
    * Set super properties (properties included with all events)
    */
-  setSuperProperties?(properties: Record<string, any>): void;
+  setSuperProperties?(properties: Record<string, unknown>): void;
 
   /**
    * Increment a user property
@@ -153,17 +153,17 @@ export interface ErrorTrackingProvider extends BaseProvider {
   /**
    * Add breadcrumb
    */
-  addBreadcrumb?(message: string, category?: string, data?: Record<string, any>): void;
+  addBreadcrumb?(message: string, category?: string, data?: Record<string, unknown>): void;
 
   /**
    * Set user context
    */
-  setUserContext(user: { id?: string; email?: string; username?: string; [key: string]: any }): void;
+  setUserContext(user: { id?: string; email?: string; username?: string; [key: string]: unknown }): void;
 
   /**
    * Set extra context
    */
-  setExtraContext(key: string, value: any): void;
+  setExtraContext(key: string, value: unknown): void;
 
   /**
    * Set tags
@@ -178,12 +178,12 @@ export interface ErrorTrackingProvider extends BaseProvider {
   /**
    * Start a transaction/span
    */
-  startTransaction?(name: string, operation?: string): any;
+  startTransaction?(name: string, operation?: string): unknown;
 
   /**
    * Finish a transaction/span
    */
-  finishTransaction?(transaction: any): void;
+  finishTransaction?(transaction: unknown): void;
 }
 
 /**

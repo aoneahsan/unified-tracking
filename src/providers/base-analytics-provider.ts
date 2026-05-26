@@ -9,10 +9,10 @@ import type { ProviderType } from '../types/provider.js';
 export abstract class BaseAnalyticsProvider extends BaseProviderImpl implements AnalyticsProvider {
   readonly type: ProviderType = 'analytics';
 
-  protected superProperties: Record<string, any> = {};
+  protected superProperties: Record<string, unknown> = {};
   protected timedEvents: Map<string, number> = new Map();
 
-  async track(eventName: string, properties?: Record<string, any>): Promise<void> {
+  async track(eventName: string, properties?: Record<string, unknown>): Promise<void> {
     this.checkReady();
 
     const mergedProperties = {
@@ -33,14 +33,14 @@ export abstract class BaseAnalyticsProvider extends BaseProviderImpl implements 
   /**
    * Provider-specific event tracking logic
    */
-  protected abstract doTrack(eventName: string, properties: Record<string, any>): Promise<void>;
+  protected abstract doTrack(eventName: string, properties: Record<string, unknown>): Promise<void>;
 
-  async trackEvent(eventName: string, properties?: Record<string, any>): Promise<void> {
+  async trackEvent(eventName: string, properties?: Record<string, unknown>): Promise<void> {
     // Alias for track method
     return this.track(eventName, properties);
   }
 
-  async identifyUser(userId: string, traits?: Record<string, any>): Promise<void> {
+  async identifyUser(userId: string, traits?: Record<string, unknown>): Promise<void> {
     this.checkReady();
 
     this.debug(`Identifying user: ${userId}`, traits);
@@ -56,9 +56,9 @@ export abstract class BaseAnalyticsProvider extends BaseProviderImpl implements 
   /**
    * Provider-specific user identification logic
    */
-  protected abstract doIdentifyUser(userId: string, traits: Record<string, any>): Promise<void>;
+  protected abstract doIdentifyUser(userId: string, traits: Record<string, unknown>): Promise<void>;
 
-  async setUserProperties(properties: Record<string, any>): Promise<void> {
+  async setUserProperties(properties: Record<string, unknown>): Promise<void> {
     this.checkReady();
 
     this.debug('Setting user properties', properties);
@@ -74,9 +74,9 @@ export abstract class BaseAnalyticsProvider extends BaseProviderImpl implements 
   /**
    * Provider-specific user properties logic
    */
-  protected abstract doSetUserProperties(properties: Record<string, any>): Promise<void>;
+  protected abstract doSetUserProperties(properties: Record<string, unknown>): Promise<void>;
 
-  async logScreenView(screenName: string, properties?: Record<string, any>): Promise<void> {
+  async logScreenView(screenName: string, properties?: Record<string, unknown>): Promise<void> {
     this.checkReady();
 
     const screenProperties = {
@@ -97,7 +97,7 @@ export abstract class BaseAnalyticsProvider extends BaseProviderImpl implements 
   /**
    * Provider-specific screen view logging logic
    */
-  protected abstract doLogScreenView(screenName: string, properties: Record<string, any>): Promise<void>;
+  protected abstract doLogScreenView(screenName: string, properties: Record<string, unknown>): Promise<void>;
 
   async logRevenue(data: RevenueData): Promise<void> {
     this.checkReady();
@@ -122,7 +122,7 @@ export abstract class BaseAnalyticsProvider extends BaseProviderImpl implements 
     this.timedEvents.set(eventName, Date.now());
   }
 
-  async endTimedEvent(eventName: string, properties?: Record<string, any>): Promise<void> {
+  async endTimedEvent(eventName: string, properties?: Record<string, unknown>): Promise<void> {
     const startTime = this.timedEvents.get(eventName);
 
     if (!startTime) {
@@ -144,7 +144,7 @@ export abstract class BaseAnalyticsProvider extends BaseProviderImpl implements 
     await this.track(eventName, timedProperties);
   }
 
-  setSuperProperties(properties: Record<string, any>): void {
+  setSuperProperties(properties: Record<string, unknown>): void {
     this.debug('Setting super properties', properties);
     this.superProperties = {
       ...this.superProperties,
@@ -188,7 +188,7 @@ export abstract class BaseAnalyticsProvider extends BaseProviderImpl implements 
   /**
    * Get common event properties
    */
-  protected getCommonProperties(): Record<string, any> {
+  protected getCommonProperties(): Record<string, unknown> {
     return {
       timestamp: new Date().toISOString(),
       platform: this.getPlatform(),

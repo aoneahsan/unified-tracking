@@ -214,7 +214,7 @@ export abstract class BaseProviderImpl implements BaseProvider {
   /**
    * Log debug message if debug mode is enabled
    */
-  protected debug(message: string, data?: any): void {
+  protected debug(message: string, data?: unknown): void {
     if (this.debugMode) {
       this.logger.debug(`[${this.name}] ${message}`, data);
     }
