@@ -47,6 +47,11 @@ export interface UnifiedTrackingPlugin {
   reset(): Promise<void>;
 
   /**
+   * Flush any buffered events across providers that support it (e.g. Segment, Sentry).
+   */
+  flush(): Promise<void>;
+
+  /**
    * Get active providers
    */
   getActiveProviders(): Promise<ActiveProvidersResult>;
@@ -61,8 +66,25 @@ export interface UnifiedTrackingPlugin {
    */
   addListener(
     eventName: 'trackingEvent' | 'error' | 'providerStatusChange',
-    listenerFunc: (event: unknown) => void,
+    listenerFunc: (event: TrackingEventPayload) => void,
   ): Promise<PluginListenerHandle>;
+}
+
+/**
+ * Payload delivered to {@link UnifiedTrackingPlugin.addListener} callbacks. Which fields
+ * are populated depends on the event: `trackingEvent` carries `event` + `properties`
+ * (+ `timestamp`); `error` carries `error` + `context`; `providerStatusChange` carries
+ * `provider` + `status`.
+ */
+export interface TrackingEventPayload {
+  event?: string;
+  properties?: Record<string, unknown>;
+  error?: Error | string;
+  context?: ErrorContext;
+  provider?: string;
+  status?: string;
+  message?: string;
+  timestamp?: string;
 }
 
 export interface UnifiedTrackingConfig {

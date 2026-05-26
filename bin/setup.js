@@ -36,11 +36,14 @@ class UnifiedTrackingSetup {
     });
 
     this.projectRoot = process.cwd();
+    // Real UnifiedTrackingConfig shape (see src/definitions.ts):
+    // analytics/errorTracking are OBJECTS with a `providers` string array plus
+    // per-provider config keys; settings holds debug + defaultConsent (+ privacy).
     this.config = {
-      analytics: [],
-      errorTracking: [],
-      consent: {
-        enabled: false,
+      analytics: { providers: [] },
+      errorTracking: { providers: [] },
+      settings: {
+        debug: false,
         defaultConsent: {
           analytics: true,
           errorTracking: true,
@@ -48,79 +51,112 @@ class UnifiedTrackingSetup {
           personalization: false,
         },
       },
-      debug: false,
-      autoInitialize: true,
+      autoDetect: false,
     };
 
+    // Provider keys here are the REAL provider ids used in
+    // UnifiedTrackingConfig.analytics.providers / .errorTracking.providers and
+    // as the per-provider config keys (e.g. analytics.google, errorTracking.sentry).
+    // Field names match the provider config interfaces in src/definitions.ts.
     this.availableProviders = {
       analytics: {
-        'google-analytics': {
+        google: {
           name: 'Google Analytics',
           requiredFields: ['measurementId'],
-          optionalFields: ['debugMode', 'sendPageView', 'customParameters'],
+          optionalFields: ['sendPageView', 'customDimensions', 'customMetrics'],
           description: 'Google Analytics 4 (GA4) for web analytics',
         },
         mixpanel: {
           name: 'Mixpanel',
           requiredFields: ['token'],
-          optionalFields: ['debugMode', 'persistence', 'apiHost', 'trackAutomaticEvents'],
+          optionalFields: ['apiHost', 'debug', 'persistence', 'trackAutomaticEvents'],
           description: 'Mixpanel for advanced product analytics',
         },
         segment: {
           name: 'Segment',
           requiredFields: ['writeKey'],
-          optionalFields: ['apiHost', 'integrations', 'trackAutomaticEvents'],
+          optionalFields: ['defaultIntegrations', 'enabledIntegrations'],
           description: 'Segment for customer data platform',
         },
         posthog: {
           name: 'PostHog',
           requiredFields: ['apiKey'],
-          optionalFields: ['apiHost', 'autocapture', 'sessionRecording', 'featureFlags'],
+          optionalFields: ['apiHost', 'featureFlags', 'sessionRecording'],
           description: 'PostHog for product analytics and feature flags',
         },
         amplitude: {
           name: 'Amplitude',
           requiredFields: ['apiKey'],
-          optionalFields: ['serverUrl', 'batchEvents', 'trackAutomaticEvents'],
+          optionalFields: ['serverUrl', 'trackingOptions'],
           description: 'Amplitude for digital product analytics',
         },
         firebase: {
           name: 'Firebase Analytics',
-          requiredFields: ['apiKey', 'authDomain', 'projectId', 'appId'],
-          optionalFields: ['measurementId', 'debugMode'],
+          requiredFields: [],
+          optionalFields: ['enabled', 'customParameters'],
           description: 'Firebase Analytics for mobile and web apps',
+        },
+        heap: {
+          name: 'Heap',
+          requiredFields: ['appId'],
+          optionalFields: ['enableAutocapture'],
+          description: 'Heap for autocaptured product analytics',
+        },
+        matomo: {
+          name: 'Matomo',
+          requiredFields: ['siteId', 'trackerUrl'],
+          optionalFields: ['customDimensions'],
+          description: 'Matomo for privacy-friendly, self-hosted analytics',
         },
       },
       errorTracking: {
         sentry: {
           name: 'Sentry',
           requiredFields: ['dsn'],
-          optionalFields: ['environment', 'release', 'tracesSampleRate', 'replaysSessionSampleRate'],
+          optionalFields: ['environment', 'release', 'tracesSampleRate', 'attachStacktrace'],
           description: 'Sentry for error tracking and performance monitoring',
+        },
+        crashlytics: {
+          name: 'Firebase Crashlytics',
+          requiredFields: [],
+          optionalFields: ['enabled', 'collectionEnabled'],
+          description: 'Firebase Crashlytics for crash reporting',
+        },
+        datadog: {
+          name: 'DataDog RUM',
+          requiredFields: ['clientToken', 'applicationId'],
+          optionalFields: ['site', 'service', 'env'],
+          description: 'DataDog Real User Monitoring for full-stack observability',
         },
         bugsnag: {
           name: 'Bugsnag',
           requiredFields: ['apiKey'],
-          optionalFields: ['appVersion', 'releaseStage', 'autoDetectErrors'],
+          optionalFields: ['releaseStage', 'enabledReleaseStages', 'appVersion'],
           description: 'Bugsnag for error monitoring and stability management',
         },
         rollbar: {
           name: 'Rollbar',
           requiredFields: ['accessToken'],
-          optionalFields: ['environment', 'codeVersion', 'captureUncaught'],
+          optionalFields: ['environment', 'captureUncaught', 'captureUnhandledRejections'],
           description: 'Rollbar for real-time error tracking',
-        },
-        datadog: {
-          name: 'DataDog RUM',
-          requiredFields: ['clientToken', 'applicationId'],
-          optionalFields: ['site', 'service', 'env', 'version', 'sessionReplaySampleRate'],
-          description: 'DataDog Real User Monitoring for full-stack observability',
         },
         logrocket: {
           name: 'LogRocket',
-          requiredFields: ['appID'],
-          optionalFields: ['release', 'shouldCaptureIP', 'captureExceptions'],
+          requiredFields: ['appId'],
+          optionalFields: ['shouldCaptureIP'],
           description: 'LogRocket for session replay and error tracking',
+        },
+        raygun: {
+          name: 'Raygun',
+          requiredFields: ['apiKey'],
+          optionalFields: ['version', 'enableCrashReporting', 'enableRealUserMonitoring'],
+          description: 'Raygun for crash reporting and real user monitoring',
+        },
+        appcenter: {
+          name: 'App Center',
+          requiredFields: ['appSecret'],
+          optionalFields: ['analytics', 'crashes'],
+          description: 'Visual Studio App Center analytics and crashes',
         },
       },
     };
@@ -177,7 +213,10 @@ class UnifiedTrackingSetup {
     }
   }
 
-  async configureProvider(providerId, providerConfig) {
+  // Prompts for a single provider's fields and returns ONLY the provider config
+  // object (e.g. { measurementId: '...' }). The caller owns the provider id, which
+  // it pushes onto the `providers` array and uses as the per-provider config key.
+  async configureProvider(providerConfig) {
     log.subtitle(`Configuring ${providerConfig.name}`);
 
     const config = {};
@@ -219,7 +258,7 @@ class UnifiedTrackingSetup {
       }
     }
 
-    return { id: providerId, config };
+    return config;
   }
 
   async detectProjectType() {
@@ -315,42 +354,47 @@ export default unifiedTrackingConfig;
   generateExampleUsage(projectType) {
     const examples = {
       react: `// React Integration Example
-import React from 'react';
-import { UnifiedTrackingProvider } from 'unified-tracking/react';
+// unified-tracking/react is provider-free: there is NO <UnifiedTrackingProvider>
+// and no HOC. Initialize the singleton once, then use the hooks anywhere.
+import { useEffect } from 'react';
+import { UnifiedTracking } from 'unified-tracking';
+import { useUnifiedTracking, useTrackEvent } from 'unified-tracking/react';
 import { unifiedTrackingConfig } from './unified-tracking.config';
 
+// Initialize the core once on app start (before any hook dispatches events).
 function App() {
-  return (
-    <UnifiedTrackingProvider 
-      config={unifiedTrackingConfig}
-      onError={(error) => console.error('Tracking error:', error)}
-    >
-      <YourApp />
-    </UnifiedTrackingProvider>
-  );
+  useEffect(() => {
+    UnifiedTracking.initialize(unifiedTrackingConfig).catch((error) => {
+      console.error('Failed to initialize tracking:', error);
+    });
+  }, []);
+
+  return <MyComponent />;
 }
 
-// Usage in components
-import { useTrackEvent, useIdentifyUser } from 'unified-tracking/react';
-
+// useUnifiedTracking() returns the bound core methods (track, identify, logError,
+// logScreenView, logRevenue, setUserProperties, setConsent, reset, ...).
+// useTrackEvent() wraps track() with local loading/error state.
 function MyComponent() {
-  const { trackEvent } = useTrackEvent();
-  const { identifyUser } = useIdentifyUser();
+  const { identify } = useUnifiedTracking();
+  const { trackEvent, isTracking } = useTrackEvent();
 
   const handleClick = () => {
     trackEvent('button_click', { button: 'header_cta' });
   };
 
   const handleLogin = (user) => {
-    identifyUser(user.id, { email: user.email, name: user.name });
+    identify(user.id, { email: user.email, name: user.name });
   };
 
   return (
-    <button onClick={handleClick}>
+    <button onClick={handleClick} disabled={isTracking}>
       Track This Click
     </button>
   );
 }
+
+export default App;
 `,
       capacitor: `// Capacitor Integration Example
 import { UnifiedTracking } from 'unified-tracking';
@@ -440,8 +484,12 @@ document.querySelectorAll('button').forEach(button => {
 
       for (const providerId of analyticsProviders) {
         const providerConfig = this.availableProviders.analytics[providerId];
-        const config = await this.configureProvider(providerId, providerConfig);
-        this.config.analytics.push(config);
+        const config = await this.configureProvider(providerConfig);
+        // Enable the provider, then attach its config under analytics[providerId].
+        this.config.analytics.providers.push(providerId);
+        if (Object.keys(config).length > 0) {
+          this.config.analytics[providerId] = config;
+        }
       }
 
       // Configure error tracking providers
@@ -454,24 +502,28 @@ document.querySelectorAll('button').forEach(button => {
 
       for (const providerId of errorProviders) {
         const providerConfig = this.availableProviders.errorTracking[providerId];
-        const config = await this.configureProvider(providerId, providerConfig);
-        this.config.errorTracking.push(config);
+        const config = await this.configureProvider(providerConfig);
+        // Enable the provider, then attach its config under errorTracking[providerId].
+        this.config.errorTracking.providers.push(providerId);
+        if (Object.keys(config).length > 0) {
+          this.config.errorTracking[providerId] = config;
+        }
       }
 
-      // Configure consent management
+      // Configure default consent (settings.defaultConsent). The engine gates event
+      // dispatch on `analytics` and `errorTracking`; `marketing`/`personalization`
+      // are forwarded to provider-native consent APIs where supported.
       log.title('🔒 Privacy & Consent Configuration');
-      const enableConsent = await this.confirmPrompt('Enable consent management (GDPR compliance)?', false);
-      if (enableConsent) {
-        this.config.consent.enabled = true;
-
+      const configureConsent = await this.confirmPrompt('Customize default consent settings (GDPR)?', false);
+      if (configureConsent) {
         log.subtitle('Default consent settings:');
-        this.config.consent.defaultConsent.analytics = await this.confirmPrompt('Allow analytics by default?', true);
-        this.config.consent.defaultConsent.errorTracking = await this.confirmPrompt(
+        this.config.settings.defaultConsent.analytics = await this.confirmPrompt('Allow analytics by default?', true);
+        this.config.settings.defaultConsent.errorTracking = await this.confirmPrompt(
           'Allow error tracking by default?',
           true,
         );
-        this.config.consent.defaultConsent.marketing = await this.confirmPrompt('Allow marketing by default?', false);
-        this.config.consent.defaultConsent.personalization = await this.confirmPrompt(
+        this.config.settings.defaultConsent.marketing = await this.confirmPrompt('Allow marketing by default?', false);
+        this.config.settings.defaultConsent.personalization = await this.confirmPrompt(
           'Allow personalization by default?',
           false,
         );
@@ -479,8 +531,8 @@ document.querySelectorAll('button').forEach(button => {
 
       // Other configuration options
       log.title('⚙️ General Configuration');
-      this.config.debug = await this.confirmPrompt('Enable debug mode?', false);
-      this.config.autoInitialize = await this.confirmPrompt('Auto-initialize on app start?', true);
+      this.config.settings.debug = await this.confirmPrompt('Enable debug logging?', false);
+      this.config.autoDetect = await this.confirmPrompt('Auto-detect providers from installed packages?', false);
 
       // Generate configuration files
       this.generateConfigFile();

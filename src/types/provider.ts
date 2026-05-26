@@ -49,6 +49,8 @@ export interface Provider {
   reset?(): void | Promise<void>;
   /** Optional: toggle provider-level debug logging. */
   setDebugMode?(enabled: boolean): void;
+  /** Optional: flush any buffered events to the provider's backend (invoked by ProviderManager.flush()). Return value (if any) is ignored. */
+  flush?(): void | Promise<unknown>;
 }
 
 export interface ProviderMetadata {

@@ -23,6 +23,7 @@ import type {
   ErrorContext,
   RevenueData,
   ConsentSettings,
+  TrackingEventPayload,
 } from '../definitions.js';
 
 export class UnifiedTrackingCapacitorPlugin extends WebPlugin implements UnifiedTrackingPlugin {
@@ -73,6 +74,10 @@ export class UnifiedTrackingCapacitorPlugin extends WebPlugin implements Unified
     return this.core.reset();
   }
 
+  async flush() {
+    return this.core.flush();
+  }
+
   async getActiveProviders() {
     return this.core.getActiveProviders();
   }
@@ -83,7 +88,7 @@ export class UnifiedTrackingCapacitorPlugin extends WebPlugin implements Unified
 
   async addListener(
     eventName: 'trackingEvent' | 'error' | 'providerStatusChange',
-    listenerFunc: (event: TrackingEvent | ProviderEvent) => void,
+    listenerFunc: (event: TrackingEventPayload) => void,
   ): Promise<PluginListenerHandle> {
     // Create a wrapper function that converts core events to our event types
     const wrappedListener = (eventData: any) => {

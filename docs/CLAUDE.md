@@ -1,6 +1,6 @@
 # docs/ - Documentation Rules
 
-**Last Updated**: `2026-04-03`
+**Last Updated**: `2026-05-27`
 
 ## Documentation Structure
 

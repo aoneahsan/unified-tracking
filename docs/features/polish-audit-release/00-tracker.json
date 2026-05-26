@@ -5,8 +5,10 @@
   "package": "unified-tracking",
   "createdAt": "2026-05-26",
   "lastUpdated": "2026-05-26",
-  "round": 2,
-  "currentRound": "round02-fresh-reaudit",
+  "round": 3,
+  "currentRound": "round03-deferrals",
+  "round02Result": "COMPLETE - v3.2.0 published to npm 2026-05-27 (2 CRITICAL + 8 HIGH + 11 MEDIUM fixed). Immutable.",
+  "round03": "Complete the documented Round-02 deferrals as a minor 3.3.0: M7 (Firebase/Amplitude extend BaseAnalyticsProvider), L6 (getProviderManager), L8 (unified flush()), L10 (addListener event typing), L11 (base-class any->unknown), L16 (provider SSR guards), bin/setup.js config-shape rework, portfolio + nested-doc refresh. NATIVE iOS/Android SDK bridges remain a SEPARATE effort (needs Xcode/Gradle + devices + real SDK deps + native build verification impossible in this environment; shipping unverified native code would violate 'no issues') - documented, NOT done this round.",
   "round02Overview": "docs/features/polish-audit-release/round02-overview.md",
   "round01Result": "COMPLETE - v3.1.0 published to npm 2026-05-26 (deps->latest stable, ~25-finding audit, all security/correctness/dead-code fixes, docs, minor bump). Immutable.",
   "publishedVersion": "3.1.0",
@@ -385,6 +387,75 @@
       "awaitingUser": false,
       "result": "PUBLISHED: unified-tracking@3.2.0 is live on npm (dist-tag latest, 193 files / 135.5 kB, shasum d287a957...). Verified via `npm view unified-tracking version` -> 3.2.0 (local matches). User explicitly confirmed the publish. Pre-publish gate green (install/type-check/build/test 246-2skip/lint + Node-ESM import smoke + version consistency package.json/podspec/gradle). All commits pushed to o/main.",
       "subTasks": []
+    },
+    {
+      "id": "phase10",
+      "title": "ROUND 03: complete deferred items (target 3.3.0; API-preserving/additive minor)",
+      "status": "in_progress",
+      "completedAt": null,
+      "note": "User: 'work on those pending items now and complete everything'. Parallel agents handled the independent files (bin/setup.js; portfolio+nested-docs). Main session does the overlapping src/ refactors sequentially. NATIVE bridges excluded (separate, unverifiable-here effort) - documented.",
+      "subTasks": [
+        {
+          "id": "phase10.1",
+          "title": "L8 unified flush() (core + provider-manager fan-out to providers with flush)",
+          "status": "complete",
+          "completedAt": "2026-05-27",
+          "note": "Provider.flush?() optional added; ProviderManager.flush() fans out (per-provider catch); core.flush() + capacitor adapter.flush() + UnifiedTrackingPlugin.flush() + useUnifiedTracking().flush exposed."
+        },
+        {
+          "id": "phase10.2",
+          "title": "L10 addListener event typing (unknown -> typed TrackingEventPayload)",
+          "status": "complete",
+          "completedAt": "2026-05-27",
+          "note": "New exported TrackingEventPayload type; UnifiedTrackingPlugin.addListener + core EventListener + capacitor adapter all use it (replaces (event: unknown))."
+        },
+        {
+          "id": "phase10.3",
+          "title": "L6 getProviderManager dead export",
+          "status": "complete",
+          "completedAt": "2026-05-27",
+          "note": "@deprecated JSDoc added (returns a separate unused singleton; slated for next major). Semver-safe vs removal."
+        },
+        {
+          "id": "phase10.4",
+          "title": "L16 provider SSR guards (single guard in BaseProviderImpl.initialize)",
+          "status": "complete",
+          "completedAt": "2026-05-27",
+          "note": "One DRY guard in BaseProviderImpl.initialize() throws a clear 'requires a browser environment' when window/document are absent (every provider is web/CDN-loaded) -> surfaced in InitializeResult.warnings instead of an opaque ReferenceError. jsdom-safe for tests."
+        },
+        { "id": "phase10.5", "title": "M7 Firebase + Amplitude extend BaseAnalyticsProvider", "status": "pending" },
+        {
+          "id": "phase10.6",
+          "title": "L11 base-class any -> unknown/Record<string,unknown> across interfaces + base + provider doXxx",
+          "status": "pending"
+        },
+        {
+          "id": "phase10.7",
+          "title": "bin/setup.js real config-shape rework",
+          "status": "complete",
+          "note": "AGENT a5b15d84: real object config + real provider ids + corrected example templates; node --check OK. Verify in release gate."
+        },
+        {
+          "id": "phase10.8",
+          "title": "Portfolio refresh + nested-doc date bumps",
+          "status": "complete",
+          "note": "AGENT a07a84cb: UNIFIED-TRACKING_portfolio-info_2026-05-27.md (old deleted, exactly one), 6 nested CLAUDE/AGENTS dates -> 2026-05-27."
+        },
+        {
+          "id": "phase10.9",
+          "title": "Docs for new APIs (flush/shutdown) + CHANGELOG 3.3.0 + version bump + root CLAUDE/AGENTS",
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": "phase11",
+      "title": "ROUND 03: release 3.3.0 (gate + npm pack + ESM smoke + user-confirmed publish + push)",
+      "status": "pending",
+      "completedAt": null,
+      "awaitingUser": true,
+      "note": "Full gate + npm pack review + Node-ESM smoke, then CONFIRM 3.3.0 publish (irreversible) before npm publish + push.",
+      "subTasks": []
     }
   ],
   "runHistory": [
@@ -512,8 +583,20 @@
       "date": "2026-05-27",
       "phase": "phase09 (release 3.2.0) - ROUND 02 TASK COMPLETE",
       "summary": "User confirmed publish. Pre-publish gate green (install/type-check/build/test 246-2skip/lint + Node-ESM import smoke + version consistency package.json/podspec/gradle). PUBLISHED unified-tracking@3.2.0 to npm (latest, 193 files / 135.5 kB, shasum d287a957...). Verified `npm view` -> 3.2.0 (local matches). ROUND 02 COMPLETE: 2 CRITICAL + 8 HIGH + 11 MEDIUM fixed (H1 redaction + H5 queue runtime-proven), 3 fictional docs rewritten, version bumped, all pushed to o/main. Carried-forward future-release deferrals: native SDK bridges, M7, L6/L8/L10/L11/L16, bin/setup.js config rework, portfolio refresh.",
+      "commit": "00a798e"
+    },
+    {
+      "date": "2026-05-27",
+      "phase": "phase10 (round 03 kickoff) - deferrals -> 3.3.0",
+      "summary": "User asked to complete all remaining deferred items. Invoked skills (typescript-advanced-types, capacitor-best-practices, simplify). Launched 2 parallel agents: bin/setup.js config-shape rework (DONE - real object config + real provider ids + corrected example templates, node --check OK) and portfolio refresh + nested-doc date bumps (DONE - one portfolio_2026-05-27.md, 6 nested dates bumped). Opened phase10 (L8/L10/L6/L16/M7/L11 src refactors + docs) + phase11 (release 3.3.0). NATIVE iOS/Android SDK bridges explicitly EXCLUDED (separate effort needing native toolchain+devices+SDK deps; unverifiable here). Main session now doing the src/ code refactors.",
+      "commit": "pending"
+    },
+    {
+      "date": "2026-05-27",
+      "phase": "phase10 batch 1 (L8/L10/L6/L16 + agent work)",
+      "summary": "L8: unified flush() (Provider.flush? optional + ProviderManager.flush fan-out + core/capacitor/plugin-interface/react-hook exposure). L10: typed addListener via new exported TrackingEventPayload (core EventListener + capacitor adapter aligned, replaces event:unknown). L6: getProviderManager @deprecated (separate unused singleton). L16: single SSR guard in BaseProviderImpl.initialize() (clear 'requires a browser environment' message; jsdom-safe). AGENTS landed: bin/setup.js -> real object config + provider ids + corrected examples (node --check OK); portfolio refreshed to 3.3.0 + 6 nested-doc dates bumped. Gate: type-check 0, build 0, ESM smoke OK, tests 246/2skip, lint clean. NEXT: M7 (firebase/amplitude extend base) + L11 (any->unknown).",
       "commit": "pending"
     }
   ],
-  "resumeInstructions": "ROUND 02 TASK COMPLETE - unified-tracking@3.2.0 PUBLISHED to npm (dist-tag latest) on 2026-05-27; all commits pushed to o/main. Both 3.1.0 and 3.2.0 are shipped + immutable. Round 02 fixed 2 CRITICAL + 8 HIGH + 11 MEDIUM (see round02-findings.md); nothing remains for the core polish/release. Documented deferrals for a FUTURE release (not blockers): native iOS/Android SDK bridges; M7 (Firebase/Amplitude extend BaseAnalyticsProvider); L6 dead getProviderManager export; L8 unified flush(); L10 addListener event typing; L11 base-class any->unknown; L16 provider SSR guards; full bin/setup.js generated-config rework; portfolio file refresh; providers/+docs nested CLAUDE/AGENTS date bumps. If this prompt is re-run, recommend either confirming 3.2.0 is the final state or scoping those deferrals into a 3.3.0 (confirm before any new publish). [Historical resume trail below.] ROUND 01 (v3.1.0) COMPLETE + published (immutable). ACTIVE WAS ROUND 02 phase07 fixes (round02-findings.md). User decided: FIX EVERYTHING + WIRE-UP EventQueue. DONE: phase06 audit; 7.1 (CRITICALs C1+C2, L4/L5/SEC-08/getPlatform; d1e56f9); 7.2 (H1 logger-sink redaction proven, L2, L19; bf1d341); 7.3 (H2 config-key aliases + definitions types; M9 amplitude global; M8 GA consent default; 678d7f2); 7.4 COMPLETE (e228a10/6c16dcd: H3/H4/M10/M1/M2); 7.5 COMPLETE (M5/M6/M4/L3/L7; M7 deferred); 7.6 COMPLETE (H5 EventQueue wired up + PROVEN: pre-init buffer + drain-replay on init; M11 dedupe fixed). 7.7 COMPLETE (L9 interface + L18 .npmignore; L6/L8/L10/L11/L16 + M7 documented accepted-deferrals). PHASE07 (ALL FIXES) COMPLETE. PHASE08 (docs + version bump to 3.2.0) COMPLETE. NEXT: phase09 RELEASE - full gate (type-check+build+test+lint+Node-ESM smoke) + npm pack --dry-run review are next; then CONFIRM 3.2.0 publish intent with the user before the irreversible `npm publish`, then push. [ARCHIVE NOTE - prior text:] phase08 docs - rewrite the 3 fictional doc files (docs/api-reference.md DOC-01, docs/react-integration.md DOC-02, docs/native-implementation.md DOC-05) to match the real 2-hook/object-config API; fix bin/setup.js generated config to the real object shape; add CSP/SRI + AppCenter-legacy + M7-limitation + batching notes; fix DOC-03/04/06/07/08; update README (config-key changes, EventQueue buffering, shutdown(), consent categories), nested CLAUDE/AGENTS, portfolio file, CHANGELOG 3.2.0. THEN phase09 release: bump 3.2.0 in package.json+podspec+gradle+constants, CHANGELOG, full gate + npm pack review + Node-ESM smoke, then CONFIRM with user before the irreversible npm publish (M5 single core, M6 hook memo, M4 capacitor adapter, M7 firebase/amplitude extend base, L3 validation/init guards, L7 teardown), 7.6 EventQueue wire-up (H5+M11), 7.7 types/cleanup (L6/L8/L9/L10/L11/L16/L18), phase08 docs (3 fictional doc rewrites DOC-01/02/05 + bin/setup.js wrong-config-shape fix + CSP/SRI guidance + nested CLAUDE/AGENTS + portfolio), phase09 release (bump 3.2.0 everywhere + CHANGELOG; CONFIRM intent before the irreversible npm publish). On resume: read tracker -> first pending sub-task in highest phase -> invoke matching skills per RULE #0 -> ONE commit per batch -> keep gate (type-check+build+test+lint+Node-ESM smoke) green."
+  "resumeInstructions": "ROUND 03 ACTIVE (target 3.3.0) - completing the documented Round-02 deferrals. DONE by parallel agents: bin/setup.js config-shape rework + portfolio/nested-doc refresh (phase10.7/10.8). MAIN SESSION does the src/ refactors sequentially (phase10.1-10.6): L8 flush, L10 listener typing, L6 getProviderManager, L16 SSR guards, M7 Firebase/Amplitude extend base, L11 any->unknown; then phase10.9 (docs/CHANGELOG/version bump) + phase11 release (CONFIRM before the irreversible publish). NATIVE iOS/Android SDK bridges deliberately EXCLUDED this round (separate effort needing a native toolchain + devices + real SDK deps; can't verify here). On resume: read tracker phase10 -> first pending sub-task -> invoke skills per RULE #0 -> keep gate green -> ONE commit per logical batch. --- PRIOR: ROUND 02 TASK COMPLETE - unified-tracking@3.2.0 PUBLISHED to npm (dist-tag latest) on 2026-05-27; all commits pushed to o/main. Both 3.1.0 and 3.2.0 are shipped + immutable. Round 02 fixed 2 CRITICAL + 8 HIGH + 11 MEDIUM (see round02-findings.md); nothing remains for the core polish/release. Documented deferrals for a FUTURE release (not blockers): native iOS/Android SDK bridges; M7 (Firebase/Amplitude extend BaseAnalyticsProvider); L6 dead getProviderManager export; L8 unified flush(); L10 addListener event typing; L11 base-class any->unknown; L16 provider SSR guards; full bin/setup.js generated-config rework; portfolio file refresh; providers/+docs nested CLAUDE/AGENTS date bumps. If this prompt is re-run, recommend either confirming 3.2.0 is the final state or scoping those deferrals into a 3.3.0 (confirm before any new publish). [Historical resume trail below.] ROUND 01 (v3.1.0) COMPLETE + published (immutable). ACTIVE WAS ROUND 02 phase07 fixes (round02-findings.md). User decided: FIX EVERYTHING + WIRE-UP EventQueue. DONE: phase06 audit; 7.1 (CRITICALs C1+C2, L4/L5/SEC-08/getPlatform; d1e56f9); 7.2 (H1 logger-sink redaction proven, L2, L19; bf1d341); 7.3 (H2 config-key aliases + definitions types; M9 amplitude global; M8 GA consent default; 678d7f2); 7.4 COMPLETE (e228a10/6c16dcd: H3/H4/M10/M1/M2); 7.5 COMPLETE (M5/M6/M4/L3/L7; M7 deferred); 7.6 COMPLETE (H5 EventQueue wired up + PROVEN: pre-init buffer + drain-replay on init; M11 dedupe fixed). 7.7 COMPLETE (L9 interface + L18 .npmignore; L6/L8/L10/L11/L16 + M7 documented accepted-deferrals). PHASE07 (ALL FIXES) COMPLETE. PHASE08 (docs + version bump to 3.2.0) COMPLETE. NEXT: phase09 RELEASE - full gate (type-check+build+test+lint+Node-ESM smoke) + npm pack --dry-run review are next; then CONFIRM 3.2.0 publish intent with the user before the irreversible `npm publish`, then push. [ARCHIVE NOTE - prior text:] phase08 docs - rewrite the 3 fictional doc files (docs/api-reference.md DOC-01, docs/react-integration.md DOC-02, docs/native-implementation.md DOC-05) to match the real 2-hook/object-config API; fix bin/setup.js generated config to the real object shape; add CSP/SRI + AppCenter-legacy + M7-limitation + batching notes; fix DOC-03/04/06/07/08; update README (config-key changes, EventQueue buffering, shutdown(), consent categories), nested CLAUDE/AGENTS, portfolio file, CHANGELOG 3.2.0. THEN phase09 release: bump 3.2.0 in package.json+podspec+gradle+constants, CHANGELOG, full gate + npm pack review + Node-ESM smoke, then CONFIRM with user before the irreversible npm publish (M5 single core, M6 hook memo, M4 capacitor adapter, M7 firebase/amplitude extend base, L3 validation/init guards, L7 teardown), 7.6 EventQueue wire-up (H5+M11), 7.7 types/cleanup (L6/L8/L9/L10/L11/L16/L18), phase08 docs (3 fictional doc rewrites DOC-01/02/05 + bin/setup.js wrong-config-shape fix + CSP/SRI guidance + nested CLAUDE/AGENTS + portfolio), phase09 release (bump 3.2.0 everywhere + CHANGELOG; CONFIRM intent before the irreversible npm publish). On resume: read tracker -> first pending sub-task in highest phase -> invoke matching skills per RULE #0 -> ONE commit per batch -> keep gate (type-check+build+test+lint+Node-ESM smoke) green."
 }

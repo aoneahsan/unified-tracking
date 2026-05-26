@@ -476,11 +476,32 @@ export class ProviderManager {
       }
     }
   }
+
+  /**
+   * Flush any buffered events across every provider that implements flush()
+   * (e.g. Segment, Sentry). Per-provider failures are isolated and logged.
+   */
+  async flush(): Promise<void> {
+    await Promise.all(
+      Array.from(this.providers).map(async ([id, instance]) => {
+        try {
+          await instance.provider.flush?.();
+        } catch (error) {
+          this.logger.error(`Failed to flush provider ${id}`, error);
+        }
+      }),
+    );
+  }
 }
 
 // Singleton instance
 let instance: ProviderManager | null = null;
 
+/**
+ * @deprecated The core engine uses its own `new ProviderManager()` instance, so this
+ * returns a SEPARATE, unused singleton that does NOT reflect the active providers.
+ * Slated for removal in the next major version — use the `UnifiedTracking` API instead.
+ */
 export function getProviderManager(): ProviderManager {
   if (!instance) {
     instance = new ProviderManager();

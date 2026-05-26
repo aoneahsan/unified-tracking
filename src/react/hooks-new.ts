@@ -16,6 +16,7 @@ const boundApi = {
   logScreenView: UnifiedTracking.logScreenView.bind(UnifiedTracking),
   setConsent: UnifiedTracking.setConsent.bind(UnifiedTracking),
   reset: UnifiedTracking.reset.bind(UnifiedTracking),
+  flush: UnifiedTracking.flush.bind(UnifiedTracking),
   getActiveProviders: UnifiedTracking.getActiveProviders.bind(UnifiedTracking),
   enableDebugMode: UnifiedTracking.enableDebugMode.bind(UnifiedTracking),
 };

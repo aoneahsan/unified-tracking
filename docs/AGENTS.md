@@ -1,6 +1,6 @@
 # docs/ - Documentation Agent Instructions
 
-**Last Updated**: `2026-04-03`
+**Last Updated**: `2026-05-27`
 
 ## Structure
 

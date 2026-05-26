@@ -6,6 +6,7 @@ import type {
   RevenueData,
   ConsentSettings,
   ActiveProvidersResult,
+  TrackingEventPayload,
 } from '../definitions.js';
 import { ProviderManager } from '../providers/provider-manager.js';
 import { ConfigManager } from '../utils/config-manager.js';
@@ -40,7 +41,9 @@ export type EventData =
     };
 
 export interface EventListener {
-  (event: EventData): void;
+  // Public listener shape (matches UnifiedTrackingPlugin.addListener). The internal
+  // EventData union is assignable to TrackingEventPayload, so notifyListeners can pass it.
+  (event: TrackingEventPayload): void;
 }
 
 export interface ListenerHandle {
@@ -287,6 +290,14 @@ export class UnifiedTrackingCore implements UnifiedTrackingPlugin {
 
     await this.providerManager.reset();
     this.eventQueue.clear();
+  }
+
+  /**
+   * Flush any buffered events across all providers that support it (e.g. Segment, Sentry).
+   */
+  async flush(): Promise<void> {
+    this.logger.debug('Flushing providers');
+    await this.providerManager.flush();
   }
 
   /**

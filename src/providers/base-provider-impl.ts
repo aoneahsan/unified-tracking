@@ -28,6 +28,16 @@ export abstract class BaseProviderImpl implements BaseProvider {
       return;
     }
 
+    // SSR guard: every provider loads its vendor SDK from a browser <script>, so a
+    // server/Node (non-DOM) environment cannot initialize one. Fail with a clear message
+    // — ProviderManager catches it and surfaces it in InitializeResult.warnings instead
+    // of letting an opaque `document is not defined` ReferenceError escape from a loader.
+    if (typeof window === 'undefined' || typeof document === 'undefined') {
+      throw new Error(
+        `Provider ${this.name} requires a browser environment (web provider); skipped in this non-DOM (server/SSR) environment.`,
+      );
+    }
+
     this.logger.info(`Initializing provider ${this.name}`);
     this.config = { ...config };
     this.enabled = config.enabled !== false;
