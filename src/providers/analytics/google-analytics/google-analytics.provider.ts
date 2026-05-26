@@ -96,8 +96,12 @@ export class GoogleAnalyticsProvider extends BaseAnalyticsProvider {
       gtagConfig.send_page_view = true;
     }
 
-    if (config.anonymizeIp !== undefined) {
-      gtagConfig.anonymize_ip = config.anonymizeIp;
+    // Honor the global settings.privacy.anonymizeIp (previously inert) as a fallback
+    // when the GA-specific anonymizeIp is not set.
+    const globalAnonymizeIp = ConfigManager.getInstance().getConfig().settings?.privacy?.anonymizeIp;
+    const anonymizeIp = config.anonymizeIp ?? globalAnonymizeIp;
+    if (anonymizeIp !== undefined) {
+      gtagConfig.anonymize_ip = anonymizeIp;
     }
     if (config.cookieDomain !== undefined) {
       gtagConfig.cookie_domain = config.cookieDomain;

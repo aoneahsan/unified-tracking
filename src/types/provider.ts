@@ -12,9 +12,17 @@ export interface ProviderConfig {
   [key: string]: unknown;
 }
 
+/**
+ * Unified consent categories. NOTE: only `analytics` and `errorTracking` gate event
+ * dispatch in the engine (ProviderManager.hasConsent); the remaining categories are
+ * forwarded to provider-native consent APIs (e.g. GA Consent Mode) where supported.
+ * Kept structurally identical to the ConsentSettings in definitions.ts.
+ */
 export interface ConsentSettings {
   analytics?: boolean;
   errorTracking?: boolean;
+  marketing?: boolean;
+  personalization?: boolean;
   advertising?: boolean;
   functional?: boolean;
   performance?: boolean;

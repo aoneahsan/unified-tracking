@@ -201,11 +201,19 @@ export interface PrivacySettings {
   dataRetentionDays?: number;
 }
 
+/**
+ * Unified consent categories. NOTE: only `analytics` and `errorTracking` gate event
+ * dispatch in the engine; the rest are forwarded to provider-native consent APIs
+ * (e.g. GA Consent Mode) where supported. Identical to types/provider.ts ConsentSettings.
+ */
 export interface ConsentSettings {
   analytics?: boolean;
   errorTracking?: boolean;
   marketing?: boolean;
   personalization?: boolean;
+  advertising?: boolean;
+  functional?: boolean;
+  performance?: boolean;
   [key: string]: boolean | undefined;
 }
 
