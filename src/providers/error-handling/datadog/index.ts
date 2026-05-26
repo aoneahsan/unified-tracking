@@ -1,1 +1,1 @@
-export { DataDogErrorTrackingProvider } from './datadog.provider';
+export { DataDogErrorTrackingProvider } from './datadog.provider.js';

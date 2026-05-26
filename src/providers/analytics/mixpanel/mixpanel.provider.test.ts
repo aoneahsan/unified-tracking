@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { MixpanelAnalyticsProvider } from './mixpanel.provider';
-import type { ConsentSettings } from '../../../types/provider';
+import { MixpanelAnalyticsProvider } from './mixpanel.provider.js';
+import type { ConsentSettings } from '../../../types/provider.js';
 
 // Mock the global Mixpanel object
 const mockMixpanel = {

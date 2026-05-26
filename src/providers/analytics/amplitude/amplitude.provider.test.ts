@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { AmplitudeAnalyticsProvider } from './amplitude.provider';
+import { AmplitudeAnalyticsProvider } from './amplitude.provider.js';
 
 // Mock Amplitude SDK
 const mockAmplitude = {

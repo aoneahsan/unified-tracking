@@ -1,1 +1,1 @@
-export { SentryErrorTrackingProvider } from './sentry.provider';
+export { SentryErrorTrackingProvider } from './sentry.provider.js';

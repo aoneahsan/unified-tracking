@@ -1,5 +1,5 @@
-import type { ErrorContext, RevenueData } from '../definitions';
-import type { Provider, ProviderConfig, ProviderType, ConsentSettings } from '../types/provider';
+import type { ErrorContext, RevenueData } from '../definitions.js';
+import type { Provider, ProviderConfig, ProviderType, ConsentSettings } from '../types/provider.js';
 
 /**
  * Base interface for all providers

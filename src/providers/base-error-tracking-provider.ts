@@ -1,7 +1,7 @@
-import { BaseProviderImpl } from './base-provider-impl';
-import type { ErrorTrackingProvider } from './base';
-import type { ErrorContext } from '../definitions';
-import type { ProviderType } from '../types/provider';
+import { BaseProviderImpl } from './base-provider-impl.js';
+import type { ErrorTrackingProvider } from './base.js';
+import type { ErrorContext } from '../definitions.js';
+import type { ProviderType } from '../types/provider.js';
 
 interface Breadcrumb {
   message: string;
@@ -196,7 +196,7 @@ export abstract class BaseErrorTrackingProvider extends BaseProviderImpl impleme
   protected getPlatform(): string {
     if (typeof window !== 'undefined') {
       return 'web';
-    } else if (typeof global !== 'undefined' && global.process) {
+    } else if (typeof (globalThis as { process?: unknown }).process !== 'undefined') {
       return 'node';
     }
     return 'unknown';

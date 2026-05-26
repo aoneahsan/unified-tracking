@@ -1,10 +1,12 @@
-import { Logger } from '../utils/logger';
-import { ConfigManager } from '../utils/config-manager';
-import { EventQueue } from '../utils/event-queue';
-import type { Provider, ProviderType, ProviderState, ProviderConfig, ConsentSettings } from '../types/provider';
-import type { AnalyticsProvider } from './base';
-import type { ErrorTrackingProvider } from './base';
-import type { UnifiedTrackingConfig, ErrorContext, RevenueData } from '../definitions';
+import { Logger } from '../utils/logger.js';
+import { ConfigManager } from '../utils/config-manager.js';
+import { EventQueue } from '../utils/event-queue.js';
+import { ProviderRegistry } from './registry.js';
+import { PROVIDER_LOADERS } from './provider-loaders.js';
+import type { Provider, ProviderType, ProviderState, ProviderConfig, ConsentSettings } from '../types/provider.js';
+import type { AnalyticsProvider } from './base.js';
+import type { ErrorTrackingProvider } from './base.js';
+import type { UnifiedTrackingConfig, ErrorContext, RevenueData } from '../definitions.js';
 
 export interface ProviderInstance {
   provider: Provider;
@@ -84,30 +86,31 @@ export class ProviderManager {
   }
 
   private async loadProvider(name: string, type: ProviderType): Promise<Provider | null> {
+    const resolution = this.resolveProviderModule(name, type);
     try {
-      // First check if provider is already registered
-      const { ProviderRegistry } = await import('./registry');
       const registry = ProviderRegistry.getInstance();
-      const resolution = this.resolveProviderModule(name, type);
+
+      // Provider modules self-register with the registry (via the @RegisterProvider
+      // decorator) as a side effect of being imported. Import through the static loader
+      // map so the specifier is statically analyzable by bundlers and resolvable by Node
+      // ESM — a runtime-built variable specifier is neither, and also lets an arbitrary
+      // (non-allowlisted) name trigger an unintended module import.
+      if (!registry.has(resolution.registryId)) {
+        const loadModule = PROVIDER_LOADERS[resolution.registryId];
+        if (!loadModule) {
+          this.logger.warn(
+            `Unknown provider "${name}" (id "${resolution.registryId}") is not registered and was skipped.`,
+          );
+          return null;
+        }
+        await loadModule();
+      }
 
       if (registry.has(resolution.registryId)) {
         return registry.createProvider(resolution.registryId);
       }
 
-      // Try dynamic import if not in registry
-      const modulePath =
-        type === 'analytics'
-          ? `./analytics/${resolution.folder}/${resolution.file}.provider`
-          : `./error-handling/${resolution.folder}/${resolution.file}.provider`;
-
-      await import(modulePath);
-
-      // Check registry again after import
-      if (registry.has(resolution.registryId)) {
-        return registry.createProvider(resolution.registryId);
-      }
-
-      throw new Error(`Provider ${name} not found after import`);
+      throw new Error(`Provider ${name} not found in registry after import`);
     } catch (error) {
       this.logger.error(`Failed to load provider ${name}`, error);
       return null;

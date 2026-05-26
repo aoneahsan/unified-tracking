@@ -1,1 +1,1 @@
-export { MixpanelAnalyticsProvider } from './mixpanel.provider';
+export { MixpanelAnalyticsProvider } from './mixpanel.provider.js';

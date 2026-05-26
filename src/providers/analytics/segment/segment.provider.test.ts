@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { SegmentAnalyticsProvider } from './segment.provider';
-import type { ConsentSettings } from '../../../types/provider';
+import { SegmentAnalyticsProvider } from './segment.provider.js';
+import type { ConsentSettings } from '../../../types/provider.js';
 
 // Mock the global analytics object
 const mockAnalytics = {

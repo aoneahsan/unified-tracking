@@ -1,6 +1,6 @@
-import { Logger } from '../utils/logger';
-import type { Provider } from '../types/provider';
-import type { ProviderMetadata } from '../types/provider';
+import { Logger } from '../utils/logger.js';
+import type { Provider } from '../types/provider.js';
+import type { ProviderMetadata } from '../types/provider.js';
 
 export type ProviderConstructor = new () => Provider;
 

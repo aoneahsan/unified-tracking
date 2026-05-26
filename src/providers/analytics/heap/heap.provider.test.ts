@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { HeapAnalyticsProvider } from './heap.provider';
+import { HeapAnalyticsProvider } from './heap.provider.js';
 
 // Mock the global window object
 const mockHeap = {

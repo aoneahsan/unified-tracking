@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { PostHogAnalyticsProvider } from './posthog.provider';
-import type { ConsentSettings } from '../../../types/provider';
+import { PostHogAnalyticsProvider } from './posthog.provider.js';
+import type { ConsentSettings } from '../../../types/provider.js';
 
 // Mock the global PostHog object
 const mockPostHog = {

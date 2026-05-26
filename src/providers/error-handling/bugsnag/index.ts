@@ -1,1 +1,1 @@
-export { BugsnagErrorTrackingProvider } from './bugsnag.provider';
+export { BugsnagErrorTrackingProvider } from './bugsnag.provider.js';

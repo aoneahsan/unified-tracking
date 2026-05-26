@@ -1,1 +1,1 @@
-export { AmplitudeAnalyticsProvider } from './amplitude.provider';
+export { AmplitudeAnalyticsProvider } from './amplitude.provider.js';

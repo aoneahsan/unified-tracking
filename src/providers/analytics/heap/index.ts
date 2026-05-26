@@ -1,1 +1,1 @@
-export { HeapAnalyticsProvider } from './heap.provider';
+export { HeapAnalyticsProvider } from './heap.provider.js';

@@ -30,15 +30,15 @@ BaseProviderImpl (base-provider-impl.ts)
 
 ## Key Files
 
-| File | Purpose |
-|------|---------|
-| `base.ts` | Provider interface definitions (`AnalyticsProvider`, `ErrorTrackingProvider`) |
-| `base-provider-impl.ts` | Abstract base with lifecycle (init, ready check, reset, destroy) |
-| `base-analytics-provider.ts` | Analytics base: track, identify, screen view, revenue, timed events |
-| `base-error-tracking-provider.ts` | Error base: logError, breadcrumbs, user/extra context, tags, transactions |
-| `provider-manager.ts` | Orchestrates all registered providers, routes API calls |
-| `registry.ts` | Provider registration system |
-| `index.ts` | Barrel exports |
+| File                              | Purpose                                                                       |
+| --------------------------------- | ----------------------------------------------------------------------------- |
+| `base.ts`                         | Provider interface definitions (`AnalyticsProvider`, `ErrorTrackingProvider`) |
+| `base-provider-impl.ts`           | Abstract base with lifecycle (init, ready check, reset, destroy)              |
+| `base-analytics-provider.ts`      | Analytics base: track, identify, screen view, revenue, timed events           |
+| `base-error-tracking-provider.ts` | Error base: logError, breadcrumbs, user/extra context, tags, transactions     |
+| `provider-manager.ts`             | Orchestrates all registered providers, routes API calls                       |
+| `registry.ts`                     | Provider registration system                                                  |
+| `index.ts`                        | Barrel exports                                                                |
 
 ## Template Method Pattern
 
@@ -57,9 +57,11 @@ protected abstract doTrack(eventName: string, properties: Record<string, any>): 
 ```
 
 ### Analytics abstract methods to implement
+
 `doTrack`, `doIdentifyUser`, `doSetUserProperties`, `doLogScreenView`, `doLogRevenue`, `doProviderReset`
 
 ### Error tracking abstract methods to implement
+
 `doLogError`, `doSetUserContext`, `doSetExtraContext`, `doSetTags`, `doCaptureException`, `doProviderReset`
 
 ## Adding a New Provider

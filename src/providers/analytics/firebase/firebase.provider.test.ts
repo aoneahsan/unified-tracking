@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { FirebaseAnalyticsProvider } from './firebase.provider';
+import { FirebaseAnalyticsProvider } from './firebase.provider.js';
 
 describe('FirebaseAnalyticsProvider', () => {
   let provider: FirebaseAnalyticsProvider;

@@ -1,1 +1,1 @@
-export { SegmentAnalyticsProvider } from './segment.provider';
+export { SegmentAnalyticsProvider } from './segment.provider.js';

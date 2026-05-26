@@ -10,12 +10,12 @@ When the prompt was re-run, the tracker correctly reported the 3.1.0 cycle as co
 
 > **"Fresh independent re-audit"** — trust nothing from the prior cycle; run a brand-new deep security + functionality + gap audit from scratch to catch anything the same-day audit missed, then decide on fixes/release based on what turns up.
 
-So Round 02 deliberately does **not** lean on `phase02-findings.md`. Three independent audit agents were given the codebase with an explicit instruction *not* to read the prior findings.
+So Round 02 deliberately does **not** lean on `phase02-findings.md`. Three independent audit agents were given the codebase with an explicit instruction _not_ to read the prior findings.
 
 ## Scope of Round 02
 
 1. **Independent deep audit** (3 parallel agents, fresh eyes):
-   - Security (deps/CVEs, secrets, injection, proto-pollution, input validation, data leakage, consent/privacy *enforcement* vs claims, storage safety, randomness, native bridge).
+   - Security (deps/CVEs, secrets, injection, proto-pollution, input validation, data leakage, consent/privacy _enforcement_ vs claims, storage safety, randomness, native bridge).
    - Functionality & correctness (public API end-to-end, fan-out error isolation, async/init races, event queue leaks/ordering, React hook correctness, consent-gate timing, dead code, error handling, cleanup).
    - Provider completeness + feature gaps + public API/types + docs-vs-reality (16-provider capability matrix, native stub status, type leaks, config-vs-reality, README/AI-guide/docs accuracy).
 2. **Independent baseline re-verification** — re-run `type-check + build + test + eslint + prettier` to confirm the shipped 3.1.0 tree is genuinely green (not taken on faith from Round 01).

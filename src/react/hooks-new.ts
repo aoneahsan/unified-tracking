@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { getUnifiedTracking } from '../core/unified-tracking-core';
+import { getUnifiedTracking } from '../core/unified-tracking-core.js';
 
 const UnifiedTracking = getUnifiedTracking();
 

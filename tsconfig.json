@@ -6,8 +6,8 @@
     "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
     "lib": ["dom", "es2023"],
-    "module": "esnext",
-    "moduleResolution": "bundler",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": true,
     "noImplicitReturns": true,
@@ -19,14 +19,8 @@
     "strict": true,
     "target": "es2022",
     "jsx": "react",
-    "rootDir": "./",
-    "paths": {
-      "@/*": ["./src/*"],
-      "@providers/*": ["./src/providers/*"],
-      "@utils/*": ["./src/utils/*"],
-      "@types/*": ["./src/types/*"]
-    }
+    "rootDir": "./"
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "vitest.config.ts", "rollup.config.js"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "vitest.config.ts"],
   "exclude": ["node_modules", "dist", "examples"]
 }

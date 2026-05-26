@@ -1,8 +1,8 @@
-import type { AnalyticsProvider } from '../../base';
-import type { ProviderConfig, ProviderType, ConsentSettings } from '../../../types/provider';
-import type { RevenueData } from '../../../definitions';
-import { RegisterProvider } from '../../registry';
-import { Logger } from '../../../utils/logger';
+import type { AnalyticsProvider } from '../../base.js';
+import type { ProviderConfig, ProviderType, ConsentSettings } from '../../../types/provider.js';
+import type { RevenueData } from '../../../definitions.js';
+import { RegisterProvider } from '../../registry.js';
+import { Logger } from '../../../utils/logger.js';
 
 interface AmplitudeConfig {
   apiKey: string;

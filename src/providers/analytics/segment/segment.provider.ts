@@ -1,7 +1,7 @@
-import { BaseAnalyticsProvider } from '../../base-analytics-provider';
-import { RegisterProvider } from '../../registry';
-import type { ProviderConfig, ProviderType, ConsentSettings } from '../../../types/provider';
-import type { RevenueData } from '../../../definitions';
+import { BaseAnalyticsProvider } from '../../base-analytics-provider.js';
+import { RegisterProvider } from '../../registry.js';
+import type { ProviderConfig, ProviderType, ConsentSettings } from '../../../types/provider.js';
+import type { RevenueData } from '../../../definitions.js';
 
 interface SegmentConfig extends ProviderConfig {
   writeKey: string;

@@ -1,6 +1,6 @@
 import { WebPlugin } from '@capacitor/core';
 import type { PluginListenerHandle } from '@capacitor/core';
-import { UnifiedTrackingCore } from '../core/unified-tracking-core';
+import { UnifiedTrackingCore } from '../core/unified-tracking-core.js';
 
 export interface TrackingEvent {
   type: 'trackingEvent';
@@ -23,7 +23,7 @@ import type {
   ErrorContext,
   RevenueData,
   ConsentSettings,
-} from '../definitions';
+} from '../definitions.js';
 
 export class UnifiedTrackingCapacitorPlugin extends WebPlugin implements UnifiedTrackingPlugin {
   private core: UnifiedTrackingCore;

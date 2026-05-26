@@ -1,1 +1,1 @@
-export { FirebaseCrashlyticsProvider } from './firebase-crashlytics.provider';
+export { FirebaseCrashlyticsProvider } from './firebase-crashlytics.provider.js';

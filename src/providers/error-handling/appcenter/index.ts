@@ -1,1 +1,1 @@
-export { AppCenterProvider } from './appcenter.provider';
+export { AppCenterProvider } from './appcenter.provider.js';

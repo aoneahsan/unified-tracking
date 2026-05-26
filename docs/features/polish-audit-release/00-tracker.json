@@ -10,7 +10,13 @@
   "round02Overview": "docs/features/polish-audit-release/round02-overview.md",
   "round01Result": "COMPLETE - v3.1.0 published to npm 2026-05-26 (deps->latest stable, ~25-finding audit, all security/correctness/dead-code fixes, docs, minor bump). Immutable.",
   "publishedVersion": "3.1.0",
-  "round02TargetVersion": "3.2.0 only if Round 02 produces real fixes; else hold at 3.1.0 (confirm before any publish - irreversible).",
+  "round02TargetVersion": "3.2.0 - CONFIRMED: Round 02 found 2 CRITICAL + 8 HIGH, so a minor release is warranted. Confirm again before the irreversible publish (phase09).",
+  "round02Decisions": {
+    "scope": "FIX EVERYTHING - all 7 phase07 batches + full docs rewrite (user choice 2026-05-26).",
+    "eventQueue": "WIRE IT UP FOR REAL - pre-init/offline buffering + drain-on-init + honor settings.batching + fix retry/dedupe/ordering (H5 option A + M11) (user choice 2026-05-26).",
+    "apiCompat": "All fixes API-preserving (config-key changes additive aliases; consent unify additive) -> minor bump 3.2.0.",
+    "publish": "User pre-authorized minor npm release; still gate behind full verification + Node-ESM smoke + npm pack review + explicit go-ahead before publish."
+  },
   "currentVersion": "3.0.2",
   "targetVersion": "3.1.0",
   "overview": "docs/features/polish-audit-release/00-overview.md",
@@ -265,26 +271,91 @@
     {
       "id": "phase06",
       "title": "ROUND 02: fresh independent deep re-audit (security + functionality + provider/gap/docs)",
-      "status": "in_progress",
-      "completedAt": null,
+      "status": "complete",
+      "completedAt": "2026-05-26",
       "spec": "docs/features/polish-audit-release/round02-overview.md",
       "findings": "docs/features/polish-audit-release/round02-findings.md",
-      "note": "User chose 'fresh independent re-audit' - trust nothing from Round 01. 3 parallel agents told NOT to read phase02-findings.md. Plus independent baseline gate re-run.",
+      "result": "3 independent agents + manual verification produced ~30 de-duplicated findings the same-day Round 01 audit MISSED, incl. 2 CRITICAL (C1 Node-ESM unimportable - reproduced ERR_MODULE_NOT_FOUND; C2 variable dynamic import -> providers may never register), 8 HIGH (H1 secret logging, H2 config-key mismatch, H3 breadcrumbs dropped, H4 crashlytics web-broken, H5 EventQueue inert, H6/H7/H8 fictional docs). Core dispatch/consent/privacy/isolation verified solid; deps clean; 0 secrets.",
+      "note": "User chose 'fresh independent re-audit' - trusted nothing from Round 01. Agents told NOT to read phase02-findings.md.",
       "subTasks": [
-        { "id": "phase06.1", "title": "Security audit (deps/secrets/injection/proto-pollution/validation/leakage/consent+privacy enforcement/storage/randomness/native)", "status": "in_progress" },
-        { "id": "phase06.2", "title": "Functionality & correctness audit (API end-to-end, fan-out isolation, async/init, queue, hooks, consent timing, dead code, error handling, cleanup)", "status": "in_progress" },
-        { "id": "phase06.3", "title": "Provider-completeness + feature-gap + API/type + docs-vs-reality audit (16-provider matrix, native stubs, type leaks, config-vs-reality)", "status": "in_progress" },
-        { "id": "phase06.4", "title": "Independent baseline gate re-run (type-check+build+test+eslint+prettier)", "status": "complete", "note": "Gate exit 0 - see runHistory." },
-        { "id": "phase06.5", "title": "Synthesize -> round02-findings.md (dedup, FIX/DOC/DEFER, severity, confidence) + populate phase07", "status": "pending" }
+        {
+          "id": "phase06.1",
+          "title": "Security audit",
+          "status": "complete",
+          "note": "13 findings; HIGH=SEC-01 secret logging. Deps clean, 0 secrets, no eval/innerHTML, proto-pollution guard OK."
+        },
+        {
+          "id": "phase06.2",
+          "title": "Functionality & correctness audit",
+          "status": "complete",
+          "note": "15 findings; 2 CRITICAL (FUNC-01 Node-ESM, FUNC-02 dynamic-import loader), HIGH=FUNC-05 EventQueue inert. Fan-out isolation verified solid."
+        },
+        {
+          "id": "phase06.3",
+          "title": "Provider-completeness + gap + API/type + docs-vs-reality audit",
+          "status": "complete",
+          "note": "24 findings; 7 HIGH (GAP-01 breadcrumbs, GAP-02 crashlytics, GAP-07 config keys, GAP-08 native, DOC-01/02/05 fictional docs). 16-provider matrix captured in findings."
+        },
+        {
+          "id": "phase06.4",
+          "title": "Independent baseline gate re-run (type-check+build+test+eslint+prettier)",
+          "status": "complete",
+          "note": "type-check/build/test(246/2skip)/eslint PASS; prettier --check FAILS on 2 committed md (L17)."
+        },
+        {
+          "id": "phase06.5",
+          "title": "Synthesize -> round02-findings.md + verify CRITICALs + populate phase07",
+          "status": "complete",
+          "note": "C1 reproduced (ERR_MODULE_NOT_FOUND); C2 confirmed (variable import in emitted JS). ~30 merged findings, FIX/DOC/DEFER, 8 fix batches proposed."
+        }
       ]
     },
     {
       "id": "phase07",
       "title": "ROUND 02: implement fixes from round02-findings.md (security/correctness first)",
-      "status": "pending",
+      "status": "in_progress",
       "completedAt": null,
-      "note": "Sub-tasks populated after phase06.5. No NEW automated tests (global rule). Minor release: no breaking public API changes.",
-      "subTasks": []
+      "note": "Batches from round02-findings.md. No NEW automated tests (global rule, except a Node-ESM import smoke check if added to gate). Minor release: fixes are API-preserving (config-key changes are additive aliases; consent unify additive). ONE commit per batch.",
+      "subTasks": [
+        {
+          "id": "phase07.1",
+          "title": "Batch 7.1 CRITICAL build/loader: NodeNext + .js extensions (C1) + static provider import map (C2) + drop orphan rollup (L4) + exclude tests from dist (L5); SEC-08 name allowlist via map; getPlatform global->globalThis",
+          "status": "complete",
+          "completedAt": "2026-05-26",
+          "note": "tsconfig module+moduleResolution=nodenext; +.js on 154 relative imports across 60 files (0 dir-imports, mechanical anchored transform); new provider-loaders.ts static map (16 literal imports) replaces variable import() in provider-manager + providers/index (also closes SEC-08 arbitrary-name vector); dropped rollup step+rollup.config.js+3 rollup devdeps (L4); tsconfig.build.json excludes tests/test-setup from emitted dist (L5); base getPlatform global->globalThis (NodeNext surfaced TS2304). VERIFIED: type-check 0, build 0, Node-ESM import OK (index+capacitor; react needs the optional peer installed), tests 246/2skip, full lint (eslint+prettier) GREEN (L17 prettier drift cleared)."
+        },
+        {
+          "id": "phase07.2",
+          "title": "Batch 7.2 Security: redact in logger sink + extend SENSITIVE_KEY (H1, L1); SRI+crossOrigin+pinned versions on CDN loaders (M3); dynamic-import name allowlist (L2); setup.js plaintext gitignore note (L19)",
+          "status": "pending"
+        },
+        {
+          "id": "phase07.3",
+          "title": "Batch 7.3 Config correctness: provider key aliases + fix definitions.ts types (H2); Amplitude/AppCenter SDK URL+global fixes (M9); GA consent default denied (M8)",
+          "status": "pending"
+        },
+        {
+          "id": "phase07.4",
+          "title": "Batch 7.4 Error-provider + privacy: breadcrumbs reach SDK (H3); crashlytics native-only guard+doc (H4); unify ConsentSettings (M1); wire/remove anonymizeIp (M2); deep-strip excludedProperties (M10)",
+          "status": "pending"
+        },
+        {
+          "id": "phase07.5",
+          "title": "Batch 7.5 Engine/React: single core singleton (M5); memoize useUnifiedTracking (M6); capacitor adapter delegate+listener fix (M4); validation/init guards (L3); teardown/shutdown (L7); Firebase+Amplitude extend base class (M7, ex-phase03.7)",
+          "status": "pending"
+        },
+        {
+          "id": "phase07.6",
+          "title": "Batch 7.6 EventQueue (H5+M11): WIRE IT UP - pre-init/offline buffering + drain-on-init + honor settings.batching + fix retry/dedupe/ordering",
+          "status": "pending",
+          "note": "User chose option A (wire it up for real) 2026-05-26."
+        },
+        {
+          "id": "phase07.7",
+          "title": "Batch 7.7 Types/cleanup: dead loadProviders/getProviderManager (L6); flush (L8); reset/setDebugMode on interface (L9); addListener types (L10); any->unknown public surface (L11); SSR guards (L16); .npmignore reconcile (L18); prettier fmt (L17)",
+          "status": "pending"
+        }
+      ]
     },
     {
       "id": "phase08",
@@ -363,7 +434,19 @@
       "phase": "phase06 (round 02 kickoff + baseline gate)",
       "summary": "User re-ran the prompt; chose 'fresh independent re-audit'. Confirmed 3.1.0 live on npm, git in sync with o/main, deps still at latest stable. Invoked skills (security-review, analytics-tracking, nodejs-best-practices). Launched 3 independent audit agents (told NOT to read prior findings) + background baseline gate. GATE RESULT: type-check PASS, build PASS, test PASS (246/2 skip), eslint PASS (0/0), but `yarn prettier --check` FAILS on 2 committed files (src/providers/AGENTS.md, src/providers/CLAUDE.md) -> real LOW finding: shipped tree fails the full `yarn lint`. Wrote round02-overview.md, opened phases 06-09.",
       "commit": "pending"
+    },
+    {
+      "date": "2026-05-26",
+      "phase": "phase06 complete (audit synthesized)",
+      "summary": "All 3 audit agents returned (13 security + 15 functionality + 24 provider/gap/docs findings). De-duplicated to ~30 in round02-findings.md. VERIFIED the 2 CRITICALs empirically: C1 (Node ESM import -> ERR_MODULE_NOT_FOUND; tsconfig moduleResolution:bundler + type:module + extensionless emit) and C2 (emitted provider-manager.js has variable `await import(modulePath)` + extensionless `./registry`). Populated phase07 with 8 fix batches (security/correctness first; API-preserving). Awaiting user decision on scope + EventQueue (H5 wire-up vs trim) before executing fixes.",
+      "commit": "pending"
+    },
+    {
+      "date": "2026-05-26",
+      "phase": "phase07.1 (batch 7.1 CRITICAL build/loader)",
+      "summary": "User chose FIX EVERYTHING + WIRE-UP the EventQueue. Fixed both CRITICALs: tsconfig -> NodeNext; added .js to 154 relative imports across 60 files (anchored transform, 0 directory imports); new provider-loaders.ts static import map (16 literal specifiers) replaces the variable import() in provider-manager.loadProvider + providers/index.loadProviders (closes C2 AND the SEC-08 arbitrary-name vector); dropped the orphan rollup step + rollup.config.js + 3 rollup devdeps (L4); added tsconfig.build.json to keep tests/test-setup out of emitted dist (L5); base getPlatform global->globalThis (NodeNext surfaced TS2304 x4). Gate GREEN: type-check 0, build 0, Node-ESM `import('dist/esm/src/index.js')` + capacitor entry succeed (was ERR_MODULE_NOT_FOUND), tests 246/2skip, eslint+prettier clean (L17 cleared).",
+      "commit": "pending"
     }
   ],
-  "resumeInstructions": "ROUND 01 (v3.1.0) is COMPLETE and published to npm - immutable, never redo. ACTIVE WORK IS ROUND 02 (phases 06+). On resume: (1) read this tracker; (2) the next thing to do is the first 'pending'/'in_progress' sub-task in the HIGHEST phase number - currently phase06 (fresh independent re-audit) in_progress; (3) once the 3 audit agents produced round02-findings.md, do phase06.5 synthesis then populate + execute phase07 fixes; (4) invoke matching skills per RULE #0 before any edit; (5) ONE commit per session; (6) do NOT publish 3.2.0 without confirming intent (publish is irreversible) - if round02-findings.md shows only cosmetic items, recommend holding at 3.1.0. Known baseline issue already found: shipped tree fails `yarn prettier --check` on src/providers/AGENTS.md + CLAUDE.md."
+  "resumeInstructions": "ROUND 01 (v3.1.0) COMPLETE + published (immutable). ACTIVE = ROUND 02, phase07 fixes (round02-findings.md). User decided: FIX EVERYTHING + WIRE-UP EventQueue (round02Decisions). DONE: phase06 audit + phase07.1 (both CRITICALs C1+C2, plus L4/L5/SEC-08/getPlatform) - gate green incl Node-ESM smoke. NEXT: phase07.2 (security: H1 logger-sink redaction + M3 SRI + L2 + L19), then 7.3 config keys, 7.4 error/privacy, 7.5 engine/react, 7.6 EventQueue wire-up, 7.7 types/cleanup, then phase08 docs, then phase09 release (bump 3.2.0; CONFIRM intent before the irreversible npm publish). On resume: read tracker -> first pending sub-task in highest phase -> invoke matching skills per RULE #0 -> ONE commit per batch -> keep gate (type-check+build+test+lint+Node-ESM smoke) green."
 }

@@ -1,1 +1,1 @@
-export { RaygunProvider } from './raygun.provider';
+export { RaygunProvider } from './raygun.provider.js';

@@ -1,1 +1,1 @@
-export { MatomoAnalyticsProvider } from './matomo.provider';
+export { MatomoAnalyticsProvider } from './matomo.provider.js';

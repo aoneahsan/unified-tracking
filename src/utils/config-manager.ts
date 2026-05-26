@@ -1,4 +1,4 @@
-import type { UnifiedTrackingConfig, ConsentSettings, AnalyticsProvider, ErrorProvider } from '../definitions';
+import type { UnifiedTrackingConfig, ConsentSettings, AnalyticsProvider, ErrorProvider } from '../definitions.js';
 
 export class ConfigManager {
   private static instance: ConfigManager;

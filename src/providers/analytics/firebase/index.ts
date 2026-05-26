@@ -1,1 +1,1 @@
-export { FirebaseAnalyticsProvider } from './firebase.provider';
+export { FirebaseAnalyticsProvider } from './firebase.provider.js';

@@ -1,7 +1,7 @@
-import { BaseProviderImpl } from './base-provider-impl';
-import type { AnalyticsProvider } from './base';
-import type { RevenueData } from '../definitions';
-import type { ProviderType } from '../types/provider';
+import { BaseProviderImpl } from './base-provider-impl.js';
+import type { AnalyticsProvider } from './base.js';
+import type { RevenueData } from '../definitions.js';
+import type { ProviderType } from '../types/provider.js';
 
 /**
  * Abstract base class for analytics provider implementations
@@ -203,7 +203,7 @@ export abstract class BaseAnalyticsProvider extends BaseProviderImpl implements 
   protected getPlatform(): string {
     if (typeof window !== 'undefined') {
       return 'web';
-    } else if (typeof global !== 'undefined' && global.process) {
+    } else if (typeof (globalThis as { process?: unknown }).process !== 'undefined') {
       return 'node';
     }
     return 'unknown';

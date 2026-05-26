@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { GoogleAnalyticsProvider } from './google-analytics.provider';
-import type { ConsentSettings } from '../../../types/provider';
+import { GoogleAnalyticsProvider } from './google-analytics.provider.js';
+import type { ConsentSettings } from '../../../types/provider.js';
 
 // Mock window.gtag
 const mockGtag = vi.fn();

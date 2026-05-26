@@ -1,6 +1,6 @@
-import { Logger } from '../utils/logger';
-import type { BaseProvider } from './base';
-import type { ProviderConfig, ProviderType, ConsentSettings } from '../types/provider';
+import { Logger } from '../utils/logger.js';
+import type { BaseProvider } from './base.js';
+import type { ProviderConfig, ProviderType, ConsentSettings } from '../types/provider.js';
 
 /**
  * Abstract base class for all provider implementations

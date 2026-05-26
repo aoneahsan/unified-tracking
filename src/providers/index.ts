@@ -1,76 +1,37 @@
-export * from './base';
-export * from './base-provider-impl';
-export * from './base-analytics-provider';
-export * from './base-error-tracking-provider';
-export * from './provider-manager';
-export * from './registry';
+export * from './base.js';
+export * from './base-provider-impl.js';
+export * from './base-analytics-provider.js';
+export * from './base-error-tracking-provider.js';
+export * from './provider-manager.js';
+export * from './registry.js';
+export { PROVIDER_LOADERS, KNOWN_PROVIDER_IDS } from './provider-loaders.js';
+export type { ProviderModuleLoader } from './provider-loaders.js';
 
-import { ProviderRegistry } from './registry';
-import { Logger } from '../utils/logger';
+import { ProviderRegistry } from './registry.js';
+import { PROVIDER_LOADERS } from './provider-loaders.js';
+import { Logger } from '../utils/logger.js';
 
 const logger = Logger.getInstance();
 
 /**
- * Load all available providers
+ * Eagerly import every provider module so each one self-registers with the
+ * {@link ProviderRegistry}. This is OPTIONAL — `ProviderManager` already lazily loads only
+ * the providers a consumer configures (the preferred path, which preserves per-provider
+ * tree-shaking). Call this only if you explicitly want every provider registered up front.
  */
 export async function loadProviders(): Promise<void> {
   const registry = ProviderRegistry.getInstance();
-
-  try {
-    // Analytics providers
-    await loadAnalyticsProviders();
-
-    // Error tracking providers
-    await loadErrorTrackingProviders();
-
-    logger.info(`Loaded ${registry.getAll().length} providers`);
-  } catch (error) {
-    logger.error('Failed to load providers', error);
-  }
-}
-
-async function loadAnalyticsProviders(): Promise<void> {
-  const providers = [
-    { folder: 'google-analytics', file: 'google-analytics' },
-    { folder: 'firebase', file: 'firebase' },
-    { folder: 'amplitude', file: 'amplitude' },
-    { folder: 'mixpanel', file: 'mixpanel' },
-    { folder: 'segment', file: 'segment' },
-    { folder: 'posthog', file: 'posthog' },
-    { folder: 'heap', file: 'heap' },
-    { folder: 'matomo', file: 'matomo' },
-  ];
-
-  for (const provider of providers) {
-    try {
-      await import(`./analytics/${provider.folder}/${provider.file}.provider`);
-    } catch {
-      // Provider module could not be loaded (e.g. its optional vendor SDK is absent).
-      logger.debug(`Analytics provider ${provider.folder} not available`);
-    }
-  }
-}
-
-async function loadErrorTrackingProviders(): Promise<void> {
-  const providers = [
-    { folder: 'sentry', file: 'sentry' },
-    { folder: 'firebase-crashlytics', file: 'firebase-crashlytics' },
-    { folder: 'datadog', file: 'datadog' },
-    { folder: 'bugsnag', file: 'bugsnag' },
-    { folder: 'rollbar', file: 'rollbar' },
-    { folder: 'logrocket', file: 'logrocket' },
-    { folder: 'raygun', file: 'raygun' },
-    { folder: 'appcenter', file: 'appcenter' },
-  ];
-
-  for (const provider of providers) {
-    try {
-      await import(`./error-handling/${provider.folder}/${provider.file}.provider`);
-    } catch {
-      // Provider module could not be loaded (e.g. its optional vendor SDK is absent).
-      logger.debug(`Error tracking provider ${provider.folder} not available`);
-    }
-  }
+  await Promise.all(
+    Object.entries(PROVIDER_LOADERS).map(async ([id, load]) => {
+      try {
+        await load();
+      } catch {
+        // Provider module could not be loaded (e.g. its optional vendor SDK is absent).
+        logger.debug(`Provider ${id} not available`);
+      }
+    }),
+  );
+  logger.info(`Loaded ${registry.getAll().length} providers`);
 }
 
 /**

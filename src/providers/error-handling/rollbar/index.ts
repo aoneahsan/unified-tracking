@@ -1,1 +1,1 @@
-export { RollbarErrorTrackingProvider } from './rollbar.provider';
+export { RollbarErrorTrackingProvider } from './rollbar.provider.js';

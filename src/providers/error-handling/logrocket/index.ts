@@ -1,1 +1,1 @@
-export { LogRocketErrorTrackingProvider } from './logrocket.provider';
+export { LogRocketErrorTrackingProvider } from './logrocket.provider.js';

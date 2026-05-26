@@ -1,2 +1,2 @@
 // React integration for Unified Tracking - No providers needed!
-export { useUnifiedTracking, useTrackEvent } from './hooks-new';
+export { useUnifiedTracking, useTrackEvent } from './hooks-new.js';

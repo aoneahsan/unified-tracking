@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { AppCenterProvider } from './appcenter.provider';
-import type { ConsentSettings, ErrorContext } from '../../../definitions';
+import { AppCenterProvider } from './appcenter.provider.js';
+import type { ConsentSettings, ErrorContext } from '../../../definitions.js';
 
 // Mock App Center SDK
 const mockAppCenter = {

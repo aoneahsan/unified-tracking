@@ -17,20 +17,21 @@ BaseProviderImpl
 
 ## Key Files
 
-| File | Purpose |
-|------|---------|
-| `base.ts` | Provider interface definitions |
-| `base-provider-impl.ts` | Abstract base with lifecycle |
-| `base-analytics-provider.ts` | Analytics base: track, identify, screen view, revenue |
-| `base-error-tracking-provider.ts` | Error base: logError, breadcrumbs, context, tags |
-| `provider-manager.ts` | Orchestrates providers, routes API calls |
-| `registry.ts` | Provider registration system |
+| File                              | Purpose                                               |
+| --------------------------------- | ----------------------------------------------------- |
+| `base.ts`                         | Provider interface definitions                        |
+| `base-provider-impl.ts`           | Abstract base with lifecycle                          |
+| `base-analytics-provider.ts`      | Analytics base: track, identify, screen view, revenue |
+| `base-error-tracking-provider.ts` | Error base: logError, breadcrumbs, context, tags      |
+| `provider-manager.ts`             | Orchestrates providers, routes API calls              |
+| `registry.ts`                     | Provider registration system                          |
 
 ## Template Method Pattern
 
 Base classes define public API → call `doXxx()` abstract methods → providers implement only `doXxx()`.
 
 ### Analytics: implement `doTrack`, `doIdentifyUser`, `doSetUserProperties`, `doLogScreenView`, `doLogRevenue`, `doProviderReset`
+
 ### Error tracking: implement `doLogError`, `doSetUserContext`, `doSetExtraContext`, `doSetTags`, `doCaptureException`, `doProviderReset`
 
 ## Adding a New Provider

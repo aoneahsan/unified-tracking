@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { ProviderManager } from './provider-manager';
-import type { ConsentSettings, ErrorContext, RevenueData } from '../definitions';
+import { ProviderManager } from './provider-manager.js';
+import type { ConsentSettings, ErrorContext, RevenueData } from '../definitions.js';
 
 describe('ProviderManager', () => {
   let providerManager: ProviderManager;

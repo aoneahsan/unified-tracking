@@ -1,1 +1,1 @@
-export { PostHogAnalyticsProvider } from './posthog.provider';
+export { PostHogAnalyticsProvider } from './posthog.provider.js';

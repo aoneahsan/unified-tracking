@@ -6,11 +6,11 @@ import type {
   RevenueData,
   ConsentSettings,
   ActiveProvidersResult,
-} from '../definitions';
-import { ProviderManager } from '../providers/provider-manager';
-import { ConfigManager } from '../utils/config-manager';
-import { EventQueue } from '../utils/event-queue';
-import { Logger } from '../utils/logger';
+} from '../definitions.js';
+import { ProviderManager } from '../providers/provider-manager.js';
+import { ConfigManager } from '../utils/config-manager.js';
+import { EventQueue } from '../utils/event-queue.js';
+import { Logger } from '../utils/logger.js';
 
 export interface TrackingEvent {
   type: 'trackingEvent';

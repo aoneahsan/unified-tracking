@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { SentryErrorTrackingProvider } from './sentry.provider';
-import type { ConsentSettings, ErrorContext } from '../../../definitions';
+import { SentryErrorTrackingProvider } from './sentry.provider.js';
+import type { ConsentSettings, ErrorContext } from '../../../definitions.js';
 
 // Mock Sentry SDK
 const mockSentry = {
