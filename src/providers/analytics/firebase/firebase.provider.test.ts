@@ -86,7 +86,8 @@ describe('FirebaseAnalyticsProvider', () => {
     it('should not track when not ready', async () => {
       provider = new FirebaseAnalyticsProvider();
 
-      await provider.trackEvent('test');
+      // Base class guards via checkReady(): tracking before initialize() rejects.
+      await expect(provider.trackEvent('test')).rejects.toThrow('not initialized');
 
       expect(mockAnalytics.logEvent).not.toHaveBeenCalled();
     });

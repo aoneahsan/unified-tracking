@@ -1,10 +1,9 @@
-import type { AnalyticsProvider } from '../../base.js';
+import { BaseAnalyticsProvider } from '../../base-analytics-provider.js';
+import { RegisterProvider } from '../../registry.js';
 import type { ProviderConfig, ProviderType, ConsentSettings } from '../../../types/provider.js';
 import type { RevenueData } from '../../../definitions.js';
-import { RegisterProvider } from '../../registry.js';
-import { Logger } from '../../../utils/logger.js';
 
-interface AmplitudeConfig {
+interface AmplitudeConfig extends ProviderConfig {
   apiKey: string;
   serverUrl?: string;
   defaultTracking?: {
@@ -51,27 +50,16 @@ declare global {
   version: '1.0.0',
   supportedPlatforms: ['web', 'ios', 'android'],
 })
-export class AmplitudeAnalyticsProvider implements AnalyticsProvider {
+export class AmplitudeAnalyticsProvider extends BaseAnalyticsProvider {
   readonly id = 'amplitude';
   readonly name = 'Amplitude Analytics';
-  readonly type: ProviderType = 'analytics';
   readonly version = '1.0.0';
 
-  private logger: Logger;
   private amplitude?: AmplitudeInstance;
-  private config: ProviderConfig = {};
-  private ready = false;
-  private enabled = true;
 
-  constructor() {
-    this.logger = new Logger('AmplitudeAnalytics');
-  }
-
-  async initialize(config: ProviderConfig): Promise<void> {
-    this.config = config;
-
-    if (config.enabled === false) {
-      this.enabled = false;
+  protected async doInitialize(config: ProviderConfig): Promise<void> {
+    // Preserve original behavior: when disabled by configuration, skip SDK setup entirely.
+    if (!this.enabled) {
       this.logger.info('Amplitude Analytics disabled by configuration');
       return;
     }
@@ -82,50 +70,43 @@ export class AmplitudeAnalyticsProvider implements AnalyticsProvider {
       throw new Error('Amplitude API key is required');
     }
 
-    try {
-      // Load Amplitude SDK
-      await this.loadAmplitudeSDK();
+    // Load Amplitude SDK
+    await this.loadAmplitudeSDK();
 
-      // Initialize Amplitude
-      if (window.amplitude) {
-        this.amplitude = window.amplitude;
+    // Initialize Amplitude
+    if (window.amplitude) {
+      this.amplitude = window.amplitude;
 
-        // Set server URL if provided
-        if (amplitudeConfig.serverUrl) {
-          this.amplitude.setServerUrl(amplitudeConfig.serverUrl);
-        }
-
-        // Initialize with options
-        const options: any = {};
-
-        if (amplitudeConfig.trackingOptions) {
-          Object.assign(options, amplitudeConfig.trackingOptions);
-        }
-
-        if (amplitudeConfig.defaultTracking) {
-          options.defaultTracking = amplitudeConfig.defaultTracking;
-        }
-
-        this.amplitude.init(amplitudeConfig.apiKey, amplitudeConfig.trackingOptions?.userId || undefined, options);
-
-        this.ready = true;
-        this.logger.info('Amplitude Analytics initialized successfully');
-      } else {
-        throw new Error('Failed to load Amplitude SDK');
+      // Set server URL if provided
+      if (amplitudeConfig.serverUrl) {
+        this.amplitude.setServerUrl(amplitudeConfig.serverUrl);
       }
-    } catch (error) {
-      this.logger.error('Failed to initialize Amplitude Analytics', error);
-      throw error;
+
+      // Initialize with options
+      const options: any = {};
+
+      if (amplitudeConfig.trackingOptions) {
+        Object.assign(options, amplitudeConfig.trackingOptions);
+      }
+
+      if (amplitudeConfig.defaultTracking) {
+        options.defaultTracking = amplitudeConfig.defaultTracking;
+      }
+
+      this.amplitude.init(amplitudeConfig.apiKey, amplitudeConfig.trackingOptions?.userId || undefined, options);
+
+      this.logger.info('Amplitude Analytics initialized successfully');
+    } else {
+      throw new Error('Failed to load Amplitude SDK');
     }
   }
 
-  async shutdown(): Promise<void> {
-    this.ready = false;
+  protected async doShutdown(): Promise<void> {
     this.amplitude = undefined;
     this.logger.info('Amplitude Analytics shut down');
   }
 
-  async updateConsent(consent: ConsentSettings): Promise<void> {
+  protected async doUpdateConsent(consent: ConsentSettings): Promise<void> {
     if (!this.amplitude) return;
 
     if (consent.analytics === false) {
@@ -137,148 +118,100 @@ export class AmplitudeAnalyticsProvider implements AnalyticsProvider {
     }
   }
 
-  isReady(): boolean {
-    return this.ready && this.enabled;
-  }
-
-  getConfig(): ProviderConfig {
-    return this.config;
-  }
-
-  setEnabled(enabled: boolean): void {
-    this.enabled = enabled;
-    if (this.amplitude) {
-      this.amplitude.setOptOut(!enabled);
-    }
-  }
-
-  isEnabled(): boolean {
-    return this.enabled;
-  }
-
-  setDebugMode(enabled: boolean): void {
-    // Amplitude doesn't have a specific debug mode
-    // Debug logging is handled at initialization
+  protected doSetDebugMode(enabled: boolean): void {
+    // Amplitude doesn't have a specific debug mode.
+    // Debug logging is handled at initialization.
     if (enabled) {
       this.logger.debug('Debug mode enabled');
     }
   }
 
-  async reset(): Promise<void> {
-    if (!this.isReady()) return;
+  protected async doProviderReset(): Promise<void> {
+    if (!this.amplitude) return;
 
-    try {
-      this.amplitude!.reset();
-      this.logger.info('Amplitude Analytics reset');
-    } catch (error) {
-      this.logger.error('Failed to reset Amplitude Analytics', error);
-    }
+    this.amplitude.reset();
+    this.logger.info('Amplitude Analytics reset');
   }
 
-  async track(eventName: string, properties?: Record<string, any>): Promise<void> {
-    await this.trackEvent(eventName, properties);
+  protected async doTrack(eventName: string, properties: Record<string, any>): Promise<void> {
+    if (!this.amplitude) {
+      throw new Error('Amplitude not initialized');
+    }
+
+    const sanitizedName = this.sanitizeEventName(eventName);
+    // Preserve original behavior: pass `undefined` (not an empty object) to the SDK when there
+    // are no properties. The base merges super-properties into a `{}` for empty calls, so check size.
+    const sanitizedProperties =
+      properties && Object.keys(properties).length > 0 ? this.sanitizeProperties(properties) : undefined;
+
+    this.amplitude.track(sanitizedName, sanitizedProperties);
+    this.logger.debug('Event tracked:', sanitizedName, sanitizedProperties);
   }
 
-  async trackEvent(eventName: string, properties?: Record<string, any>): Promise<void> {
-    if (!this.isReady()) {
-      this.logger.warn('Amplitude Analytics not ready, event not tracked:', eventName);
-      return;
+  protected async doIdentifyUser(userId: string, traits: Record<string, any>): Promise<void> {
+    if (!this.amplitude) {
+      throw new Error('Amplitude not initialized');
     }
 
-    try {
-      const sanitizedName = this.sanitizeEventName(eventName);
-      const sanitizedProperties = properties ? this.sanitizeProperties(properties) : undefined;
+    this.amplitude.setUserId(userId);
 
-      this.amplitude!.track(sanitizedName, sanitizedProperties);
-      this.logger.debug('Event tracked:', sanitizedName, sanitizedProperties);
-    } catch (error) {
-      this.logger.error('Failed to track event', error);
-      throw error;
+    if (Object.keys(traits).length > 0) {
+      await this.doSetUserProperties(traits);
     }
+
+    this.logger.debug('User identified:', userId);
   }
 
-  async identifyUser(userId: string, traits?: Record<string, any>): Promise<void> {
-    if (!this.isReady()) {
-      this.logger.warn('Amplitude Analytics not ready, user not identified');
-      return;
+  protected async doSetUserProperties(properties: Record<string, any>): Promise<void> {
+    if (!this.amplitude) {
+      throw new Error('Amplitude not initialized');
     }
 
-    try {
-      this.amplitude!.setUserId(userId);
+    const identify = new this.amplitude.Identify();
 
-      if (traits) {
-        await this.setUserProperties(traits);
+    Object.entries(properties).forEach(([key, value]) => {
+      const sanitizedKey = this.sanitizePropertyKey(key);
+      const sanitizedValue = this.sanitizePropertyValue(value);
+
+      if (sanitizedValue !== undefined) {
+        identify.set(sanitizedKey, sanitizedValue);
       }
+    });
 
-      this.logger.debug('User identified:', userId);
-    } catch (error) {
-      this.logger.error('Failed to identify user', error);
-      throw error;
-    }
+    this.amplitude.identify(identify);
+    this.logger.debug('User properties set:', properties);
   }
 
-  async setUserProperties(properties: Record<string, any>): Promise<void> {
-    if (!this.isReady()) {
-      this.logger.warn('Amplitude Analytics not ready, user properties not set');
-      return;
+  protected async doLogRevenue(data: RevenueData): Promise<void> {
+    if (!this.amplitude) {
+      throw new Error('Amplitude not initialized');
     }
 
-    try {
-      const identify = new this.amplitude!.Identify();
+    const revenueObj = new this.amplitude.Revenue().setPrice(data.amount).setQuantity(data.quantity || 1);
 
-      Object.entries(properties).forEach(([key, value]) => {
-        const sanitizedKey = this.sanitizePropertyKey(key);
-        const sanitizedValue = this.sanitizePropertyValue(value);
-
-        if (sanitizedValue !== undefined) {
-          identify.set(sanitizedKey, sanitizedValue);
-        }
-      });
-
-      this.amplitude!.identify(identify);
-      this.logger.debug('User properties set:', properties);
-    } catch (error) {
-      this.logger.error('Failed to set user properties', error);
-      throw error;
+    if (data.currency) {
+      revenueObj.setRevenue(data.amount * (data.quantity || 1));
     }
+
+    if (data.productId) {
+      revenueObj.setProductId(data.productId);
+    }
+
+    if (data.productName) {
+      revenueObj.setEventProperties({ productName: data.productName });
+    }
+
+    this.amplitude.revenue(revenueObj);
+    this.logger.debug('Revenue logged:', data);
   }
 
-  async logRevenue(data: RevenueData): Promise<void> {
-    if (!this.isReady()) {
-      this.logger.warn('Amplitude Analytics not ready, revenue not logged');
-      return;
-    }
-
-    try {
-      const revenueObj = new this.amplitude!.Revenue().setPrice(data.amount).setQuantity(data.quantity || 1);
-
-      if (data.currency) {
-        revenueObj.setRevenue(data.amount * (data.quantity || 1));
-      }
-
-      if (data.productId) {
-        revenueObj.setProductId(data.productId);
-      }
-
-      if (data.productName) {
-        revenueObj.setEventProperties({ productName: data.productName });
-      }
-
-      this.amplitude!.revenue(revenueObj);
-      this.logger.debug('Revenue logged:', data);
-    } catch (error) {
-      this.logger.error('Failed to log revenue', error);
-      throw error;
-    }
-  }
-
-  async logScreenView(screenName: string, properties?: Record<string, any>): Promise<void> {
+  protected async doLogScreenView(screenName: string, properties: Record<string, any>): Promise<void> {
     const eventProperties = {
       screen_name: screenName,
       ...properties,
     };
 
-    await this.trackEvent('Screen View', eventProperties);
+    await this.doTrack('Screen View', eventProperties);
   }
 
   private async loadAmplitudeSDK(): Promise<void> {

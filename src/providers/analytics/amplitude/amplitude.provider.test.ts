@@ -150,7 +150,8 @@ describe('AmplitudeAnalyticsProvider', () => {
 
     it('should not track if provider is disabled', async () => {
       provider.setEnabled(false);
-      await provider.trackEvent('Test Event');
+      // Base class guards via checkReady(): a disabled provider rejects.
+      await expect(provider.trackEvent('Test Event')).rejects.toThrow('disabled');
 
       expect(mockAmplitude.track).not.toHaveBeenCalled();
     });
@@ -165,7 +166,8 @@ describe('AmplitudeAnalyticsProvider', () => {
     it('should not track if not initialized', async () => {
       const uninitializedProvider = new AmplitudeAnalyticsProvider();
 
-      await uninitializedProvider.trackEvent('Test');
+      // Base class guards via checkReady(): tracking before initialize() rejects.
+      await expect(uninitializedProvider.trackEvent('Test')).rejects.toThrow('not initialized');
 
       expect(mockAmplitude.track).not.toHaveBeenCalled();
     });
@@ -197,7 +199,8 @@ describe('AmplitudeAnalyticsProvider', () => {
 
     it('should not identify if provider is disabled', async () => {
       provider.setEnabled(false);
-      await provider.identifyUser('user123');
+      // Base class guards via checkReady(): a disabled provider rejects.
+      await expect(provider.identifyUser('user123')).rejects.toThrow('disabled');
 
       expect(mockAmplitude.setUserId).not.toHaveBeenCalled();
     });
@@ -222,7 +225,8 @@ describe('AmplitudeAnalyticsProvider', () => {
 
     it('should not set properties if provider is disabled', async () => {
       provider.setEnabled(false);
-      await provider.setUserProperties({ name: 'Test' });
+      // Base class guards via checkReady(): a disabled provider rejects.
+      await expect(provider.setUserProperties({ name: 'Test' })).rejects.toThrow('disabled');
 
       expect(mockAmplitude.identify).not.toHaveBeenCalled();
     });
@@ -256,7 +260,8 @@ describe('AmplitudeAnalyticsProvider', () => {
 
     it('should not log revenue if provider is disabled', async () => {
       provider.setEnabled(false);
-      await provider.logRevenue({ amount: 10, currency: 'USD' });
+      // Base class guards via checkReady(): a disabled provider rejects.
+      await expect(provider.logRevenue({ amount: 10, currency: 'USD' })).rejects.toThrow('disabled');
 
       expect(mockAmplitude.revenue).not.toHaveBeenCalled();
     });

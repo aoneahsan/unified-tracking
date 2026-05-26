@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.0] - 2026-05-27
+
+Completes the documented polish backlog deferred from 3.2.0. No breaking public API changes (all additive).
+
+### ✨ Added
+
+- **`flush()`** — flush buffered events across every provider that supports it (e.g. Segment, Sentry). Available on the main `UnifiedTracking` API, the `useUnifiedTracking()` hook, and the Capacitor adapter.
+- **Typed event listeners** — `addListener()` callbacks now receive a typed `TrackingEventPayload` instead of `unknown`.
+
+### 🔧 Changed / improved
+
+- **Firebase & Amplitude providers now extend `BaseAnalyticsProvider`** (the template-method base used by every other analytics provider), so they now honor `setSuperProperties()`, support timed events (`startTimedEvent`/`endTimedEvent`), and share consistent lifecycle/ready handling — previously they bypassed the base and silently ignored those features.
+- **Clear non-browser error** — initializing a provider in a server/Node (non-DOM) environment now fails with an explicit "requires a browser environment" message (surfaced in `InitializeResult.warnings`) instead of an opaque `document is not defined` ReferenceError.
+- **Stronger public types** — remaining `any` in the public provider base classes/interfaces tightened to `unknown` / `Record<string, unknown>`.
+- **`unified-tracking-setup` CLI** now generates the correct object-shaped config (`analytics: { providers: [...], google: {...} }`, `settings: { defaultConsent }`) and accurate example code using the real `useUnifiedTracking`/`useTrackEvent` hooks (no non-existent Provider/HOC).
+
+### 🗑️ Deprecated
+
+- `getProviderManager()` — returns a separate, unused manager instance that does not reflect the active providers; it will be removed in the next major. Use the `UnifiedTracking` API.
+
+### ⏭️ Still deferred (documented, unchanged)
+
+- Native iOS/Android SDK bridges remain scaffolding (not wired). Implementing + verifying them requires a native toolchain (Xcode/Gradle), real vendor SDK dependencies, and device/simulator builds — a separate effort. Tracking continues to run via the web layer (including inside the Capacitor WebView).
+
 ## [3.2.0] - 2026-05-26
 
 A second, independent deep-audit pass found and fixed defects the same-day 3.1.0 audit missed — including two that affected whether the package works at all. No breaking public API changes (config-key changes are additive aliases).
