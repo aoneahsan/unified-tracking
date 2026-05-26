@@ -80,6 +80,20 @@ export abstract class BaseErrorTrackingProvider extends BaseProviderImpl impleme
       this.breadcrumbs.shift();
     }
 
+    // Forward to the provider's SDK breadcrumb API if it implements one, so the
+    // breadcrumb actually reaches the provider and is attached to subsequent errors.
+    // Previously breadcrumbs were only buffered locally and never sent to any SDK.
+    // Providers without a native breadcrumb concept simply omit `doAddBreadcrumb`.
+    const forward = (this as { doAddBreadcrumb?: (m: string, c?: string, d?: Record<string, any>) => void })
+      .doAddBreadcrumb;
+    if (typeof forward === 'function') {
+      try {
+        forward.call(this, message, category, data);
+      } catch (error) {
+        this.logger.error('Failed to forward breadcrumb to provider', error);
+      }
+    }
+
     this.debug('Added breadcrumb', breadcrumb);
   }
 

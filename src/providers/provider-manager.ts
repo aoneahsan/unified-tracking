@@ -328,11 +328,27 @@ export class ProviderManager {
     if (!properties || !excluded || excluded.length === 0) {
       return properties;
     }
-    const sanitized = { ...properties };
-    for (const key of excluded) {
-      delete sanitized[key];
-    }
-    return sanitized as T;
+    const excludedSet = new Set(excluded);
+    // Recurse into nested objects/arrays so an excluded key is stripped at any depth
+    // (a shallow top-level delete left e.g. { user: { email } } exposed). Returns a
+    // deep copy so the caller's nested objects are never mutated. Depth-capped.
+    const strip = (value: unknown, depth: number): unknown => {
+      if (!value || typeof value !== 'object' || depth > 6) {
+        return value;
+      }
+      if (Array.isArray(value)) {
+        return value.map((item) => strip(item, depth + 1));
+      }
+      const out: Record<string, unknown> = {};
+      for (const [key, val] of Object.entries(value as Record<string, unknown>)) {
+        if (excludedSet.has(key)) {
+          continue;
+        }
+        out[key] = strip(val, depth + 1);
+      }
+      return out;
+    };
+    return strip(properties, 0) as T;
   }
 
   async trackEvent(eventName: string, properties?: Record<string, any>): Promise<void> {

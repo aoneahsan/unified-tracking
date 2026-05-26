@@ -98,7 +98,9 @@ export class FirebaseCrashlyticsProvider extends BaseErrorTrackingProvider {
 
     this._crashlyticsConfig = config;
 
-    // Load Firebase SDK
+    // Load Firebase SDK. NOTE: Firebase Crashlytics has NO web/JS SDK — it is an
+    // iOS/Android-only product — so this load will fail on web with the honest message
+    // below. Native bridges are not yet wired in this package. (See loadFirebaseSDK.)
     await this.loadFirebaseSDK();
 
     if (!window.firebase) {
@@ -176,7 +178,13 @@ export class FirebaseCrashlyticsProvider extends BaseErrorTrackingProvider {
         };
 
         crashlyticsScript.onerror = () => {
-          reject(new Error('Failed to load Firebase Crashlytics SDK'));
+          reject(
+            new Error(
+              'Firebase Crashlytics is not supported on web — it has no web/JS SDK (it is an ' +
+                'iOS/Android-only product) and native bridges are not yet implemented in ' +
+                'unified-tracking. Use sentry, bugsnag, rollbar, datadog, logrocket or raygun for web error tracking.',
+            ),
+          );
         };
 
         document.head.appendChild(crashlyticsScript);
