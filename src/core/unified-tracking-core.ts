@@ -79,6 +79,9 @@ export class UnifiedTrackingCore implements UnifiedTrackingPlugin {
 
       this.initialized = true;
 
+      // Replay any events that were buffered before init completed (FIFO order).
+      await this.replayQueuedEvents();
+
       const analyticsProviders = this.providerManager.getActiveProviders('analytics');
       const errorProviders = this.providerManager.getActiveProviders('error-tracking');
 
@@ -117,11 +120,67 @@ export class UnifiedTrackingCore implements UnifiedTrackingPlugin {
     }
   }
 
-  async track(event: string, properties?: Record<string, unknown>): Promise<void> {
-    this.ensureInitialized();
+  /**
+   * Buffer an event when called before initialize() has resolved, so events fired during
+   * app startup are not lost. Returns true if the event was buffered (caller returns
+   * early); false once initialized so the caller dispatches normally. Buffered events are
+   * replayed in FIFO order by replayQueuedEvents() once initialize() completes.
+   */
+  private bufferIfNotReady(
+    type: 'track' | 'identify' | 'error' | 'revenue' | 'screenView' | 'userProperties',
+    data: Record<string, unknown>,
+  ): boolean {
+    if (this.initialized) {
+      return false;
+    }
+    this.eventQueue.add({ type, data });
+    this.logger.debug(`Buffered "${type}" event until initialize() completes`);
+    return true;
+  }
 
+  /** Replay (in FIFO order) any events buffered before initialize() completed. */
+  private async replayQueuedEvents(): Promise<void> {
+    const events = this.eventQueue.drain();
+    if (events.length === 0) {
+      return;
+    }
+    this.logger.debug(`Replaying ${events.length} buffered event(s)`);
+    for (const e of events) {
+      const d = e.data;
+      try {
+        switch (e.type) {
+          case 'track':
+            await this.track(d.event as string, d.properties as Record<string, unknown> | undefined);
+            break;
+          case 'identify':
+            await this.identify(d.userId as string, d.traits as Record<string, unknown> | undefined);
+            break;
+          case 'screenView':
+            await this.logScreenView(d.screenName as string, d.properties as Record<string, unknown> | undefined);
+            break;
+          case 'revenue':
+            await this.logRevenue(d.revenue as RevenueData);
+            break;
+          case 'userProperties':
+            await this.setUserProperties(d.properties as Record<string, unknown>);
+            break;
+          case 'error':
+            await this.logError(d.error as Error | string, d.context as ErrorContext | undefined);
+            break;
+        }
+      } catch (err) {
+        this.logger.error('Failed to replay a buffered event', err);
+      }
+    }
+  }
+
+  async track(event: string, properties?: Record<string, unknown>): Promise<void> {
     if (typeof event !== 'string' || event.trim() === '') {
       this.logger.warn('track() called with an invalid event name; ignoring.', event);
+      return;
+    }
+
+    if (this.bufferIfNotReady('track', { event, properties })) {
       return;
     }
 
@@ -133,10 +192,12 @@ export class UnifiedTrackingCore implements UnifiedTrackingPlugin {
   }
 
   async identify(userId: string, traits?: Record<string, unknown>): Promise<void> {
-    this.ensureInitialized();
-
     if (typeof userId !== 'string' || userId.trim() === '') {
       this.logger.warn('identify() called with an invalid userId; ignoring.');
+      return;
+    }
+
+    if (this.bufferIfNotReady('identify', { userId, traits })) {
       return;
     }
 
@@ -146,10 +207,12 @@ export class UnifiedTrackingCore implements UnifiedTrackingPlugin {
   }
 
   async setUserProperties(properties: Record<string, unknown>): Promise<void> {
-    this.ensureInitialized();
-
     if (!properties || typeof properties !== 'object' || Array.isArray(properties)) {
       this.logger.warn('setUserProperties() called with a non-object; ignoring.');
+      return;
+    }
+
+    if (this.bufferIfNotReady('userProperties', { properties })) {
       return;
     }
 
@@ -159,7 +222,9 @@ export class UnifiedTrackingCore implements UnifiedTrackingPlugin {
   }
 
   async logError(error: Error | string, context?: ErrorContext): Promise<void> {
-    this.ensureInitialized();
+    if (this.bufferIfNotReady('error', { error, context })) {
+      return;
+    }
 
     const errorObj = typeof error === 'string' ? new Error(error) : error;
 
@@ -173,10 +238,12 @@ export class UnifiedTrackingCore implements UnifiedTrackingPlugin {
   }
 
   async logRevenue(revenue: RevenueData): Promise<void> {
-    this.ensureInitialized();
-
     if (!revenue || typeof revenue.amount !== 'number' || !Number.isFinite(revenue.amount)) {
       this.logger.warn('logRevenue() called with an invalid amount; ignoring.', revenue?.amount);
+      return;
+    }
+
+    if (this.bufferIfNotReady('revenue', { revenue })) {
       return;
     }
 
@@ -186,10 +253,12 @@ export class UnifiedTrackingCore implements UnifiedTrackingPlugin {
   }
 
   async logScreenView(screenName: string, properties?: Record<string, unknown>): Promise<void> {
-    this.ensureInitialized();
-
     if (typeof screenName !== 'string' || screenName.trim() === '') {
       this.logger.warn('logScreenView() called with an invalid screenName; ignoring.');
+      return;
+    }
+
+    if (this.bufferIfNotReady('screenView', { screenName, properties })) {
       return;
     }
 
@@ -287,12 +356,6 @@ export class UnifiedTrackingCore implements UnifiedTrackingPlugin {
           this.logger.error(`Error in listener for ${eventName}`, error);
         }
       });
-    }
-  }
-
-  private ensureInitialized(): void {
-    if (!this.initialized) {
-      throw new Error('UnifiedTracking not initialized. Call initialize() first.');
     }
   }
 }

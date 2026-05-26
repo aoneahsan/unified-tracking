@@ -98,25 +98,19 @@ export class EventQueue {
       // Process batch with all listeners
       const results = await Promise.allSettled(this.listeners.map((listener) => listener(batch)));
 
-      // Handle failed events
-      const failedEvents: QueuedEvent[] = [];
-      results.forEach((result) => {
-        if (result.status === 'rejected') {
-          // Re-queue events that failed for this listener
-          batch.forEach((event) => {
-            if (event.retryCount < this.maxRetries) {
-              failedEvents.push({
-                ...event,
-                retryCount: event.retryCount + 1,
-              });
-            }
-          });
+      // If ANY listener rejected, re-queue the batch ONCE — incrementing retryCount and
+      // dropping events past maxRetries. Previously each event was re-queued once per
+      // failed listener, duplicating it; now each event is re-queued at most once.
+      // Re-added at the front (preserving relative order) so retries precede newer events.
+      // NOTE: listeners are broadcast the same batch, so listeners must be idempotent.
+      const anyListenerFailed = results.some((result) => result.status === 'rejected');
+      if (anyListenerFailed) {
+        const failedEvents = batch
+          .filter((event) => event.retryCount < this.maxRetries)
+          .map((event) => ({ ...event, retryCount: event.retryCount + 1 }));
+        if (failedEvents.length > 0) {
+          this.queue.unshift(...failedEvents);
         }
-      });
-
-      // Re-add failed events to the front of the queue
-      if (failedEvents.length > 0) {
-        this.queue.unshift(...failedEvents);
       }
 
       this.persistEvents();
@@ -128,6 +122,17 @@ export class EventQueue {
   clear(): void {
     this.queue = [];
     this.clearPersistedEvents();
+  }
+
+  /**
+   * Remove and return every queued event in FIFO order, clearing persistence. Used by
+   * the core to replay events that were buffered before initialize() completed.
+   */
+  drain(): QueuedEvent[] {
+    const events = [...this.queue];
+    this.queue = [];
+    this.clearPersistedEvents();
+    return events;
   }
 
   getQueueSize(): number {
