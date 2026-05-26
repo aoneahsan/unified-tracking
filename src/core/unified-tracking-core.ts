@@ -148,6 +148,11 @@ export class UnifiedTrackingCore implements UnifiedTrackingPlugin {
   async setUserProperties(properties: Record<string, unknown>): Promise<void> {
     this.ensureInitialized();
 
+    if (!properties || typeof properties !== 'object' || Array.isArray(properties)) {
+      this.logger.warn('setUserProperties() called with a non-object; ignoring.');
+      return;
+    }
+
     this.logger.debug('Setting user properties', properties);
 
     await this.providerManager.setUserProperties(properties);
@@ -194,8 +199,16 @@ export class UnifiedTrackingCore implements UnifiedTrackingPlugin {
   }
 
   async setConsent(consent: ConsentSettings): Promise<void> {
+    if (!consent || typeof consent !== 'object' || Array.isArray(consent)) {
+      this.logger.warn('setConsent() called with a non-object; ignoring.');
+      return;
+    }
+
     this.logger.debug('Setting consent', consent);
 
+    // Intentionally NOT gated by ensureInitialized(): consent may legitimately be set
+    // before initialize() (e.g. a consent banner resolves first). Dispatch methods do
+    // require init; this one applies the consent to the config + any active providers.
     this.configManager.setConsent(consent);
     await this.providerManager.handleConsentChange(consent);
   }
@@ -205,6 +218,20 @@ export class UnifiedTrackingCore implements UnifiedTrackingPlugin {
 
     await this.providerManager.reset();
     this.eventQueue.clear();
+  }
+
+  /**
+   * Fully tear down tracking: shuts down + unregisters every provider, clears all event
+   * listeners, and returns the engine to an uninitialized state (a later initialize()
+   * starts fresh). Use this on logout/app-teardown; reset() only clears user state while
+   * keeping providers running.
+   */
+  async shutdown(): Promise<void> {
+    this.logger.debug('Shutting down Unified Tracking');
+
+    await this.providerManager.shutdown();
+    this.listeners.clear();
+    this.initialized = false;
   }
 
   async getActiveProviders(): Promise<ActiveProvidersResult> {

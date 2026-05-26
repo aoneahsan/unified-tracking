@@ -1,6 +1,6 @@
 import { WebPlugin } from '@capacitor/core';
 import type { PluginListenerHandle } from '@capacitor/core';
-import { UnifiedTrackingCore } from '../core/unified-tracking-core.js';
+import { getUnifiedTracking, UnifiedTrackingCore } from '../core/unified-tracking-core.js';
 
 export interface TrackingEvent {
   type: 'trackingEvent';
@@ -30,7 +30,11 @@ export class UnifiedTrackingCapacitorPlugin extends WebPlugin implements Unified
 
   constructor() {
     super();
-    this.core = new UnifiedTrackingCore();
+    // Use the shared singleton so the Capacitor plugin, the React hooks, and the main
+    // `unified-tracking` entry all operate on the SAME core instance — init state,
+    // provider registrations, and listeners live on the instance, so separate cores
+    // would silently diverge (e.g. hooks seeing initialized:false after the plugin init).
+    this.core = getUnifiedTracking();
   }
 
   async initialize(options?: UnifiedTrackingConfig) {
@@ -107,15 +111,14 @@ export class UnifiedTrackingCapacitorPlugin extends WebPlugin implements Unified
 
     const handle = await this.core.addListener(eventName, wrappedListener);
 
-    // Wrap in Capacitor-compatible handle
+    // Wrap in a Capacitor-compatible handle. We intentionally do NOT also register on
+    // super/WebPlugin: the core is what emits events (via notifyListeners), so a second
+    // registration would leak — the returned remove() only detaches the core handle.
     const capacitorHandle: PluginListenerHandle = {
       remove: async () => {
-        handle.remove();
+        await handle.remove();
       },
     };
-
-    // Also register with WebPlugin for compatibility
-    await super.addListener(eventName, wrappedListener);
 
     return capacitorHandle;
   }

@@ -1,23 +1,28 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { getUnifiedTracking } from '../core/unified-tracking-core.js';
 
 const UnifiedTracking = getUnifiedTracking();
 
-// Direct access to UnifiedTracking instance - no provider needed
-export const useUnifiedTracking = () => {
-  return {
-    track: UnifiedTracking.track.bind(UnifiedTracking),
-    identify: UnifiedTracking.identify.bind(UnifiedTracking),
-    setUserProperties: UnifiedTracking.setUserProperties.bind(UnifiedTracking),
-    logError: UnifiedTracking.logError.bind(UnifiedTracking),
-    logRevenue: UnifiedTracking.logRevenue.bind(UnifiedTracking),
-    logScreenView: UnifiedTracking.logScreenView.bind(UnifiedTracking),
-    setConsent: UnifiedTracking.setConsent.bind(UnifiedTracking),
-    reset: UnifiedTracking.reset.bind(UnifiedTracking),
-    getActiveProviders: UnifiedTracking.getActiveProviders.bind(UnifiedTracking),
-    enableDebugMode: UnifiedTracking.enableDebugMode.bind(UnifiedTracking),
-  };
+// Bind the singleton's methods ONCE at module scope so the returned API object has a
+// stable identity across renders. The previous version returned a fresh object with
+// fresh .bind() calls on every render, which churns any useEffect/useMemo/useCallback
+// that lists the API (or one of its methods) in its dependency array.
+const boundApi = {
+  track: UnifiedTracking.track.bind(UnifiedTracking),
+  identify: UnifiedTracking.identify.bind(UnifiedTracking),
+  setUserProperties: UnifiedTracking.setUserProperties.bind(UnifiedTracking),
+  logError: UnifiedTracking.logError.bind(UnifiedTracking),
+  logRevenue: UnifiedTracking.logRevenue.bind(UnifiedTracking),
+  logScreenView: UnifiedTracking.logScreenView.bind(UnifiedTracking),
+  setConsent: UnifiedTracking.setConsent.bind(UnifiedTracking),
+  reset: UnifiedTracking.reset.bind(UnifiedTracking),
+  getActiveProviders: UnifiedTracking.getActiveProviders.bind(UnifiedTracking),
+  enableDebugMode: UnifiedTracking.enableDebugMode.bind(UnifiedTracking),
 };
+
+// Direct access to the UnifiedTracking singleton — no provider needed. Returns a stable
+// (memoized) reference so it is safe to use in effect dependency arrays.
+export const useUnifiedTracking = () => useMemo(() => boundApi, []);
 
 // Hook for tracking events
 export const useTrackEvent = () => {
