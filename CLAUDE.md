@@ -1,7 +1,7 @@
 # unified-tracking Package
 
 **Package Name**: `unified-tracking`
-**Version**: `3.1.0`
+**Version**: `3.2.0`
 **NPM**: `https://www.npmjs.com/package/unified-tracking`
 **Last Updated**: `2026-05-26`
 
@@ -9,12 +9,14 @@ Unified analytics and error tracking infrastructure for React, web, and Capacito
 
 ## Current Verified State
 
-- Reviewed on: `2026-05-26`
+- Reviewed on: `2026-05-26` (Round 02 — fresh independent re-audit)
 - Install: `yarn install` passed (all dependencies at latest stable)
-- Typecheck: `yarn type-check` passed (TypeScript 6)
+- Typecheck: `yarn type-check` passed (TypeScript 6, NodeNext module resolution)
 - Build: `yarn build` passed cleanly
 - Tests: `yarn test` passed (`246` passed, `2` skipped)
-- Lint: `yarn eslint` passed (`0` warnings, `0` errors)
+- Lint: `yarn lint` passed (eslint `0`/`0` + prettier clean)
+- Node ESM import smoke check: passed (`import('dist/esm/src/index.js')` resolves — was broken before 3.2.0)
+- Round 02 fixed 2 CRITICAL (Node-ESM unimportable; providers could silently fail to register) + 8 HIGH + 11 MEDIUM; see `docs/features/polish-audit-release/round02-findings.md`. Deliberate documented deferrals: native SDK bridges; Firebase/Amplitude base-class refactor (M7); a few LOW type/cleanup items; full `bin/setup.js` config-shape rework.
 
 ## CLAUDE.md + AGENTS.md Sync Rule (IRON-SOLID)
 
@@ -107,22 +109,24 @@ Domain-specific rules live in nested `CLAUDE.md` + `AGENTS.md` files to optimize
 
 ## Package Update History
 
-| Date       | Version | Notes                                                                                                                                                                                                                                   |
-| ---------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-05-26 | 3.1.0   | Polish + hardening: deps → latest stable (TS6/ESLint10/jsdom29), full audit, enforced privacy controls + consent gate, script-src validation, removed eval + dead code (web.ts + React island), public types tightened, 0 lint warnings |
-| 2026-03-25 | 3.0.2   | Fixed provider-manager/web/google-analytics test failures, removed fragile docgen from default build                                                                                                                                    |
-| 2026-03-24 | 3.0.2   | Refreshed docs, recorded current verification status, added portfolio maintenance rule                                                                                                                                                  |
-| 2026-02-02 | unknown | Full update to latest versions, build passed, lint had known issues                                                                                                                                                                     |
+| Date       | Version | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ---------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-05-26 | 3.2.0   | Round 02 fresh independent re-audit: fixed 2 CRITICAL (Node-ESM unimportable → NodeNext + .js; providers could silently fail to register → static import map), HIGH secret-logging (redact in sink), config-key mismatches (aliases + types), breadcrumbs reach SDK, crashlytics honest error, EventQueue wired up (pre-init buffering), unified ConsentSettings, GA consent default, anonymizeIp honored, single core singleton, stable hooks, shutdown(); rewrote 3 fictional /docs files. No breaking API changes. |
+| 2026-05-26 | 3.1.0   | Polish + hardening: deps → latest stable (TS6/ESLint10/jsdom29), full audit, enforced privacy controls + consent gate, script-src validation, removed eval + dead code (web.ts + React island), public types tightened, 0 lint warnings                                                                                                                                                                                                                                                                               |
+| 2026-03-25 | 3.0.2   | Fixed provider-manager/web/google-analytics test failures, removed fragile docgen from default build                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| 2026-03-24 | 3.0.2   | Refreshed docs, recorded current verification status, added portfolio maintenance rule                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| 2026-02-02 | unknown | Full update to latest versions, build passed, lint had known issues                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 
 ## Comprehensive Audit Record
 
-| Date       | Audit Type                   | Status                    | Issues Found | Resolved                                                                            |
-| ---------- | ---------------------------- | ------------------------- | ------------ | ----------------------------------------------------------------------------------- |
-| 2026-05-26 | Deep audit + polish (v3.1.0) | Passed                    | ~25          | Most fixed; Firebase base-class refactor + native SDK bridges deferred (documented) |
-| 2026-03-25 | Issue Remediation            | Passed with minor warning | 4            | 4                                                                                   |
-| 2026-03-24 | Portfolio + Docs Refresh     | Passed with issues        | 3            | 0                                                                                   |
-| 2026-02-02 | Package Update               | Passed with issues        | 2            | 0                                                                                   |
-| 2026-01-23 | Full Audit                   | Passed with issues        | 2            | 0                                                                                   |
+| Date       | Audit Type                                    | Status                    | Issues Found                                          | Resolved                                                                                                                                               |
+| ---------- | --------------------------------------------- | ------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2026-05-26 | Fresh independent re-audit (v3.2.0, Round 02) | Passed                    | ~30 (incl. 2 CRITICAL, 8 HIGH the 3.1.0 audit missed) | Fixed 2 CRITICAL + 8 HIGH + 11 MEDIUM + most LOW; deferred M7 + a few LOW + native bridges + bin/setup.js rework (documented). See round02-findings.md |
+| 2026-05-26 | Deep audit + polish (v3.1.0)                  | Passed                    | ~25                                                   | Most fixed; Firebase base-class refactor + native SDK bridges deferred (documented)                                                                    |
+| 2026-03-25 | Issue Remediation                             | Passed with minor warning | 4                                                     | 4                                                                                                                                                      |
+| 2026-03-24 | Portfolio + Docs Refresh                      | Passed with issues        | 3                                                     | 0                                                                                                                                                      |
+| 2026-02-02 | Package Update                                | Passed with issues        | 2                                                     | 0                                                                                                                                                      |
+| 2026-01-23 | Full Audit                                    | Passed with issues        | 2                                                     | 0                                                                                                                                                      |
 
 ### Last Audit Details
 

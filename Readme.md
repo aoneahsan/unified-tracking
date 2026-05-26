@@ -14,23 +14,27 @@ A comprehensive Capacitor plugin that provides a unified API for multiple analyt
 
 ## Current State
 
-- Package version: `3.1.0`
+- Package version: `3.2.0`
 - Verified on: `2026-05-26`
 - `yarn install`: passed (all dependencies at latest stable)
 - `yarn type-check`: passed (TypeScript 6)
 - `yarn build`: passed cleanly
 - `yarn test`: passed — `246` passed, `2` skipped
 - `yarn lint`: passed — `0` warnings, `0` errors
+- Node ESM import smoke check: passed
 
-`3.1.0` is a polish and hardening release: every dependency updated to its latest
-stable version, a full security/privacy/quality audit, and the fixes that audit
-produced — enforced privacy controls (`excludedProperties` stripping), a consent
-gate at dispatch, script-source validation, removal of dead subsystems, and stricter
-public TypeScript types. The verification snapshot above is the current engineering truth.
+`3.2.0` follows a second, independent deep-audit pass that fixed defects the same-day
+`3.1.0` audit missed — most importantly making the package importable in **Node ESM** and
+ensuring providers **actually register** (a runtime-variable dynamic import previously
+could drop every event), plus secret-safe logging, deep `excludedProperties` stripping,
+**pre-init event buffering**, breadcrumbs that reach the SDK, a `shutdown()` teardown,
+corrected public config keys (with back-compat aliases), and documentation rewritten to
+match the real API. See [`CHANGELOG.md`](./CHANGELOG.md) for the full list. No breaking
+public API changes.
 
 ## ✨ Features
 
-- 🚀 **Zero Dependencies** - Works out of the box, no required dependencies
+- 🚀 **No runtime npm dependencies** - the package ships zero runtime deps; each provider's vendor SDK loads from its CDN at runtime (needs a CSP `script-src` allowlist for those origins, and is not compatible with Manifest-V3 browser extensions)
 - 🎯 **Provider-less** - No React Context/Providers needed, works in dynamic components
 - 📊 **Multiple Analytics** - Support for Google Analytics, Mixpanel, Segment, PostHog, Amplitude, Firebase
 - 🐛 **Error Tracking** - Integrated Sentry, Bugsnag, Rollbar, DataDog, LogRocket support
@@ -329,9 +333,10 @@ UnifiedTracking.track('purchase', { value: 99.99 });
 
 ## 📚 Documentation
 
-- [API Reference](./docs/api/README.md) - Complete API documentation
-- [React Hooks Guide](./docs/react-integration.md) - All available React hooks
-- [Provider Configuration](./docs/api/interfaces/provider-interfaces.md) - Provider-specific settings
+- [API Reference](./docs/api-reference.md) - Complete API documentation
+- [AI Integration Guide](./AI-INTEGRATION-GUIDE.md) - Full, accurate API reference
+- [React Hooks Guide](./docs/react-integration.md) - The two React hooks
+- [Native Implementation Status](./docs/native-implementation.md) - Web-first / native status
 - [Migration Guide](./docs/migration-guide.md) - Migrate from other solutions
 - [Examples](./examples) - Complete examples for various use cases
 
@@ -340,15 +345,27 @@ UnifiedTracking.track('purchase', { value: 99.99 });
 ### Custom Providers
 
 ```typescript
-import { ProviderRegistry, BaseAnalyticsProvider } from 'unified-tracking';
+import { BaseAnalyticsProvider, RegisterProvider } from 'unified-tracking';
 
 @RegisterProvider({
   id: 'my-analytics',
   name: 'My Analytics',
   type: 'analytics',
+  version: '1.0.0',
+  supportedPlatforms: ['web'],
 })
 class MyAnalyticsProvider extends BaseAnalyticsProvider {
-  // Implementation
+  readonly id = 'my-analytics';
+  readonly name = 'My Analytics';
+  readonly version = '1.0.0';
+
+  protected async doInitialize(): Promise<void> {
+    /* load your SDK */
+  }
+  protected async doTrack(event: string, properties?: Record<string, unknown>): Promise<void> {
+    /* forward to your SDK */
+  }
+  // …implement the remaining doXxx() methods — see AI-INTEGRATION-GUIDE.md
 }
 ```
 

@@ -5,6 +5,47 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.0] - 2026-05-26
+
+A second, independent deep-audit pass found and fixed defects the same-day 3.1.0 audit missed — including two that affected whether the package works at all. No breaking public API changes (config-key changes are additive aliases).
+
+### 🐛 Critical fixes
+
+- **Importable in Node ESM.** The published ESM emitted extensionless relative imports under `"type": "module"`, so `import 'unified-tracking'` threw `ERR_MODULE_NOT_FOUND` in Node/SSR/edge. Switched to `NodeNext` module resolution with `.js` import specifiers.
+- **Providers actually register.** Provider loading used a runtime-variable dynamic `import()` that bundlers can't analyze and Node ESM can't resolve, so providers could silently fail to register and `track()`/`logError()` would drop events. Replaced with a static import map (also closes an arbitrary-name import vector).
+
+### 🔒 Security & Privacy
+
+- **Secrets never logged.** `Logger.redact()` is now applied inside every log sink, so provider tokens/DSNs/write-keys are masked even when `info`/debug logging is enabled (8 providers previously printed them in cleartext).
+- **Deep privacy stripping.** `privacy.excludedProperties` now strips matching keys at any nesting depth and returns a deep copy (was top-level only).
+- **GA Consent Mode** defaults now derive from your consent state (denied when `analytics` consent is `false`) instead of always granting analytics storage.
+
+### ✨ Features & correctness
+
+- **Pre-init event buffering.** Events fired before `initialize()` resolves are buffered and replayed in order once providers are ready (the `EventQueue` was previously inert).
+- **Breadcrumbs reach the SDK.** `addBreadcrumb()` now forwards to the provider (Sentry/Bugsnag/Rollbar/DataDog/LogRocket) instead of only buffering locally.
+- **`shutdown()`** added for full teardown (unregister providers + clear listeners) vs `reset()` which only clears user state.
+- **Config keys corrected** in the public types to match what providers read — Matomo `trackerUrl` (+ `siteId: string | number`), PostHog `apiHost`, Segment `enabledIntegrations`, LogRocket `appId`. The previous keys (`url`, `host`, `integrations`, `appID`) are still accepted as runtime aliases, so existing configs keep working.
+- **Amplitude** loader now detects the correct `window.amplitude` global (it previously always failed to initialize).
+- **`useUnifiedTracking()`** returns a stable reference (was a new object each render, causing effect churn).
+- **Capacitor adapter** now shares the core singleton (was a separate instance) and no longer leaks a duplicate event listener.
+- Unified the two divergent `ConsentSettings` types into one shape.
+
+### 📝 Documentation
+
+- Rewrote `docs/api-reference.md`, `docs/react-integration.md`, and `docs/native-implementation.md`, which described APIs, hooks, HOCs, and native SDKs that do not exist. Documentation now matches the real two-hook / object-config API and the honest web-first / native-not-yet-wired status.
+- Firebase Crashlytics is documented as web-unsupported (no web SDK; native not wired) and fails fast with a clear message.
+
+### 🧹 Internal
+
+- Build emits only `src/` (tests no longer ship in `dist/`); dropped the orphan Rollup bundle + its devDependencies; removed the redundant `.npmignore` (the `files` allowlist governs publishing).
+
+### ⏭️ Known limitations (unchanged this release)
+
+- Native iOS/Android SDK bridges remain scaffolding (not wired) — tracking runs via the web layer (including inside the Capacitor WebView).
+- Providers load their vendor SDK from a CDN at runtime (not bundled); not compatible with a strict-CSP `script-src` without allowlisting, nor with Manifest-V3 browser extensions.
+- The `unified-tracking-setup` CLI still emits an older config shape — follow the README / `AI-INTEGRATION-GUIDE.md` config until it is updated.
+
 ## [3.1.0] - 2026-05-26
 
 Polish and hardening release. Every dependency updated to its latest stable version, a full security/privacy/quality audit, and the fixes below. No breaking public API changes.

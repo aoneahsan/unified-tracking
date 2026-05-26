@@ -2,6 +2,8 @@
 
 This guide explains how to set up Unified Tracking in your project with minimal configuration.
 
+> **Config shape note (3.2.0):** Some examples below may show an older configuration shape. The current API uses an **object** config — `analytics: { providers: [...], google: {...} }`, `errorTracking: { providers: [...], sentry: {...} }`, `settings: { debug, defaultConsent, privacy }` — and there is no `<UnifiedTrackingProvider>` (use the `useUnifiedTracking` / `useTrackEvent` hooks). See [`../AI-INTEGRATION-GUIDE.md`](../AI-INTEGRATION-GUIDE.md) and [`./api-reference.md`](./api-reference.md) for the authoritative current API.
+
 ## Quick Start
 
 The fastest way to get started is using the automated setup script:

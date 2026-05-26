@@ -9,7 +9,7 @@
 | Property     | Value                                          |
 | ------------ | ---------------------------------------------- |
 | Package Name | `unified-tracking`                             |
-| Version      | 3.1.0                                          |
+| Version      | 3.2.0                                          |
 | License      | MIT                                            |
 | Repository   | Public                                         |
 | NPM          | https://www.npmjs.com/package/unified-tracking |
