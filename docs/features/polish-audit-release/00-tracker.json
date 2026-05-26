@@ -371,9 +371,10 @@
     },
     {
       "id": "phase08",
-      "title": "ROUND 02: documentation refresh for anything changed (README, AI-guide, nested CLAUDE/AGENTS, portfolio)",
-      "status": "pending",
+      "title": "ROUND 02: documentation refresh for anything changed (README, /docs, bin/setup.js, nested CLAUDE/AGENTS, portfolio, CHANGELOG)",
+      "status": "in_progress",
       "completedAt": null,
+      "note": "DONE so far: rewrote the 3 fictional /docs files to match the real API - docs/react-integration.md (DOC-02: removed Provider/HOC fiction -> real 2 hooks), docs/api-reference.md (DOC-01: removed fake hooks/HOCs/config shape -> real singleton + object config + result types), docs/native-implementation.md (DOC-05: honest stub/not-wired status incl crashlytics). REMAINING: README round-2 updates (config-key aliases, EventQueue buffering, shutdown(), consent categories, AppCenter-legacy + M7-limitation notes, dead links DOC-06, CSP/MV3/zero-deps clarification DOC-07, custom-provider snippet DOC-08); bin/setup.js generated config -> real object shape; docs/setup-guide.md (DOC-03) + docs/migration-guide.md (DOC-04) correction; CHANGELOG 3.2.0; root CLAUDE.md+AGENTS.md (version/state/native/round-2 summary); portfolio file; nested docs date bumps.",
       "subTasks": []
     },
     {
