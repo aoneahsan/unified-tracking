@@ -326,12 +326,14 @@
         },
         {
           "id": "phase07.2",
-          "title": "Batch 7.2 Security: redact in logger sink + extend SENSITIVE_KEY (H1, L1); SRI+crossOrigin+pinned versions on CDN loaders (M3); dynamic-import name allowlist (L2); setup.js plaintext gitignore note (L19)",
-          "status": "pending"
+          "title": "Batch 7.2 Security: redact in logger sink + extend SENSITIVE_KEY (H1, L1); dynamic-import name allowlist (L2); setup.js secret/gitignore note (L19); M3 split",
+          "status": "complete",
+          "completedAt": "2026-05-26",
+          "note": "H1: Logger.redact() applied inside ALL sinks (debug/info/warn/error) so the 8 providers that logged token/apiKey/accessToken/appSecret/writeKey/clientToken/dsn are auto-redacted; SENSITIVE_KEY extended (write/access/client/private-key, passwd/pwd); redact hardened (Error pass-through, depth cap 6). RUNTIME-PROVEN against built dist (secrets->[REDACTED], normal fields visible). L1 (PII at debug) mitigated for secret-shaped keys; arbitrary PII at debug is opt-in + host's own data -> documented in phase08. L2: resolved by 7.1 static map (loadProvider imports only allowlisted registry ids). L19: setup.js warns + appends generated config to .gitignore. M3 SPLIT: mixpanel 'latest' URL-pin -> 7.3; SRI integrity + crossOrigin NOT shipped by default (stale/fabricated hashes or missing CDN CORS would BREAK script loading) -> CSP allowlist + self-host/SRI guidance documented in phase08 (deliberate do-no-harm decision). Gate: type-check 0, build 0, tests 246/2skip, eslint+prettier clean."
         },
         {
           "id": "phase07.3",
-          "title": "Batch 7.3 Config correctness: provider key aliases + fix definitions.ts types (H2); Amplitude/AppCenter SDK URL+global fixes (M9); GA consent default denied (M8)",
+          "title": "Batch 7.3 Config correctness: provider key aliases + fix definitions.ts types (H2); Amplitude/AppCenter/Mixpanel SDK URL+global fixes incl mixpanel 'latest'->pinned (M9 + M3 url-pin); GA consent default denied (M8)",
           "status": "pending"
         },
         {
@@ -433,20 +435,26 @@
       "date": "2026-05-26",
       "phase": "phase06 (round 02 kickoff + baseline gate)",
       "summary": "User re-ran the prompt; chose 'fresh independent re-audit'. Confirmed 3.1.0 live on npm, git in sync with o/main, deps still at latest stable. Invoked skills (security-review, analytics-tracking, nodejs-best-practices). Launched 3 independent audit agents (told NOT to read prior findings) + background baseline gate. GATE RESULT: type-check PASS, build PASS, test PASS (246/2 skip), eslint PASS (0/0), but `yarn prettier --check` FAILS on 2 committed files (src/providers/AGENTS.md, src/providers/CLAUDE.md) -> real LOW finding: shipped tree fails the full `yarn lint`. Wrote round02-overview.md, opened phases 06-09.",
-      "commit": "pending"
+      "commit": "d1e56f9"
     },
     {
       "date": "2026-05-26",
       "phase": "phase06 complete (audit synthesized)",
       "summary": "All 3 audit agents returned (13 security + 15 functionality + 24 provider/gap/docs findings). De-duplicated to ~30 in round02-findings.md. VERIFIED the 2 CRITICALs empirically: C1 (Node ESM import -> ERR_MODULE_NOT_FOUND; tsconfig moduleResolution:bundler + type:module + extensionless emit) and C2 (emitted provider-manager.js has variable `await import(modulePath)` + extensionless `./registry`). Populated phase07 with 8 fix batches (security/correctness first; API-preserving). Awaiting user decision on scope + EventQueue (H5 wire-up vs trim) before executing fixes.",
-      "commit": "pending"
+      "commit": "d1e56f9"
     },
     {
       "date": "2026-05-26",
       "phase": "phase07.1 (batch 7.1 CRITICAL build/loader)",
       "summary": "User chose FIX EVERYTHING + WIRE-UP the EventQueue. Fixed both CRITICALs: tsconfig -> NodeNext; added .js to 154 relative imports across 60 files (anchored transform, 0 directory imports); new provider-loaders.ts static import map (16 literal specifiers) replaces the variable import() in provider-manager.loadProvider + providers/index.loadProviders (closes C2 AND the SEC-08 arbitrary-name vector); dropped the orphan rollup step + rollup.config.js + 3 rollup devdeps (L4); added tsconfig.build.json to keep tests/test-setup out of emitted dist (L5); base getPlatform global->globalThis (NodeNext surfaced TS2304 x4). Gate GREEN: type-check 0, build 0, Node-ESM `import('dist/esm/src/index.js')` + capacitor entry succeed (was ERR_MODULE_NOT_FOUND), tests 246/2skip, eslint+prettier clean (L17 cleared).",
+      "commit": "d1e56f9"
+    },
+    {
+      "date": "2026-05-26",
+      "phase": "phase07.2 (batch 7.2 security)",
+      "summary": "H1 (SEC-01): folded Logger.redact() into every sink (debug/info/warn/error) + extended SENSITIVE_KEY (write/access/client/private-key, passwd/pwd) + hardened redact (Error pass-through, depth cap) -> the 8 providers that logged token/apiKey/accessToken/appSecret/writeKey/clientToken/dsn are now auto-redacted. RUNTIME-PROVEN against built dist. L1 PII-debug mitigated for secret-shaped keys (rest documented in phase08). L2 resolved by 7.1 static map. L19: setup.js warns + adds generated config to .gitignore. M3 split: mixpanel 'latest' URL-pin -> 7.3; SRI/crossOrigin NOT shipped by default (would risk breaking script loading via stale hashes / missing CDN CORS) -> CSP+self-host guidance to phase08. Gate: type-check 0, build 0, tests 246/2skip, eslint+prettier clean.",
       "commit": "pending"
     }
   ],
-  "resumeInstructions": "ROUND 01 (v3.1.0) COMPLETE + published (immutable). ACTIVE = ROUND 02, phase07 fixes (round02-findings.md). User decided: FIX EVERYTHING + WIRE-UP EventQueue (round02Decisions). DONE: phase06 audit + phase07.1 (both CRITICALs C1+C2, plus L4/L5/SEC-08/getPlatform) - gate green incl Node-ESM smoke. NEXT: phase07.2 (security: H1 logger-sink redaction + M3 SRI + L2 + L19), then 7.3 config keys, 7.4 error/privacy, 7.5 engine/react, 7.6 EventQueue wire-up, 7.7 types/cleanup, then phase08 docs, then phase09 release (bump 3.2.0; CONFIRM intent before the irreversible npm publish). On resume: read tracker -> first pending sub-task in highest phase -> invoke matching skills per RULE #0 -> ONE commit per batch -> keep gate (type-check+build+test+lint+Node-ESM smoke) green."
+  "resumeInstructions": "ROUND 01 (v3.1.0) COMPLETE + published (immutable). ACTIVE = ROUND 02 phase07 fixes (round02-findings.md). User decided: FIX EVERYTHING + WIRE-UP EventQueue. DONE: phase06 audit; 7.1 (CRITICALs C1+C2, L4/L5/SEC-08/getPlatform; commit d1e56f9); 7.2 (H1 logger-sink redaction proven, L2, L19; M3 split). NEXT: phase07.3 (config keys: H2 provider key aliases + fix definitions.ts types; M9 amplitude/appcenter/mixpanel SDK URL+global fixes; M8 GA consent default denied), then 7.4 error/privacy (H3 breadcrumbs, H4 crashlytics guard, M1 consent unify, M2 anonymizeIp, M10 deep-strip excludedProperties), 7.5 engine/react (M5 single core, M6 hook memo, M4 capacitor adapter, M7 firebase/amplitude extend base, L3 validation/init guards, L7 teardown), 7.6 EventQueue wire-up (H5+M11), 7.7 types/cleanup (L6/L8/L9/L10/L11/L16/L18), phase08 docs (3 fictional doc rewrites DOC-01/02/05 + bin/setup.js wrong-config-shape fix + CSP/SRI guidance + nested CLAUDE/AGENTS + portfolio), phase09 release (bump 3.2.0 everywhere + CHANGELOG; CONFIRM intent before the irreversible npm publish). On resume: read tracker -> first pending sub-task in highest phase -> invoke matching skills per RULE #0 -> ONE commit per batch -> keep gate (type-check+build+test+lint+Node-ESM smoke) green."
 }
