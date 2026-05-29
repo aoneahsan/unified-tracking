@@ -8,10 +8,34 @@ dist/
 build/
 *.tsbuildinfo
 
-# Capacitor
-android/
-ios/
-electron/
+# Capacitor — native build artifacts only
+# This is a Capacitor PLUGIN repo (not an app), so the native source under
+# ios/Sources/, ios/Tests/, and android/src/ MUST be tracked (npm ships them
+# via the `files` allowlist; git is their source of truth). Only ignore the
+# generated build outputs and IDE state below.
+#
+# iOS build outputs / IDE state
+ios/Pods/
+ios/.build/
+ios/build/
+ios/DerivedData/
+ios/**/xcuserdata/
+ios/**/*.xcuserstate
+ios/*.xcworkspace/xcuserdata/
+ios/*.xcodeproj/xcuserdata/
+# Android build outputs / IDE state
+android/.gradle/
+android/build/
+android/captures/
+android/local.properties
+android/.externalNativeBuild/
+android/.cxx/
+android/**/*.iml
+android/.idea/
+# Electron is not implemented; if a build tree appears later, keep it out of git.
+electron/build/
+electron/dist/
+electron/node_modules/
 
 # Testing
 coverage/

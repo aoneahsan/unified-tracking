@@ -7,9 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### 🚧 Native iOS/Android SDK bridges (in progress — NOT yet published)
+### 🚧 Native iOS/Android SDK bridges (on-branch, unverified — NOT yet published)
 
-Native vendor-SDK delivery is being implemented behind the Capacitor plugin (`registerCapacitorPlugin()`), batch by batch. **Batch 1** wires the native `ProviderManager` fan-out plus **Firebase Analytics** and **Sentry** on both iOS (FirebaseAnalytics / sentry-cocoa) and Android (Firebase BoM + `io.sentry:sentry-android`). This native code is **written but not build-verified** in the dev environment (no Xcode/Gradle) — every touched native file carries `// NOTE(unverified)` markers. It ships only after a successful native build; until then `npm latest` stays at `3.3.0` and tracking runs via the web layer (including inside the Capacitor WebView). Firebase Crashlytics native remains a stub (the `@capacitor-firebase/crashlytics` wrapper is intentionally avoided). See `docs/features/polish-audit-release/round04-native-overview.md`.
+Native vendor-SDK delivery is now in the repo behind the Capacitor plugin (`registerCapacitorPlugin()`):
+
+- **Batch 1** (2026-05-27): **Firebase Analytics** + **Sentry** on iOS (FirebaseAnalytics / sentry-cocoa) and Android (Firebase BoM + `io.sentry:sentry-android`) plus the `ProviderManager` fan-out on both platforms.
+- **Batch 2** (2026-05-29): **Mixpanel** + **Amplitude** + **Segment** on iOS (mixpanel-swift / AmplitudeSwift / Segment v4 ObjC) and Android (mixpanel-android / amplitude-android / analytics-android).
+- **Batch 3** (2026-05-29): **Bugsnag** + **Rollbar** on iOS (bugsnag-cocoa / RollbarNotifier) and Android (bugsnag-android / rollbar-android).
+- **JS↔native config-shape reconciliation** (2026-05-29): `UnifiedTrackingPlugin.swift` and `UnifiedTrackingPlugin.java` now parse the real JS `UnifiedTrackingConfig` shape — `{ analytics: { providers: [ids], <id>: {...} }, errorTracking: same, settings: { debug?, defaultConsent? } }`. `"google"` is routed through `FirebaseAnalyticsProvider` on native (GA4 IS Firebase on device); the per-provider `enabled` field was dropped (presence in `providers[]` = enabled); web-only providers (PostHog/Heap/Matomo/DataDog/LogRocket/Raygun/AppCenter) log a `"no native implementation (web-only); skipped on native"` warning and defer to the JS core.
+- **Repo hygiene** (2026-05-29): `.gitignore` was blanket-ignoring `ios/`, `android/`, `electron/` — a Capacitor _app_ convention wrong for a _plugin_ repo (npm shipped them via the `files` allowlist, but git treated them as untracked). Replaced with build-artifact-only ignores; 35 native source/config/doc files are now tracked in git for the first time.
+
+This native code is **written but not build-verified** in the dev environment (no Xcode / Android Studio / CocoaPods / Gradle). Every touched native file carries `// NOTE(unverified)` markers (~100 total across both platforms). It will ship only after a successful native build by the user. Until then, `npm latest` stays at `3.3.0` and tracking runs via the web layer (including inside the Capacitor WebView). Firebase Crashlytics native remains an intentional stub (the `@capacitor-firebase/crashlytics` wrapper is BANNED; use Sentry).
+
+See `docs/features/polish-audit-release/round04-native-overview.md` for the honesty contract, the per-batch SDK API mappings, and the build/verify steps.
 
 ## [3.3.0] - 2026-05-27
 

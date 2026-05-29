@@ -2,7 +2,7 @@
 
 > AI Agent Instructions for Unified Tracking Plugin Development
 
-**Last Updated**: `2026-05-27`
+**Last Updated**: `2026-05-29`
 
 ## Project Overview
 
@@ -140,11 +140,18 @@ npx unified-tracking-setup
 - Data minimization — `settings.privacy.excludedProperties` keys are stripped from every event/trait/context before providers receive them (enforced as of 3.1.0).
 - Secrets are redacted from logs; provider keys/DSNs never reach the console.
 
-## Native Providers (Record — updated 2026-05-27)
+## Native Providers (Record — updated 2026-05-29)
 
 - Web/JS layer: delivers tracking for all 16 providers (incl. inside the Capacitor WebView). This is the shipped `3.3.0` path.
-- **Native SDK bridges: IN PROGRESS (Round 04 — unverified, on-branch, NOT yet published).** Per the user's 2026-05-27 "implement native now" decision, native vendor-SDK bridges are being added batch-by-batch behind the existing `@CapacitorPlugin` classes (via `registerCapacitorPlugin()`). Batch 1 = Firebase Analytics + Sentry + `ProviderManager` fan-out (iOS + Android), written but **NOT build-verified here** (no Xcode/Gradle) — every touched native file carries `// NOTE(unverified)` markers; the user build-verifies in Xcode/Android Studio. Spec: `docs/features/polish-audit-release/round04-native-overview.md`.
+- **Native SDK bridges: ON-BRANCH, UNVERIFIED, NOT YET PUBLISHED.** Per the user's 2026-05-27 "implement native now" decision, native vendor-SDK bridges are now in the repo behind `@CapacitorPlugin` (via `registerCapacitorPlugin()`):
+  - **B1** (2026-05-27): Firebase Analytics + Sentry + `ProviderManager` fan-out on iOS + Android.
+  - **B2** (2026-05-29): Mixpanel + Amplitude + Segment on both platforms.
+  - **B3** (2026-05-29): Bugsnag + Rollbar on both platforms.
+  - **JS↔native config-shape reconciliation** (2026-05-29): plugin entries now parse the real JS shape (`analytics:{providers:[ids], <id>:{...}}` etc.); `"google"` routes through Firebase on native; web-only providers log a skip warning.
+  - **All unverified here** (no Xcode/Gradle/devices). Every touched native file has `// NOTE(unverified)` markers (~100 total across both platforms). User build-verifies in Xcode + Android Studio.
+  - **Repo .gitignore fix (2026-05-29):** previously blanket-ignored `ios/+android/+electron/` (Capacitor-app convention, wrong for a plugin); now ignores build artifacts only. 35 native files newly tracked in git.
 - Crashlytics native stays an intentional **stub** (`@capacitor-firebase/crashlytics` wrapper is BANNED; use Sentry).
+- Spec: `docs/features/polish-audit-release/round04-native-overview.md`.
 - Do NOT publish a native-containing version to npm until a successful native build is confirmed; `npm latest` stays `3.3.0` until then.
 
 ## Pre-Publish Testing Requirements

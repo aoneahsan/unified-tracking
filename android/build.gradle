@@ -1,0 +1,160 @@
+ext {
+    junitVersion = project.hasProperty('junitVersion') ? rootProject.ext.junitVersion : '4.13.2'
+    androidxAppCompatVersion = project.hasProperty('androidxAppCompatVersion') ? rootProject.ext.androidxAppCompatVersion : '1.7.0'
+    androidxJunitVersion = project.hasProperty('androidxJunitVersion') ? rootProject.ext.androidxJunitVersion : '1.2.1'
+    androidxEspressoCoreVersion = project.hasProperty('androidxEspressoCoreVersion') ? rootProject.ext.androidxEspressoCoreVersion : '3.6.1'
+    
+    // Analytics providers - latest versions
+    // NOTE(unverified): firebase-bom 33.x is current stable at time of writing; confirm latest BoM in Android Studio.
+    firebaseBomVersion = '33.7.0'
+    firebaseAnalyticsVersion = '22.1.2'
+    amplitudeVersion = '3.48.2'
+    mixpanelVersion = '7.5.2'
+    segmentVersion = '4.10.4'
+    posthogVersion = '3.4.2'
+    heapVersion = '4.6.5'
+    matomoVersion = '4.1.4'
+    
+    // Error tracking providers - latest versions
+    firebaseCrashlyticsVersion = '19.2.1'
+    sentryVersion = '7.18.1'
+    bugsnagVersion = '6.4.0'
+    rollbarVersion = '1.12.0'
+    datadogVersion = '2.23.1'
+    logrocketVersion = '1.2.0'
+    raygunVersion = '4.1.2'
+    appcenterVersion = '5.0.5'
+}
+
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.7.3'
+        classpath 'com.google.gms:google-services:4.4.2'
+        classpath 'com.google.firebase:firebase-crashlytics-gradle:3.0.2'
+    }
+}
+
+apply plugin: 'com.android.library'
+
+android {
+    namespace "com.aoneahsan.unifiedtracking"
+    compileSdk project.hasProperty('compileSdkVersion') ? rootProject.ext.compileSdkVersion : 35
+    
+    defaultConfig {
+        minSdk project.hasProperty('minSdkVersion') ? rootProject.ext.minSdkVersion : 24
+        targetSdk project.hasProperty('targetSdkVersion') ? rootProject.ext.targetSdkVersion : 35
+        versionCode 1
+        versionName "3.3.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+        
+        // Enable multidex if needed
+        multiDexEnabled true
+        
+        // Vector drawable support
+        vectorDrawables.useSupportLibrary = true
+    }
+    
+    buildTypes {
+        debug {
+            minifyEnabled false
+            debuggable true
+            testCoverageEnabled true
+        }
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            consumerProguardFiles 'consumer-rules.pro'
+        }
+    }
+    
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
+        disable 'InvalidPackage'
+    }
+    
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+        coreLibraryDesugaringEnabled true
+    }
+    
+    packagingOptions {
+        pickFirst '**/libc++_shared.so'
+        pickFirst '**/libjsc.so'
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
+    }
+}
+
+repositories {
+    google()
+    mavenCentral()
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(':capacitor-android')
+    
+    // Core Android dependencies
+    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    implementation "androidx.core:core:1.15.0"
+    implementation "androidx.multidex:multidex:2.0.1"
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
+    
+    // Batch 1 — implemented native bridges (SDK required at runtime).
+    // Firebase Analytics is pulled via the Firebase BoM so the BoM controls the
+    // exact analytics version; the explicit firebaseAnalyticsVersion is kept as a
+    // fallback/reference for consumers not using the BoM.
+    // NOTE(unverified): host app must include `google-services.json` and apply the
+    // `com.google.gms.google-services` Gradle plugin for Firebase Analytics to report.
+    implementation platform("com.google.firebase:firebase-bom:$firebaseBomVersion")
+    implementation "com.google.firebase:firebase-analytics"
+    implementation "io.sentry:sentry-android:$sentryVersion"
+
+    // Batch 2 + 3 — implemented native bridges (SDK required at runtime).
+    implementation "com.amplitude:analytics-android:$amplitudeVersion"
+    implementation "com.mixpanel.android:mixpanel-android:$mixpanelVersion"
+    implementation "com.segment.analytics.android:analytics:$segmentVersion"
+    implementation "com.bugsnag:bugsnag-android:$bugsnagVersion"
+    // NOTE(unverified): confirm rollbar-java vs rollbar-android artifact id for native Android.
+    implementation "com.rollbar:rollbar-java:$rollbarVersion"
+
+    // Analytics providers (remaining — future batches, optional/compileOnly)
+    compileOnly "com.posthog.android:posthog:$posthogVersion"
+    compileOnly "com.heapanalytics.android:heap-android-client:$heapVersion"
+    compileOnly "org.matomo.sdk:tracker:$matomoVersion"
+
+    // Error tracking providers (remaining — future batches, optional/compileOnly)
+    compileOnly "com.google.firebase:firebase-crashlytics:$firebaseCrashlyticsVersion"
+    compileOnly "com.datadoghq:dd-sdk-android:$datadogVersion"
+    compileOnly "com.logrocket:logrocket:$logrocketVersion"
+    compileOnly "com.raygun:raygun-android:$raygunVersion"
+    compileOnly "com.microsoft.appcenter:appcenter-crashes:$appcenterVersion"
+    compileOnly "com.microsoft.appcenter:appcenter-analytics:$appcenterVersion"
+    
+    // JSON processing
+    implementation "org.json:json:20240303"
+    
+    // Network utilities
+    implementation "com.squareup.okhttp3:okhttp:4.12.0"
+    
+    // Testing dependencies
+    testImplementation "junit:junit:$junitVersion"
+    testImplementation "org.mockito:mockito-core:5.14.2"
+    testImplementation "org.robolectric:robolectric:4.13"
+    
+    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+    androidTestImplementation "androidx.test:runner:1.6.2"
+    androidTestImplementation "androidx.test:rules:1.6.1"
+}
