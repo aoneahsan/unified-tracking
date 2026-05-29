@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### 🚧 Native iOS/Android SDK bridges (in progress — NOT yet published)
+
+Native vendor-SDK delivery is being implemented behind the Capacitor plugin (`registerCapacitorPlugin()`), batch by batch. **Batch 1** wires the native `ProviderManager` fan-out plus **Firebase Analytics** and **Sentry** on both iOS (FirebaseAnalytics / sentry-cocoa) and Android (Firebase BoM + `io.sentry:sentry-android`). This native code is **written but not build-verified** in the dev environment (no Xcode/Gradle) — every touched native file carries `// NOTE(unverified)` markers. It ships only after a successful native build; until then `npm latest` stays at `3.3.0` and tracking runs via the web layer (including inside the Capacitor WebView). Firebase Crashlytics native remains a stub (the `@capacitor-firebase/crashlytics` wrapper is intentionally avoided). See `docs/features/polish-audit-release/round04-native-overview.md`.
+
 ## [3.3.0] - 2026-05-27
 
 Completes the documented polish backlog deferred from 3.2.0. No breaking public API changes (all additive).

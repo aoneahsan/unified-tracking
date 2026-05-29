@@ -65,11 +65,12 @@ Unified analytics and error tracking infrastructure for React, web, and Capacito
 - Data minimization — `settings.privacy.excludedProperties` keys are stripped from every event/trait/context before providers receive them (enforced as of 3.1.0; previously declared but inert).
 - Secrets are redacted from logs; provider keys/DSNs never reach the console. Default log level is `warn`.
 
-## Native Providers (Record — verified 2026-05-26)
+## Native Providers (Record — updated 2026-05-27)
 
-- Decision: **web-first, native planned**. Tracking is delivered by the web/JS layer, which runs inside the Capacitor WebView on iOS/Android — all 16 providers work there.
-- The `ios/` (Swift) and `android/` (Kotlin) provider classes are **stubs** (log + return; ~69 TODOs) and `registerCapacitorPlugin` registers only the `web` implementation — native SDK bridges are NOT yet implemented.
-- Do NOT claim full native-SDK delivery in docs/store listings until implemented. Native bridges are a separate, future effort.
+- Web/JS layer: delivers tracking for all 16 providers (incl. inside the Capacitor WebView). This is the shipped `3.3.0` path.
+- **Native SDK bridges: IN PROGRESS (Round 04 — unverified, on-branch, NOT yet published).** Per the user's 2026-05-27 "implement native now" decision, native vendor-SDK bridges are being added batch-by-batch behind the existing `@CapacitorPlugin` classes (reachable via `registerCapacitorPlugin()`). Batch 1 = Firebase Analytics + Sentry + the `ProviderManager` fan-out (iOS + Android), written but **NOT build-verified here** (no Xcode/Gradle) — every touched native file carries `// NOTE(unverified)` markers; the user build-verifies in Xcode/Android Studio. Spec: `docs/features/polish-audit-release/round04-native-overview.md`.
+- Crashlytics native stays an intentional **stub** (the `@capacitor-firebase/crashlytics` wrapper is BANNED; use Sentry).
+- Do NOT publish a native-containing version to npm until a successful native build is confirmed; `npm latest` stays `3.3.0` until then. Do NOT claim full native-SDK delivery in store listings until verified.
 
 ## Critical Working Rules
 

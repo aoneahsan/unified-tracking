@@ -140,11 +140,12 @@ npx unified-tracking-setup
 - Data minimization — `settings.privacy.excludedProperties` keys are stripped from every event/trait/context before providers receive them (enforced as of 3.1.0).
 - Secrets are redacted from logs; provider keys/DSNs never reach the console.
 
-## Native Providers (Record — verified 2026-05-26)
+## Native Providers (Record — updated 2026-05-27)
 
-- Decision: **web-first, native planned**. Tracking is delivered by the web/JS layer (runs in the Capacitor WebView on iOS/Android) — all 16 providers work there.
-- The `ios/` (Swift) + `android/` (Kotlin) provider classes are stubs (log + return; ~69 TODOs); `registerCapacitorPlugin` registers only the `web` implementation. Native SDK bridges are NOT yet implemented.
-- Do NOT claim full native-SDK delivery in docs/store listings until implemented.
+- Web/JS layer: delivers tracking for all 16 providers (incl. inside the Capacitor WebView). This is the shipped `3.3.0` path.
+- **Native SDK bridges: IN PROGRESS (Round 04 — unverified, on-branch, NOT yet published).** Per the user's 2026-05-27 "implement native now" decision, native vendor-SDK bridges are being added batch-by-batch behind the existing `@CapacitorPlugin` classes (via `registerCapacitorPlugin()`). Batch 1 = Firebase Analytics + Sentry + `ProviderManager` fan-out (iOS + Android), written but **NOT build-verified here** (no Xcode/Gradle) — every touched native file carries `// NOTE(unverified)` markers; the user build-verifies in Xcode/Android Studio. Spec: `docs/features/polish-audit-release/round04-native-overview.md`.
+- Crashlytics native stays an intentional **stub** (`@capacitor-firebase/crashlytics` wrapper is BANNED; use Sentry).
+- Do NOT publish a native-containing version to npm until a successful native build is confirmed; `npm latest` stays `3.3.0` until then.
 
 ## Pre-Publish Testing Requirements
 
