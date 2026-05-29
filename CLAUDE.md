@@ -9,12 +9,12 @@ Unified analytics and error tracking infrastructure for React, web, and Capacito
 
 ## Current Verified State
 
-- Reviewed on: `2026-05-27` (Round 03 — completed the Round-02 deferral backlog)
+- Reviewed on: `2026-05-29` (portfolio-refresh pass — deps re-pinned to latest stable, gates re-run green)
 - Install: `yarn install` passed (all dependencies at latest stable)
+- Deps refresh (2026-05-29): `npx -y npm-check-updates -u` bumped 5 dev deps (`eslint` 10.4.0→10.4.1, `prettier` 3.8.1→3.8.3, `prettier-plugin-java` 2.9.5→2.9.7, `rimraf` 6.0.1→6.1.3, `@capacitor/docgen` 0.3.0→0.3.1). No runtime/peer deps changed (package ships zero runtime deps). No held-back majors.
 - Typecheck: `yarn type-check` passed (TypeScript 6, NodeNext module resolution)
-- Build: `yarn build` passed cleanly
-- Tests: `yarn test` passed (`246` passed, `2` skipped)
-- Lint: `yarn lint` passed (eslint `0`/`0` + prettier clean)
+- Build: `yarn build` passed cleanly (all 3 entrypoints emitted: `.`, `/react`, `/capacitor`)
+- Tests: `yarn test` passed (`246` passed, `2` skipped, 10 files)
 - Node ESM import smoke check: passed (`import('dist/esm/src/index.js')` resolves)
 - Round 03 (3.3.0) completed the deferred polish: unified `flush()`, typed event listeners, Firebase/Amplitude now extend `BaseAnalyticsProvider` (M7), single SSR guard, public-surface `any`→`unknown` (L11), `getProviderManager` deprecated, and the `bin/setup.js` config-shape rework. Round 02 (3.2.0) fixed 2 CRITICAL + 8 HIGH + 11 MEDIUM (see `docs/features/polish-audit-release/round02-findings.md`).
 - STILL DEFERRED (separate effort): native iOS/Android SDK bridges — require a native toolchain (Xcode/Gradle) + real vendor SDK deps + device/simulator build verification not available in this environment. Tracking runs via the web layer (incl. the Capacitor WebView).
@@ -88,12 +88,18 @@ Unified analytics and error tracking infrastructure for React, web, and Capacito
 - When providers, exports, or operational status change, update `Readme.md`, this file, and the portfolio file in the same pass.
 - Test framework: **Vitest** (NEVER Jest). Build: **tsc** (NodeNext module resolution; the orphan Rollup step + deps were removed in 3.2.0). Lint: **ESLint + Prettier**.
 
-## Root Portfolio File Maintenance Rule
+## Portfolio Info File — Weekly Update Rule
 
-- Maintain exactly one current root portfolio info file: `UNIFIED-TRACKING_portfolio-info_YYYY-MM-DD.md`
-- Refresh only after 7+ days unless major release or material capability change.
-- Keep at most 10 update-history records inside the portfolio file.
-- When the portfolio file changes, update `Readme.md` and this `CLAUDE.md` in the same pass.
+- Canonical portfolio info file: `/home/ahsan/Documents/ahsan-notebook/static/assets/personal/projects-info-as-portfolio-item/packages/UNIFIED-TRACKING_portfolio-info_<YYYY-MM-DD>.md`
+- Update at least once per week (and on any material change). Keep the last-updated date in the filename.
+- Keep a max-10-entry update history inside the file. On each refresh: prepend today's row, delete the previous dated file, write the new one.
+- Tracker: `/home/ahsan/Documents/01-code/docs/tracking/portfolio-info-files-update-tracker.json`
+- Last applied: 2026-05-29
+- Note: a now-stale in-repo copy (`UNIFIED-TRACKING_portfolio-info_2026-05-27.md`) predates the move to the canonical ahsan-notebook location; the ahsan-notebook file is authoritative.
+
+## Package Upgrades: Use `npm-check-updates`
+
+For dependency upgrades use `npx -y npm-check-updates -u && yarn install` (latest STABLE), NOT `yarn upgrade --latest`. Full rule in global `~/.claude/CLAUDE.md`. Last applied: 2026-05-29
 
 ## Nested Instruction Files
 

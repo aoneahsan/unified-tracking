@@ -76,7 +76,7 @@ yarn install
 
 | Command              | Purpose                 |
 | -------------------- | ----------------------- |
-| `yarn build`         | Clean + tsc + rollup    |
+| `yarn build`         | Clean + tsc (NodeNext)  |
 | `yarn build:docgen`  | Build with API docs     |
 | `yarn dev`           | Watch mode              |
 | `yarn clean`         | Remove dist             |
@@ -173,6 +173,19 @@ yarn example:install  # Install example deps
 yarn example:dev      # Run example app
 yarn example:build    # Build example app
 ```
+
+## Portfolio Info File — Weekly Update Rule
+
+- Canonical portfolio info file: `/home/ahsan/Documents/ahsan-notebook/static/assets/personal/projects-info-as-portfolio-item/packages/UNIFIED-TRACKING_portfolio-info_<YYYY-MM-DD>.md`
+- Update at least once per week (and on any material change). Keep the last-updated date in the filename.
+- Keep a max-10-entry update history inside the file. On each refresh: prepend today's row, delete the previous dated file, write the new one.
+- Tracker: `/home/ahsan/Documents/01-code/docs/tracking/portfolio-info-files-update-tracker.json`
+- Last applied: 2026-05-29
+- Note: an in-repo copy (`UNIFIED-TRACKING_portfolio-info_2026-05-27.md`) is now stale; the ahsan-notebook file is authoritative.
+
+## Package Upgrades: Use `npm-check-updates`
+
+For dependency upgrades use `npx -y npm-check-updates -u && yarn install` (latest STABLE), NOT `yarn upgrade --latest`. Full rule in global `~/.claude/CLAUDE.md`. Last applied: 2026-05-29
 
 ## Nested Instruction Files
 
