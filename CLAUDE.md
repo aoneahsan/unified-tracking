@@ -153,3 +153,12 @@ Domain-specific rules live in nested `CLAUDE.md` + `AGENTS.md` files to optimize
 - Features: implemented surface is substantial and reflected in docs
 
 ### Next Audit Due: 2026-06-26
+
+<!-- project-links:start -->
+## Links
+
+- Live: https://www.npmjs.com/package/unified-tracking
+- NPM: https://www.npmjs.com/package/unified-tracking
+
+_URL source of truth: `01-code/projects/project-live-urls.json` (auto-generated — do not hand-edit between these markers)._
+<!-- project-links:end -->

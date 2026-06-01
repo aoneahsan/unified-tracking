@@ -450,3 +450,12 @@ MIT © [Ahsan Mahmood](https://github.com/aoneahsan)
 Give a ⭐️ if this project helped you!
 
 [![Star History Chart](https://api.star-history.com/svg?repos=aoneahsan/unified-tracking&type=Date)](https://star-history.com/#aoneahsan/unified-tracking&Date)
+
+<!-- project-links:start -->
+## Links
+
+- Live: https://www.npmjs.com/package/unified-tracking
+- NPM: https://www.npmjs.com/package/unified-tracking
+
+_URL source of truth: `01-code/projects/project-live-urls.json` (auto-generated — do not hand-edit between these markers)._
+<!-- project-links:end -->

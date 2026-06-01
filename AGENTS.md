@@ -200,3 +200,12 @@ Domain-specific rules live in nested `CLAUDE.md` + `AGENTS.md` files:
 | `docs/`          | Documentation structure, update rules, API docs                                    |
 | `android/`       | Android native build, Kotlin/Java patterns                                         |
 | `ios/`           | iOS native build, Swift patterns, CocoaPods/SPM                                    |
+
+<!-- project-links:start -->
+## Links
+
+- Live: https://www.npmjs.com/package/unified-tracking
+- NPM: https://www.npmjs.com/package/unified-tracking
+
+_URL source of truth: `01-code/projects/project-live-urls.json` (auto-generated — do not hand-edit between these markers)._
+<!-- project-links:end -->
