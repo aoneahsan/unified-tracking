@@ -112,26 +112,4 @@ export default [
       'no-console': 'off',
     },
   },
-
-  // Test files + test setup configuration
-  {
-    files: ['**/*.test.ts', '**/*.spec.ts', '**/*.test.js', '**/*.spec.js', 'src/test-setup.ts'],
-    languageOptions: {
-      globals: {
-        ...globals.jest,
-        vi: 'readonly',
-        describe: 'readonly',
-        it: 'readonly',
-        expect: 'readonly',
-        beforeEach: 'readonly',
-        afterEach: 'readonly',
-        beforeAll: 'readonly',
-        afterAll: 'readonly',
-      },
-    },
-    rules: {
-      '@typescript-eslint/no-explicit-any': 'off',
-      'no-console': 'off',
-    },
-  },
 ];
