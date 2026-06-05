@@ -69,19 +69,10 @@ protected abstract doTrack(eventName: string, properties: Record<string, any>): 
 1. Create folder: `analytics/<name>/` or `error-handling/<name>/`
 2. Create `<name>.provider.ts` extending the appropriate base class
 3. Create `index.ts` barrel export
-4. Create `<name>.provider.test.ts` with Vitest tests
-5. Register in `registry.ts`
-6. Export from `providers/index.ts`
-7. Update root `src/index.ts` exports
-8. Update `docs/` and root `Readme.md`
-
-## Testing Providers
-
-- Mock the external SDK — never import real analytics/error SDKs
-- Test all abstract method implementations
-- Test error handling paths (SDK failures should be caught and logged)
-- Test `checkReady()` guard (should throw when not initialized)
-- Test reset clears internal state
+4. Register in `registry.ts`
+5. Export from `providers/index.ts`
+6. Update root `src/index.ts` exports
+7. Update `docs/` and root `Readme.md`
 
 ## ProviderManager
 

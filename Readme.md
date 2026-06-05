@@ -19,7 +19,6 @@ A comprehensive Capacitor plugin that provides a unified API for multiple analyt
 - `yarn install`: passed (all dependencies at latest stable)
 - `yarn type-check`: passed (TypeScript 6, NodeNext)
 - `yarn build`: passed cleanly
-- `yarn test`: passed — `246` passed, `2` skipped
 - `yarn lint`: passed — `0` warnings, `0` errors
 - Node ESM import smoke check: passed
 
@@ -423,9 +422,6 @@ yarn install
 # Build the plugin
 yarn build
 
-# Run tests
-yarn test
-
 # Run linting
 yarn lint
 ```
@@ -452,10 +448,12 @@ Give a ⭐️ if this project helped you!
 [![Star History Chart](https://api.star-history.com/svg?repos=aoneahsan/unified-tracking&type=Date)](https://star-history.com/#aoneahsan/unified-tracking&Date)
 
 <!-- project-links:start -->
+
 ## Links
 
 - Live: https://www.npmjs.com/package/unified-tracking
 - NPM: https://www.npmjs.com/package/unified-tracking
 
 _URL source of truth: `01-code/projects/project-live-urls.json` (auto-generated — do not hand-edit between these markers)._
+
 <!-- project-links:end -->

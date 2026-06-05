@@ -4,7 +4,7 @@
 
 ## Imports
 
-Source modules use **relative imports** (e.g. `../../base-analytics-provider`). The path aliases below are declared in `tsconfig.json` + `vitest.config.ts` but are **not used in source**. To adopt them, configure the Rollup build to resolve aliases first, then migrate consistently.
+Source modules use **relative imports** (e.g. `../../base-analytics-provider`). The path aliases below are declared in `tsconfig.json` but are **not used in source**. To adopt them, configure the Rollup build to resolve aliases first, then migrate consistently.
 
 | Alias (declared, unused) | Maps To             |
 | ------------------------ | ------------------- |
@@ -40,13 +40,6 @@ capacitor/      # Capacitor native bridge adapter
 - **Template method pattern**: Base classes call `doXxx()` abstract methods
 - **Barrel exports**: Each folder has `index.ts` re-exporting public APIs
 - All async operations must have try/catch with proper error logging
-
-## Testing
-
-- Framework: **Vitest** (NEVER Jest)
-- Test files: `*.test.ts` co-located with source files
-- Mock external SDKs — never import real analytics SDKs in tests
-- Coverage threshold: 60%
 
 ## CLAUDE.md + AGENTS.md Sync Rule
 

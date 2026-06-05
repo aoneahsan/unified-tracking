@@ -14,7 +14,6 @@ Unified analytics and error tracking infrastructure for React, web, and Capacito
 - Deps refresh (2026-05-29): `npx -y npm-check-updates -u` bumped 5 dev deps (`eslint` 10.4.0→10.4.1, `prettier` 3.8.1→3.8.3, `prettier-plugin-java` 2.9.5→2.9.7, `rimraf` 6.0.1→6.1.3, `@capacitor/docgen` 0.3.0→0.3.1). No runtime/peer deps changed (package ships zero runtime deps). No held-back majors.
 - Typecheck: `yarn type-check` passed (TypeScript 6, NodeNext module resolution)
 - Build: `yarn build` passed cleanly (all 3 entrypoints emitted: `.`, `/react`, `/capacitor`)
-- Tests: `yarn test` passed (`246` passed, `2` skipped, 10 files)
 - Node ESM import smoke check: passed (`import('dist/esm/src/index.js')` resolves)
 - Round 03 (3.3.0) completed the deferred polish: unified `flush()`, typed event listeners, Firebase/Amplitude now extend `BaseAnalyticsProvider` (M7), single SSR guard, public-surface `any`→`unknown` (L11), `getProviderManager` deprecated, and the `bin/setup.js` config-shape rework. Round 02 (3.2.0) fixed 2 CRITICAL + 8 HIGH + 11 MEDIUM (see `docs/features/polish-audit-release/round02-findings.md`).
 - STILL DEFERRED (separate effort): native iOS/Android SDK bridges — require a native toolchain (Xcode/Gradle) + real vendor SDK deps + device/simulator build verification not available in this environment. Tracking runs via the web layer (incl. the Capacitor WebView).
@@ -86,7 +85,7 @@ Unified analytics and error tracking infrastructure for React, web, and Capacito
 - Do not describe this package as uninitialized or in planning; it is implemented and published.
 - Document known build or test issues honestly until fixed.
 - When providers, exports, or operational status change, update `Readme.md`, this file, and the portfolio file in the same pass.
-- Test framework: **Vitest** (NEVER Jest). Build: **tsc** (NodeNext module resolution; the orphan Rollup step + deps were removed in 3.2.0). Lint: **ESLint + Prettier**.
+- Build: **tsc** (NodeNext module resolution; the orphan Rollup step + deps were removed in 3.2.0). Lint: **ESLint + Prettier**.
 
 ## Portfolio Info File — Weekly Update Rule
 
@@ -155,10 +154,12 @@ Domain-specific rules live in nested `CLAUDE.md` + `AGENTS.md` files to optimize
 ### Next Audit Due: 2026-06-26
 
 <!-- project-links:start -->
+
 ## Links
 
 - Live: https://www.npmjs.com/package/unified-tracking
 - NPM: https://www.npmjs.com/package/unified-tracking
 
 _URL source of truth: `01-code/projects/project-live-urls.json` (auto-generated — do not hand-edit between these markers)._
+
 <!-- project-links:end -->

@@ -4,7 +4,7 @@
 
 ## Imports
 
-Source modules use **relative imports** (e.g. `../../base-analytics-provider`). The path aliases below are declared in `tsconfig.json` + `vitest.config.ts` but are **not used in source** — relative imports are the convention here. To adopt aliases, also configure the Rollup build to resolve them, then migrate consistently.
+Source modules use **relative imports** (e.g. `../../base-analytics-provider`). The path aliases below are declared in `tsconfig.json` but are **not used in source** — relative imports are the convention here. To adopt aliases, also configure the Rollup build to resolve them, then migrate consistently.
 
 | Alias (declared, unused) | Maps To             |
 | ------------------------ | ------------------- |
@@ -45,14 +45,6 @@ src/
 - **Template method pattern**: Base classes call `doXxx()` abstract methods that providers implement
 - **Barrel exports**: Each folder has `index.ts` re-exporting public APIs
 - All async operations must have try/catch with proper error logging via `this.logger`
-
-## Testing
-
-- Framework: **Vitest** (NEVER Jest)
-- Test files: `*.test.ts` co-located with source files
-- Setup file: `src/test-setup.ts`
-- Mock external SDKs — never import real analytics SDKs in tests
-- Coverage threshold: 60% (configured in vitest.config.ts)
 
 ## CLAUDE.md + AGENTS.md Sync Rule
 

@@ -74,18 +74,15 @@ yarn install
 
 ## Build & Test Commands
 
-| Command              | Purpose                 |
-| -------------------- | ----------------------- |
-| `yarn build`         | Clean + tsc (NodeNext)  |
-| `yarn build:docgen`  | Build with API docs     |
-| `yarn dev`           | Watch mode              |
-| `yarn clean`         | Remove dist             |
-| `yarn lint`          | ESLint + Prettier check |
-| `yarn fmt`           | Auto-fix lint + format  |
-| `yarn test`          | Run Vitest              |
-| `yarn test:watch`    | Watch mode              |
-| `yarn test:coverage` | Coverage report         |
-| `yarn type-check`    | TypeScript check        |
+| Command             | Purpose                 |
+| ------------------- | ----------------------- |
+| `yarn build`        | Clean + tsc (NodeNext)  |
+| `yarn build:docgen` | Build with API docs     |
+| `yarn dev`          | Watch mode              |
+| `yarn clean`        | Remove dist             |
+| `yarn lint`         | ESLint + Prettier check |
+| `yarn fmt`          | Auto-fix lint + format  |
+| `yarn type-check`   | TypeScript check        |
 
 ### Platform Verification
 
@@ -99,7 +96,7 @@ yarn verify          # All platforms
 ### Publishing
 
 ```bash
-yarn release      # Build + test + lint + publish
+yarn release      # Build + lint + publish
 yarn release:dry  # Dry run
 ```
 
@@ -107,18 +104,16 @@ yarn release:dry  # Dry run
 
 ### Critical DOs
 
-1. Test all platforms before release
+1. Verify all platforms build before release
 2. Maintain privacy compliance (GDPR, consent management)
 3. Update docs when adding providers
-4. Use Vitest for testing (NEVER Jest)
-5. Use yarn exclusively (NEVER npm/pnpm)
+4. Use yarn exclusively (NEVER npm/pnpm)
 
 ### Critical DON'Ts
 
 1. NEVER break cross-platform compatibility
 2. NEVER expose user data insecurely
 3. NEVER break existing adapter interfaces
-4. NEVER use Jest — Vitest only
 
 ## Module Exports
 
@@ -160,7 +155,6 @@ Before publishing, ALL must pass:
 
 ```bash
 yarn build        # Must pass
-yarn test         # Must pass
 yarn lint         # Must pass
 yarn type-check   # Must pass
 yarn verify       # All platforms must build
@@ -202,10 +196,12 @@ Domain-specific rules live in nested `CLAUDE.md` + `AGENTS.md` files:
 | `ios/`           | iOS native build, Swift patterns, CocoaPods/SPM                                    |
 
 <!-- project-links:start -->
+
 ## Links
 
 - Live: https://www.npmjs.com/package/unified-tracking
 - NPM: https://www.npmjs.com/package/unified-tracking
 
 _URL source of truth: `01-code/projects/project-live-urls.json` (auto-generated — do not hand-edit between these markers)._
+
 <!-- project-links:end -->

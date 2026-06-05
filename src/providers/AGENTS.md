@@ -39,18 +39,8 @@ Base classes define public API → call `doXxx()` abstract methods → providers
 1. Create folder: `analytics/<name>/` or `error-handling/<name>/`
 2. Create `<name>.provider.ts` extending the appropriate base class
 3. Create `index.ts` barrel export
-4. Create `<name>.provider.test.ts` with Vitest tests
-5. Register in `registry.ts` and export from `providers/index.ts`
-6. Update `src/index.ts`, docs, and `Readme.md`
-
-## Testing Providers
-
-- Mock external SDK — never import real SDKs
-- Test all abstract method implementations
-- Test error handling paths
-- Test `checkReady()` guard
-- Test reset clears internal state
-- Framework: **Vitest** (NEVER Jest)
+4. Register in `registry.ts` and export from `providers/index.ts`
+5. Update `src/index.ts`, docs, and `Readme.md`
 
 ## CLAUDE.md + AGENTS.md Sync Rule
 
