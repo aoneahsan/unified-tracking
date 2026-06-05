@@ -3,18 +3,19 @@
 **Package Name**: `unified-tracking`
 **Version**: `3.3.0`
 **NPM**: `https://www.npmjs.com/package/unified-tracking`
-**Last Updated**: `2026-05-29`
+**Last Updated**: `2026-06-05`
 
 Unified analytics and error tracking infrastructure for React, web, and Capacitor apps with provider-based integrations, consent controls, React hooks, and cross-platform delivery targets.
 
 ## Current Verified State
 
-- Reviewed on: `2026-05-29` (portfolio-refresh pass — deps re-pinned to latest stable, gates re-run green)
+- Reviewed on: `2026-06-05` (portfolio-refresh re-run — deps re-pinned to latest stable, gates re-run green)
 - Install: `yarn install` passed (all dependencies at latest stable)
-- Deps refresh (2026-05-29): `npx -y npm-check-updates -u` bumped 5 dev deps (`eslint` 10.4.0→10.4.1, `prettier` 3.8.1→3.8.3, `prettier-plugin-java` 2.9.5→2.9.7, `rimraf` 6.0.1→6.1.3, `@capacitor/docgen` 0.3.0→0.3.1). No runtime/peer deps changed (package ships zero runtime deps). No held-back majors.
+- Deps refresh (2026-06-05): `npx -y npm-check-updates -u` bumped 2 dev-only type deps (`@types/node` 25.9.1→25.9.2, `@types/react` 19.2.16→19.2.17). No runtime/peer deps changed (package ships zero runtime deps). No held-back majors. (2026-05-29 run bumped 5 dev deps: eslint, prettier, prettier-plugin-java, rimraf, @capacitor/docgen.)
 - Typecheck: `yarn type-check` passed (TypeScript 6, NodeNext module resolution)
-- Build: `yarn build` passed cleanly (all 3 entrypoints emitted: `.`, `/react`, `/capacitor`)
-- Node ESM import smoke check: passed (`import('dist/esm/src/index.js')` resolves)
+- Build: `yarn build` passed cleanly (all 3 entrypoints emitted: `.`, `/react`, `/capacitor` — ESM `.js` + `.d.ts`)
+- Lint: `yarn eslint` clean (0 errors). `yarn prettier --check` fails ONLY on the 13 `.java` native files (pre-existing `prettier-plugin-java` parser-inference gap in `@ionic/prettier-config`, unrelated to this refresh) — TS/JS code style is clean.
+- Tests: **automated test suite REMOVED 2026-06-03** (commit `4bddbd6` "remove cypress and all automated-testing infrastructure", per the global testing-removal policy). There is no Vitest/Jest suite to run anymore; the package is verified via typecheck + build + eslint. Do NOT re-add test packages.
 - Round 03 (3.3.0) completed the deferred polish: unified `flush()`, typed event listeners, Firebase/Amplitude now extend `BaseAnalyticsProvider` (M7), single SSR guard, public-surface `any`→`unknown` (L11), `getProviderManager` deprecated, and the `bin/setup.js` config-shape rework. Round 02 (3.2.0) fixed 2 CRITICAL + 8 HIGH + 11 MEDIUM (see `docs/features/polish-audit-release/round02-findings.md`).
 - STILL DEFERRED (separate effort): native iOS/Android SDK bridges — require a native toolchain (Xcode/Gradle) + real vendor SDK deps + device/simulator build verification not available in this environment. Tracking runs via the web layer (incl. the Capacitor WebView).
 
@@ -93,12 +94,12 @@ Unified analytics and error tracking infrastructure for React, web, and Capacito
 - Update at least once per week (and on any material change). Keep the last-updated date in the filename.
 - Keep a max-10-entry update history inside the file. On each refresh: prepend today's row, delete the previous dated file, write the new one.
 - Tracker: `/home/ahsan/Documents/01-code/docs/tracking/portfolio-info-files-update-tracker.json`
-- Last applied: 2026-05-29
+- Last applied: 2026-06-05
 - Note: a now-stale in-repo copy (`UNIFIED-TRACKING_portfolio-info_2026-05-27.md`) predates the move to the canonical ahsan-notebook location; the ahsan-notebook file is authoritative.
 
 ## Package Upgrades: Use `npm-check-updates`
 
-For dependency upgrades use `npx -y npm-check-updates -u && yarn install` (latest STABLE), NOT `yarn upgrade --latest`. Full rule in global `~/.claude/CLAUDE.md`. Last applied: 2026-05-29
+For dependency upgrades use `npx -y npm-check-updates -u && yarn install` (latest STABLE), NOT `yarn upgrade --latest`. Full rule in global `~/.claude/CLAUDE.md`. Last applied: 2026-06-05
 
 ## Nested Instruction Files
 
@@ -148,7 +149,7 @@ Domain-specific rules live in nested `CLAUDE.md` + `AGENTS.md` files to optimize
 - Package Manager: yarn confirmed
 - Build: passes cleanly; `docgen` moved out of default build path
 - TypeScript: passes
-- Tests: passing
+- Tests: automated test suite removed 2026-06-03 (global testing-removal policy) — verified via typecheck + build + eslint instead
 - Features: implemented surface is substantial and reflected in docs
 
 ### Next Audit Due: 2026-06-26
