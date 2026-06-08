@@ -3,9 +3,19 @@
 **Package Name**: `unified-tracking`
 **Version**: `3.3.0`
 **NPM**: `https://www.npmjs.com/package/unified-tracking`
-**Last Updated**: `2026-06-05`
+**Last Updated**: `2026-06-08`
 
 Unified analytics and error tracking infrastructure for React, web, and Capacitor apps with provider-based integrations, consent controls, React hooks, and cross-platform delivery targets.
+
+## Package Manager Hierarchy: nvm → npm (global) → yarn (local) (IRON-SOLID)
+
+Three tiers, each tool ONLY for its tier — for the best, most reproducible dev results:
+
+- **`nvm`** → install/update Node.js (which bundles `npm`): `nvm install --lts`. Use nvm to get/update `npm` itself.
+- **`npm`** → ALL global packages: `npm install -g yarn` (install yarn globally if missing) + `npm install -g <pkg>` (every other global CLI).
+- **`yarn`** → ALL local project work: `yarn`, `yarn add <pkg>`, `yarn add -D <pkg>` inside the project.
+
+❌ NEVER use `npm`/`pnpm` for LOCAL installs. NEVER use `pnpm` at all. ✅ Only `yarn.lock` in the project — delete `package-lock.json` and `pnpm-lock.yaml`.
 
 ## Current Verified State
 
@@ -81,7 +91,7 @@ Unified analytics and error tracking infrastructure for React, web, and Capacito
 
 ## Critical Working Rules
 
-- Use `yarn` exclusively. No `npm`, `pnpm`, or `package-lock.json`.
+- Use `yarn` for all LOCAL work (never `npm`/`pnpm` locally; `npm` is only for global installs per the Package Manager Hierarchy above). Only `yarn.lock` — no `package-lock.json`/`pnpm-lock.yaml`.
 - Keep docs aligned with actual package version and verified repo state.
 - Do not describe this package as uninitialized or in planning; it is implemented and published.
 - Document known build or test issues honestly until fixed.
