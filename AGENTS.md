@@ -4,6 +4,10 @@
 
 **Last Updated**: `2026-06-08`
 
+## Task Speed Over Docs (IRON-SOLID — BEHAVIORAL)
+
+Finish the real task fast + correctly FIRST; docs/trackers/sync are a footnote (≤~20% of effort) — never let recording outpace the fix. HARD STOP when doc work outpaces the change → ship, then ONE line if anything. No new summary/status/completion files unless asked; edit/delete over add; delete stale docs. Full rule: `~/.claude/CLAUDE.md`. (Est. 2026-06-19)
+
 ## Package Manager Hierarchy: nvm → npm (global) → yarn (local) (IRON-SOLID)
 
 Three tiers, each tool ONLY for its tier — for the best, most reproducible dev results:
