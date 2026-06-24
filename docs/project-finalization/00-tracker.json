@@ -1,0 +1,105 @@
+{
+  "$schema": "unified-tracking-project-finalization-tracker",
+  "description": "Resumable tracker for the production-finalization / gap-completion pass on the unified-tracking npm package. The first phase/sub-task with status 'pending' or 'in_progress' is the next thing to work on.",
+  "module": "project-finalization",
+  "project": "unified-tracking",
+  "stack": "npm package — Capacitor plugin + framework-agnostic TypeScript library; unified analytics + error-tracking facade over 8 analytics (Google/Firebase/Amplitude/Mixpanel/Segment/PostHog/Heap/Matomo) + 8 error providers (Sentry/Crashlytics/DataDog/Bugsnag/Rollbar/LogRocket/Raygun/AppCenter). Web/JS delivery layer is the shipped (3.3.0) path; native iOS/Android SDK bridges are on-branch + unverified. Build: tsc (NodeNext ESM). Lint: ESLint + Prettier. No runtime deps.",
+  "createdAt": "2026-06-24",
+  "lastUpdated": "2026-06-24",
+  "version": "3.3.0",
+  "repo": "git@github.com:aoneahsan/unified-tracking.git (remote o, main)",
+  "verifyCommands": {
+    "typecheck": "yarn type-check",
+    "build": "yarn build",
+    "lint": "yarn eslint",
+    "note": "Package-style verify. `yarn prettier --check` fails ONLY on .java native files (pre-existing prettier-plugin-java parser gap); TS/JS code style is clean. No automated test suite (removed 2026-06-03 per global policy)."
+  },
+  "gapInventory": [
+    {
+      "id": "gap-docs-site",
+      "title": "No public documentation website (Docusaurus) exists for the package",
+      "classification": "AUTOMATABLE",
+      "status": "complete",
+      "note": "Built new PUBLIC repo unified-tracking-docs (Docusaurus 3) modeled on native-update-docs. Documents the real API read from src/definitions.ts + core + react + capacitor entrypoints. Full SEO floor + dual-hosting config."
+    },
+    {
+      "id": "gap-finalization-scaffold",
+      "title": "Missing docs/project-finalization tracker + docs/MANUAL-TASKS.md",
+      "classification": "AUTOMATABLE",
+      "status": "complete",
+      "note": "Scaffolded this tracker + MANUAL-TASKS.md; refreshed root + nested CLAUDE.md/AGENTS.md to true state with docs-site + manual-tasks pointers."
+    },
+    {
+      "id": "gap-native-build-verify",
+      "title": "Native iOS/Android SDK bridges are written on-branch but NOT build-verified",
+      "classification": "MANUAL",
+      "status": "blocked",
+      "blocker": "Requires a native toolchain not present in this environment (Xcode + CocoaPods/SPM for iOS, Android Studio + Gradle for Android) and a device/simulator build. Cannot be verified or published from here.",
+      "note": "Honest contract already documented in docs/features/polish-audit-release/round04-native-overview.md. ~50 // NOTE(unverified) markers per platform. npm `latest` stays 3.3.0 (web/JS path) until a successful native build is confirmed by the owner."
+    },
+    {
+      "id": "gap-npm-publish",
+      "title": "Publish next version to npm",
+      "classification": "MANUAL",
+      "status": "blocked",
+      "blocker": "Publishing is a registry action (npm publish) reserved for the owner; the agent never publishes. Web-layer 3.3.0 is already live on npm.",
+      "note": "Release flow: `yarn build && yarn lint && npm publish` (see package.json `release` script). Owner-only."
+    },
+    {
+      "id": "gap-docs-deploy",
+      "title": "Deploy the docs site (Firebase Hosting + GitHub Pages) and point DNS",
+      "classification": "MANUAL",
+      "status": "blocked",
+      "blocker": "Deploy actions + DNS are owner-only: Firebase project creation/deploy needs the owner's Firebase account; GitHub Pages needs repo Settings -> Pages enablement + a custom-domain DNS CNAME. Agent wrote both configs but never deploys.",
+      "note": "firebase.json + .firebaserc (site unified-tracking-docs) AND .github/workflows/deploy.yml + static/CNAME are committed in the docs repo. Steps in the docs repo + app MANUAL-TASKS.md."
+    }
+  ],
+  "phases": [
+    {
+      "id": "phase0",
+      "title": "Setup: skills, read real code vs plan, scaffold tracker + MANUAL-TASKS, refresh CLAUDE/AGENTS",
+      "status": "complete",
+      "completedAt": "2026-06-24"
+    },
+    {
+      "id": "phase1",
+      "title": "Env/secret + privacy gate (no .env/secret files exist — pure library)",
+      "status": "complete",
+      "completedAt": "2026-06-24"
+    },
+    {
+      "id": "phase2",
+      "title": "Gap audit — classify gapInventory[] (above)",
+      "status": "complete",
+      "completedAt": "2026-06-24"
+    },
+    {
+      "id": "phaseD",
+      "title": "Docs site — new PUBLIC repo unified-tracking-docs (Docusaurus 3, full SEO, dual-hosting)",
+      "status": "complete",
+      "completedAt": "2026-06-24"
+    },
+    {
+      "id": "phaseN1",
+      "title": "Manual-task consolidation into docs/MANUAL-TASKS.md",
+      "status": "complete",
+      "completedAt": "2026-06-24"
+    },
+    {
+      "id": "phaseN2",
+      "title": "Finalize — verify gates, tracker runHistory, clean git",
+      "status": "complete",
+      "completedAt": "2026-06-24"
+    }
+  ],
+  "runHistory": [
+    {
+      "date": "2026-06-24",
+      "phase": "all",
+      "summary": "Gap-completion pass: package is feature-complete at the web/JS layer (16 providers, full core engine, React hooks, Capacitor bridge) with zero code stubs. Built the missing public docs site (unified-tracking-docs, Docusaurus 3) as the single automatable gap; documented every real API + SEO floor + dual-hosting. Native build-verify + npm publish + docs deploy are true owner-only blockers. Verify gates green (typecheck+build+eslint).",
+      "commit": "pending"
+    }
+  ],
+  "readiness": 96,
+  "resumeInstructions": "1) Read this tracker. 2) All phases complete for this pass. 3) Remaining work is owner-only (native build verification, npm publish, docs deploy + DNS) — see docs/MANUAL-TASKS.md."
+}

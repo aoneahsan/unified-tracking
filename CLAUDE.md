@@ -3,9 +3,16 @@
 **Package Name**: `unified-tracking`
 **Version**: `3.3.0`
 **NPM**: `https://www.npmjs.com/package/unified-tracking`
-**Last Updated**: `2026-06-08`
+**Last Updated**: `2026-06-24`
 
 Unified analytics and error tracking infrastructure for React, web, and Capacitor apps with provider-based integrations, consent controls, React hooks, and cross-platform delivery targets.
+
+## Production Finalization / Gap Pass (2026-06-24)
+
+- **Gap audit result:** the package is feature-complete at the web/JS delivery layer — full core engine (16 providers, consent gate, privacy minimization, event queue), React hooks, and the Capacitor bridge, with **zero code stubs/TODOs**. The only honest deferral is the native iOS/Android SDK bridges (on-branch, unverified — a TRUE toolchain/device blocker).
+- **Built this pass:** the missing **public documentation website** — separate PUBLIC repo `unified-tracking-docs` (Docusaurus 3, modeled on `native-update-docs`): documents every real API read from `src/`, full SEO floor (AI-bot robots allowlist, sitemap, llms.txt, JSON-LD SoftwareSourceCode/SoftwareApplication), dual-hosting (Firebase + GitHub Pages) config.
+- **Trackers:** `docs/project-finalization/00-tracker.json` (gapInventory + phases). Owner-only work in **`docs/MANUAL-TASKS.md`** (native build-verify, npm publish, docs deploy + DNS, search-engine submission).
+- **Verify gates (green 2026-06-24):** `yarn type-check`, `yarn build`, `yarn eslint` all exit 0. `yarn prettier --check` still fails only on `.java` native files (pre-existing parser gap).
 
 ## Task Speed Over Docs (IRON-SOLID — BEHAVIORAL)
 

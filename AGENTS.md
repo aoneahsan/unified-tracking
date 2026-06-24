@@ -2,7 +2,14 @@
 
 > AI Agent Instructions for Unified Tracking Plugin Development
 
-**Last Updated**: `2026-06-08`
+**Last Updated**: `2026-06-24`
+
+## Production Finalization / Gap Pass (2026-06-24)
+
+- **Gap audit:** feature-complete at the web/JS layer (16 providers, full core engine, React hooks, Capacitor bridge) — **zero code stubs/TODOs**. Only honest deferral: native iOS/Android SDK bridges (on-branch, unverified — TRUE toolchain/device blocker).
+- **Built this pass:** the missing **public docs website** — separate PUBLIC repo `unified-tracking-docs` (Docusaurus 3, modeled on `native-update-docs`): every real API documented from `src/`, full SEO floor (AI-bot robots allowlist, sitemap, llms.txt, JSON-LD), dual-hosting (Firebase + GitHub Pages) config.
+- **Trackers:** `docs/project-finalization/00-tracker.json`. Owner-only work in **`docs/MANUAL-TASKS.md`** (native build-verify, npm publish, docs deploy + DNS, search-engine submission).
+- **Verify gates (green 2026-06-24):** `yarn type-check`, `yarn build`, `yarn eslint` exit 0; `yarn prettier --check` fails only on `.java` native files (pre-existing parser gap).
 
 ## Task Speed Over Docs (IRON-SOLID — BEHAVIORAL)
 
