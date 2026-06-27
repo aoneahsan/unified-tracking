@@ -432,7 +432,7 @@ We welcome contributions! Please see our [Contributing Guide](./CONTRIBUTING.md)
 
 ## 📄 License
 
-MIT © [Ahsan Mahmood](https://github.com/aoneahsan)
+MIT © [Ahsan Mahmood](https://aoneahsan.com)
 
 ## 🤝 Support
 
@@ -451,8 +451,8 @@ Give a ⭐️ if this project helped you!
 
 ## Links
 
-- Live: https://www.npmjs.com/package/unified-tracking
-- NPM: https://www.npmjs.com/package/unified-tracking
+- Live: https://npmjs.com/package/unified-tracking
+- NPM: https://npmjs.com/package/unified-tracking
 
 _URL source of truth: `01-code/projects/project-live-urls.json` (auto-generated — do not hand-edit between these markers)._
 
