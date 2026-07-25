@@ -37,7 +37,7 @@ reported and skipped rather than allowed to break your app.
 
 |                  |                                                             |
 | ---------------- | ----------------------------------------------------------- |
-| **Version**      | `3.3.0`                                                     |
+| **Version**      | `3.3.2`                                                     |
 | **License**      | MIT                                                         |
 | **Node**         | `>=24.13.0`                                                 |
 | **Platforms**    | Web · React · Capacitor WebView (iOS · Android)             |
@@ -483,9 +483,7 @@ Yes, with a [custom provider](https://unified-tracking-docs.aoneahsan.com/guides
 <a id="changelog"></a>
 ## 🔄 Changelog&nbsp;[#](#changelog)
 
-Latest release: **`3.3.0`** — adds `flush()`, typed event listeners, and an explicit error when initialised
-outside a browser. Full history:
-[CHANGELOG.md](https://github.com/aoneahsan/unified-tracking/blob/main/CHANGELOG.md).
+Latest release: **`3.3.2`** — documentation only: the at-a-glance table above reported the previous version, because it is a static duplicate of `package.json`. Full history in the changelog.
 
 <a id="roadmap"></a>
 ## 🗺️ Roadmap&nbsp;[#](#roadmap)

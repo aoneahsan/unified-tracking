@@ -1,6 +1,6 @@
 {
   "name": "unified-tracking",
-  "version": "3.3.1",
+  "version": "3.3.2",
   "description": "One analytics and error-tracking API across 16 providers for web, React and Capacitor apps",
   "type": "module",
   "sideEffects": [
