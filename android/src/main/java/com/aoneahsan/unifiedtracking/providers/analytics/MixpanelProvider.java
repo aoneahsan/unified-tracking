@@ -2,14 +2,11 @@ package com.aoneahsan.unifiedtracking.providers.analytics;
 
 import android.content.Context;
 import android.util.Log;
-
-import com.getcapacitor.JSObject;
 import com.aoneahsan.unifiedtracking.providers.AnalyticsProvider;
+import com.getcapacitor.JSObject;
 import com.mixpanel.android.mpmetrics.MixpanelAPI;
-
-import org.json.JSONObject;
-
 import java.util.Map;
+import org.json.JSONObject;
 
 /**
  * Mixpanel analytics provider for Android.
@@ -23,6 +20,7 @@ import java.util.Map;
  * optOutTracking) in Android Studio against the resolved SDK version.
  */
 public class MixpanelProvider implements AnalyticsProvider {
+
     private static final String TAG = "Mixpanel";
     private final Context context;
     private final JSObject config;

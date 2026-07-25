@@ -2,14 +2,12 @@ package com.aoneahsan.unifiedtracking.providers.analytics;
 
 import android.content.Context;
 import android.util.Log;
-
-import com.getcapacitor.JSObject;
-import com.aoneahsan.unifiedtracking.providers.AnalyticsProvider;
 import com.amplitude.android.Amplitude;
 import com.amplitude.android.Configuration;
 import com.amplitude.core.events.Identify;
 import com.amplitude.core.events.Revenue;
-
+import com.aoneahsan.unifiedtracking.providers.AnalyticsProvider;
+import com.getcapacitor.JSObject;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,6 +27,7 @@ import java.util.Map;
  * if the project is still on the legacy SDK the API surface differs.
  */
 public class AmplitudeProvider implements AnalyticsProvider {
+
     private static final String TAG = "Amplitude";
     private final Context context;
     private final JSObject config;

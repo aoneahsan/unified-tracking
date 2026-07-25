@@ -2,15 +2,12 @@ package com.aoneahsan.unifiedtracking.providers.errortracking;
 
 import android.content.Context;
 import android.util.Log;
-
-import com.getcapacitor.JSObject;
 import com.aoneahsan.unifiedtracking.providers.ErrorTrackingProvider;
-
-import java.util.Map;
-
+import com.getcapacitor.JSObject;
 import io.sentry.Sentry;
 import io.sentry.android.core.SentryAndroid;
 import io.sentry.protocol.User;
+import java.util.Map;
 
 /**
  * Sentry error-tracking provider for Android.
@@ -25,6 +22,7 @@ import io.sentry.protocol.User;
  * SDK version.
  */
 public class SentryProvider implements ErrorTrackingProvider {
+
     private static final String TAG = "Sentry";
     private final Context context;
     private final JSObject config;
@@ -48,15 +46,13 @@ public class SentryProvider implements ErrorTrackingProvider {
             final String environment = config.getString("environment", null);
             final String release = config.getString("release", null);
             // tracesSampleRate is a double in the JS config; fall back to 0.0 (errors only).
-            final Double tracesSampleRate = config.has("tracesSampleRate")
-                ? config.getDouble("tracesSampleRate")
-                : null;
+            final Double tracesSampleRate = config.has("tracesSampleRate") ? config.getDouble("tracesSampleRate") : null;
             final boolean debugConfig = config.getBoolean("debug", false);
 
             // NOTE(unverified): SentryAndroid.init(Context, OptionsConfiguration) is the
             // documented Android entry point in SDK 7.x. Confirm the lambda receives
             // SentryAndroidOptions (a subclass of SentryOptions) in Android Studio.
-            SentryAndroid.init(context, options -> {
+            SentryAndroid.init(context, (options) -> {
                 options.setDsn(dsn);
                 if (environment != null && !environment.trim().isEmpty()) {
                     options.setEnvironment(environment);
@@ -104,7 +100,7 @@ public class SentryProvider implements ErrorTrackingProvider {
             // Attach the context map as scope "extras" so it travels with the event,
             // then capture the throwable. configureScope mutates the current scope.
             if (context != null && !context.isEmpty()) {
-                Sentry.configureScope(scope -> {
+                Sentry.configureScope((scope) -> {
                     for (Map.Entry<String, Object> entry : context.entrySet()) {
                         if (entry.getValue() == null) continue;
                         // NOTE(unverified): Scope.setExtra(String, Object) exists in SDK 7.x.

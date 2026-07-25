@@ -2,11 +2,9 @@ package com.aoneahsan.unifiedtracking.providers.errortracking;
 
 import android.content.Context;
 import android.util.Log;
-
-import com.getcapacitor.JSObject;
 import com.aoneahsan.unifiedtracking.providers.ErrorTrackingProvider;
+import com.getcapacitor.JSObject;
 import com.rollbar.android.Rollbar;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,6 +30,7 @@ import java.util.Map;
  * against the resolved SDK version.
  */
 public class RollbarProvider implements ErrorTrackingProvider {
+
     private static final String TAG = "Rollbar";
     private final Context context;
     private final JSObject config;
@@ -99,9 +98,7 @@ public class RollbarProvider implements ErrorTrackingProvider {
             }
 
             // Defensive copy so we never hand the SDK a null custom-data map.
-            Map<String, Object> custom = errorContext != null
-                ? new HashMap<>(errorContext)
-                : new HashMap<>();
+            Map<String, Object> custom = errorContext != null ? new HashMap<>(errorContext) : new HashMap<>();
 
             // NOTE(unverified): Rollbar.error(Throwable, Map<String,Object>, String)
             // is the documented overload (throwable, custom data, description) in

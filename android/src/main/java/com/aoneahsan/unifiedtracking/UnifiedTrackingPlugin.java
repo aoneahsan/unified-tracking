@@ -3,27 +3,24 @@ package com.aoneahsan.unifiedtracking;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
-
+import com.aoneahsan.unifiedtracking.providers.ProviderManager;
+import com.aoneahsan.unifiedtracking.providers.analytics.*;
+import com.aoneahsan.unifiedtracking.providers.errortracking.*;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
-
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
-import com.aoneahsan.unifiedtracking.providers.ProviderManager;
-import com.aoneahsan.unifiedtracking.providers.analytics.*;
-import com.aoneahsan.unifiedtracking.providers.errortracking.*;
-
 @CapacitorPlugin(name = "UnifiedTracking")
 public class UnifiedTrackingPlugin extends Plugin {
+
     private static final String TAG = "UnifiedTracking";
     private ProviderManager providerManager;
     private boolean initialized = false;
@@ -81,15 +78,15 @@ public class UnifiedTrackingPlugin extends Plugin {
     @PluginMethod
     public void track(PluginCall call) {
         if (!ensureInitialized(call)) return;
-        
+
         String event = call.getString("event");
         if (event == null) {
             call.reject("Event name is required");
             return;
         }
-        
+
         JSObject properties = call.getObject("properties", new JSObject());
-        
+
         try {
             Map<String, Object> props = jsObjectToMap(properties);
             providerManager.trackEvent(event, props);
@@ -103,15 +100,15 @@ public class UnifiedTrackingPlugin extends Plugin {
     @PluginMethod
     public void identify(PluginCall call) {
         if (!ensureInitialized(call)) return;
-        
+
         String userId = call.getString("userId");
         if (userId == null) {
             call.reject("User ID is required");
             return;
         }
-        
+
         JSObject traits = call.getObject("traits", new JSObject());
-        
+
         try {
             Map<String, Object> userTraits = jsObjectToMap(traits);
             providerManager.identifyUser(userId, userTraits);
@@ -125,13 +122,13 @@ public class UnifiedTrackingPlugin extends Plugin {
     @PluginMethod
     public void setUserProperties(PluginCall call) {
         if (!ensureInitialized(call)) return;
-        
+
         JSObject properties = call.getObject("properties");
         if (properties == null) {
             call.reject("Properties are required");
             return;
         }
-        
+
         try {
             Map<String, Object> props = jsObjectToMap(properties);
             providerManager.setUserProperties(props);
@@ -145,15 +142,15 @@ public class UnifiedTrackingPlugin extends Plugin {
     @PluginMethod
     public void logError(PluginCall call) {
         if (!ensureInitialized(call)) return;
-        
+
         String error = call.getString("error");
         if (error == null) {
             call.reject("Error message is required");
             return;
         }
-        
+
         JSObject context = call.getObject("context", new JSObject());
-        
+
         try {
             Map<String, Object> errorContext = jsObjectToMap(context);
             Exception exception = new Exception(error);
@@ -168,18 +165,18 @@ public class UnifiedTrackingPlugin extends Plugin {
     @PluginMethod
     public void logRevenue(PluginCall call) {
         if (!ensureInitialized(call)) return;
-        
+
         Double amount = call.getDouble("amount");
         if (amount == null) {
             call.reject("Amount is required");
             return;
         }
-        
+
         String currency = call.getString("currency", "USD");
         String productId = call.getString("productId");
         Integer quantity = call.getInt("quantity", 1);
         JSObject properties = call.getObject("properties", new JSObject());
-        
+
         try {
             Map<String, Object> props = jsObjectToMap(properties);
             providerManager.logRevenue(amount, currency, productId, quantity, props);
@@ -193,15 +190,15 @@ public class UnifiedTrackingPlugin extends Plugin {
     @PluginMethod
     public void logScreenView(PluginCall call) {
         if (!ensureInitialized(call)) return;
-        
+
         String screenName = call.getString("screenName");
         if (screenName == null) {
             call.reject("Screen name is required");
             return;
         }
-        
+
         JSObject properties = call.getObject("properties", new JSObject());
-        
+
         try {
             Map<String, Object> props = jsObjectToMap(properties);
             providerManager.logScreenView(screenName, props);
@@ -219,12 +216,12 @@ public class UnifiedTrackingPlugin extends Plugin {
             call.reject("Consent settings are required");
             return;
         }
-        
+
         try {
             boolean analytics = consent.getBoolean("analytics", true);
             boolean errorTracking = consent.getBoolean("errorTracking", true);
             boolean personalization = consent.getBoolean("personalization", true);
-            
+
             providerManager.setConsent(analytics, errorTracking, personalization);
             call.resolve();
         } catch (Exception e) {
@@ -258,7 +255,7 @@ public class UnifiedTrackingPlugin extends Plugin {
     @PluginMethod
     public void enableDebugMode(PluginCall call) {
         Boolean enabled = call.getBoolean("enabled", false);
-        
+
         try {
             providerManager.setDebugMode(enabled);
             call.resolve();
@@ -343,11 +340,11 @@ public class UnifiedTrackingPlugin extends Plugin {
     private Map<String, Object> jsObjectToMap(JSObject object) throws JSONException {
         Map<String, Object> map = new HashMap<>();
         Iterator<String> keys = object.keys();
-        
+
         while (keys.hasNext()) {
             String key = keys.next();
             Object value = object.get(key);
-            
+
             if (value instanceof JSONObject) {
                 map.put(key, jsObjectToMap(new JSObject((JSONObject) value)));
             } else if (value instanceof JSONArray) {
@@ -356,16 +353,16 @@ public class UnifiedTrackingPlugin extends Plugin {
                 map.put(key, value);
             }
         }
-        
+
         return map;
     }
 
     private Object[] jsonArrayToList(JSONArray array) throws JSONException {
         Object[] list = new Object[array.length()];
-        
+
         for (int i = 0; i < array.length(); i++) {
             Object value = array.get(i);
-            
+
             if (value instanceof JSONObject) {
                 list[i] = jsObjectToMap(new JSObject((JSONObject) value));
             } else if (value instanceof JSONArray) {
@@ -374,7 +371,7 @@ public class UnifiedTrackingPlugin extends Plugin {
                 list[i] = value;
             }
         }
-        
+
         return list;
     }
 }

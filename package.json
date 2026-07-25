@@ -1,11 +1,14 @@
 {
   "name": "unified-tracking",
-  "version": "3.3.0",
-  "description": "Unified analytics and error tracking plugin for React + Capacitor Apps",
+  "version": "3.3.1",
+  "description": "One analytics and error-tracking API across 16 providers for web, React and Capacitor apps",
   "type": "module",
-  "main": "dist/esm/src/index.js",
-  "module": "dist/esm/src/index.js",
-  "types": "dist/esm/src/index.d.ts",
+  "sideEffects": [
+    "./dist/esm/src/providers/**/*.provider.js"
+  ],
+  "main": "./dist/esm/src/index.js",
+  "module": "./dist/esm/src/index.js",
+  "types": "./dist/esm/src/index.d.ts",
   "files": [
     "android/src/main/",
     "android/build.gradle",
@@ -17,10 +20,13 @@
     "Package.swift",
     "UnifiedTracking.podspec",
     "bin/",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
     "AI-INTEGRATION-GUIDE.md"
   ],
   "bin": {
-    "unified-tracking-setup": "./bin/setup.js"
+    "unified-tracking-setup": "./bin/setup.cjs"
   },
   "author": {
     "name": "Ahsan Mahmood",
@@ -28,62 +34,41 @@
     "url": "https://aoneahsan.com"
   },
   "license": "MIT",
-  "repository": "https://github.com/aoneahsan/unified-tracking.git",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aoneahsan/unified-tracking.git"
+  },
   "bugs": {
     "url": "https://github.com/aoneahsan/unified-tracking/issues"
   },
-  "homepage": "https://github.com/aoneahsan/unified-tracking#readme",
-  "funding": {
-    "type": "github",
-    "url": "https://github.com/sponsors/aoneahsan"
-  },
+  "homepage": "https://unified-tracking-docs.aoneahsan.com",
+  "funding": "https://aoneahsan.com/payment?project-id=unified-tracking&project-identifier=unified-tracking",
   "keywords": [
-    "capacitor",
-    "plugin",
-    "native",
     "analytics",
-    "tracking",
     "error-tracking",
-    "unified-analytics",
-    "cross-platform",
+    "capacitor",
     "react",
     "typescript",
-    "firebase",
     "google-analytics",
-    "sentry",
-    "amplitude",
     "mixpanel",
-    "segment",
     "posthog",
-    "heap",
-    "matomo",
-    "bugsnag",
-    "rollbar",
-    "datadog",
-    "logrocket",
-    "raygun",
-    "appcenter",
-    "ios",
-    "android",
-    "web",
-    "mobile-analytics",
-    "crash-reporting",
-    "user-tracking",
-    "event-tracking",
-    "privacy-compliant"
+    "amplitude",
+    "sentry",
+    "consent",
+    "cross-platform"
   ],
   "exports": {
     ".": {
-      "import": "./dist/esm/src/index.js",
-      "types": "./dist/esm/src/index.d.ts"
+      "types": "./dist/esm/src/index.d.ts",
+      "import": "./dist/esm/src/index.js"
     },
     "./react": {
-      "import": "./dist/esm/src/react/index.js",
-      "types": "./dist/esm/src/react/index.d.ts"
+      "types": "./dist/esm/src/react/index.d.ts",
+      "import": "./dist/esm/src/react/index.js"
     },
     "./capacitor": {
-      "import": "./dist/esm/src/capacitor/index.js",
-      "types": "./dist/esm/src/capacitor/index.d.ts"
+      "types": "./dist/esm/src/capacitor/index.d.ts",
+      "import": "./dist/esm/src/capacitor/index.js"
     },
     "./package.json": "./package.json"
   },
@@ -105,7 +90,8 @@
     "dev": "yarn clean && tsc --watch",
     "prepublishOnly": "yarn build",
     "prepack": "yarn build",
-    "type-check": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "type-check": "yarn typecheck",
     "prepare": "husky || true",
     "release": "yarn build && yarn lint && npm publish",
     "release:dry": "yarn build && yarn lint && npm publish --dry-run",
@@ -126,7 +112,6 @@
     }
   },
   "swiftlint": "@ionic/swiftlint-config",
-  "prettier": "@ionic/prettier-config",
   "engines": {
     "node": ">=24.13.0"
   },

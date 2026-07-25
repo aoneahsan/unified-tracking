@@ -2,13 +2,12 @@ package com.aoneahsan.unifiedtracking.providers.errortracking;
 
 import android.content.Context;
 import android.util.Log;
-
-import com.getcapacitor.JSObject;
 import com.aoneahsan.unifiedtracking.providers.ErrorTrackingProvider;
-
+import com.getcapacitor.JSObject;
 import java.util.Map;
 
 public class CrashlyticsProvider implements ErrorTrackingProvider {
+
     private static final String TAG = "Crashlytics";
     private Context context;
     private JSObject config;
@@ -21,7 +20,7 @@ public class CrashlyticsProvider implements ErrorTrackingProvider {
         this.config = config;
         this.enabled = config.getBoolean("enabled", true);
         this.initialized = true;
-        
+
         if (debugMode) {
             Log.d(TAG, "Firebase Crashlytics provider initialized (stub)");
         }
@@ -45,7 +44,7 @@ public class CrashlyticsProvider implements ErrorTrackingProvider {
     @Override
     public void logError(Exception error, Map<String, Object> context) {
         if (!enabled || !initialized) return;
-        
+
         if (debugMode) {
             Log.d(TAG, "logError called with error: " + error.getMessage() + ", context: " + context);
         }
@@ -54,7 +53,7 @@ public class CrashlyticsProvider implements ErrorTrackingProvider {
     @Override
     public void setUserContext(String userId, Map<String, Object> properties) {
         if (!enabled || !initialized) return;
-        
+
         if (debugMode) {
             Log.d(TAG, "setUserContext called with userId: " + userId + ", properties: " + properties);
         }
@@ -63,7 +62,7 @@ public class CrashlyticsProvider implements ErrorTrackingProvider {
     @Override
     public void setConsent(boolean granted) {
         if (!initialized) return;
-        
+
         this.enabled = granted;
         if (debugMode) {
             Log.d(TAG, "setConsent called with granted: " + granted);
@@ -73,7 +72,7 @@ public class CrashlyticsProvider implements ErrorTrackingProvider {
     @Override
     public void reset() {
         if (!initialized) return;
-        
+
         if (debugMode) {
             Log.d(TAG, "reset called");
         }

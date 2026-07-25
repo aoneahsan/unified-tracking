@@ -3,14 +3,13 @@ package com.aoneahsan.unifiedtracking.providers.analytics;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
-
+import com.aoneahsan.unifiedtracking.providers.AnalyticsProvider;
 import com.getcapacitor.JSObject;
 import com.google.firebase.analytics.FirebaseAnalytics;
-import com.aoneahsan.unifiedtracking.providers.AnalyticsProvider;
-
 import java.util.Map;
 
 public class FirebaseAnalyticsProvider implements AnalyticsProvider {
+
     private static final String TAG = "FirebaseAnalytics";
     private FirebaseAnalytics analytics;
     private boolean enabled;
@@ -64,11 +63,11 @@ public class FirebaseAnalyticsProvider implements AnalyticsProvider {
     @Override
     public void trackEvent(String event, Map<String, Object> properties) {
         if (!enabled || !initialized) return;
-        
+
         try {
             Bundle bundle = mapToBundle(properties);
             analytics.logEvent(sanitizeEventName(event), bundle);
-            
+
             if (debugMode) {
                 Log.d(TAG, "Tracked event: " + event);
             }
@@ -87,8 +86,7 @@ public class FirebaseAnalyticsProvider implements AnalyticsProvider {
             if (traits != null) {
                 for (Map.Entry<String, Object> entry : traits.entrySet()) {
                     if (entry.getValue() == null) continue;
-                    analytics.setUserProperty(sanitizePropertyName(entry.getKey()),
-                                             sanitizeUserPropertyValue(entry.getValue()));
+                    analytics.setUserProperty(sanitizePropertyName(entry.getKey()), sanitizeUserPropertyValue(entry.getValue()));
                 }
             }
 
@@ -107,8 +105,7 @@ public class FirebaseAnalyticsProvider implements AnalyticsProvider {
         try {
             for (Map.Entry<String, Object> entry : properties.entrySet()) {
                 if (entry.getValue() == null) continue;
-                analytics.setUserProperty(sanitizePropertyName(entry.getKey()),
-                                         sanitizeUserPropertyValue(entry.getValue()));
+                analytics.setUserProperty(sanitizePropertyName(entry.getKey()), sanitizeUserPropertyValue(entry.getValue()));
             }
 
             if (debugMode) {
@@ -122,26 +119,26 @@ public class FirebaseAnalyticsProvider implements AnalyticsProvider {
     @Override
     public void logRevenue(double amount, String currency, String productId, int quantity, Map<String, Object> properties) {
         if (!enabled || !initialized) return;
-        
+
         try {
             Bundle bundle = new Bundle();
             bundle.putDouble(FirebaseAnalytics.Param.VALUE, amount);
             bundle.putString(FirebaseAnalytics.Param.CURRENCY, currency);
-            
+
             if (productId != null) {
                 bundle.putString(FirebaseAnalytics.Param.ITEM_ID, productId);
             }
-            
+
             bundle.putLong(FirebaseAnalytics.Param.QUANTITY, quantity);
-            
+
             if (properties != null) {
                 for (Map.Entry<String, Object> entry : properties.entrySet()) {
                     addToBundle(bundle, entry.getKey(), entry.getValue());
                 }
             }
-            
+
             analytics.logEvent(FirebaseAnalytics.Event.PURCHASE, bundle);
-            
+
             if (debugMode) {
                 Log.d(TAG, "Logged revenue: " + amount + " " + currency);
             }
@@ -153,20 +150,20 @@ public class FirebaseAnalyticsProvider implements AnalyticsProvider {
     @Override
     public void logScreenView(String screenName, Map<String, Object> properties) {
         if (!enabled || !initialized) return;
-        
+
         try {
             Bundle bundle = new Bundle();
             bundle.putString(FirebaseAnalytics.Param.SCREEN_NAME, screenName);
             bundle.putString(FirebaseAnalytics.Param.SCREEN_CLASS, screenName);
-            
+
             if (properties != null) {
                 for (Map.Entry<String, Object> entry : properties.entrySet()) {
                     addToBundle(bundle, entry.getKey(), entry.getValue());
                 }
             }
-            
+
             analytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW, bundle);
-            
+
             if (debugMode) {
                 Log.d(TAG, "Logged screen view: " + screenName);
             }
@@ -178,11 +175,11 @@ public class FirebaseAnalyticsProvider implements AnalyticsProvider {
     @Override
     public void setConsent(boolean granted) {
         if (!initialized) return;
-        
+
         try {
             analytics.setAnalyticsCollectionEnabled(granted);
             this.enabled = granted;
-            
+
             if (debugMode) {
                 Log.d(TAG, "Set consent: " + granted);
             }
@@ -194,10 +191,10 @@ public class FirebaseAnalyticsProvider implements AnalyticsProvider {
     @Override
     public void reset() {
         if (!initialized) return;
-        
+
         try {
             analytics.resetAnalyticsData();
-            
+
             if (debugMode) {
                 Log.d(TAG, "Reset analytics data");
             }
@@ -213,19 +210,19 @@ public class FirebaseAnalyticsProvider implements AnalyticsProvider {
 
     private Bundle mapToBundle(Map<String, Object> map) {
         Bundle bundle = new Bundle();
-        
+
         if (map != null) {
             for (Map.Entry<String, Object> entry : map.entrySet()) {
                 addToBundle(bundle, entry.getKey(), entry.getValue());
             }
         }
-        
+
         return bundle;
     }
 
     private void addToBundle(Bundle bundle, String key, Object value) {
         String sanitizedKey = sanitizePropertyName(key);
-        
+
         if (value instanceof String) {
             bundle.putString(sanitizedKey, (String) value);
         } else if (value instanceof Integer) {

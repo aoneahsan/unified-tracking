@@ -2,13 +2,12 @@ package com.aoneahsan.unifiedtracking.providers.analytics;
 
 import android.content.Context;
 import android.util.Log;
-
-import com.getcapacitor.JSObject;
 import com.aoneahsan.unifiedtracking.providers.AnalyticsProvider;
-
+import com.getcapacitor.JSObject;
 import java.util.Map;
 
 public class GoogleAnalyticsProvider implements AnalyticsProvider {
+
     private static final String TAG = "GoogleAnalytics";
     private Context context;
     private JSObject config;
@@ -21,7 +20,7 @@ public class GoogleAnalyticsProvider implements AnalyticsProvider {
         this.config = config;
         this.enabled = config.getBoolean("enabled", true);
         this.initialized = true;
-        
+
         if (debugMode) {
             Log.d(TAG, "Google Analytics provider initialized (stub)");
         }
@@ -45,7 +44,7 @@ public class GoogleAnalyticsProvider implements AnalyticsProvider {
     @Override
     public void trackEvent(String event, Map<String, Object> properties) {
         if (!enabled || !initialized) return;
-        
+
         if (debugMode) {
             Log.d(TAG, "trackEvent called with event: " + event + ", properties: " + properties);
         }
@@ -54,7 +53,7 @@ public class GoogleAnalyticsProvider implements AnalyticsProvider {
     @Override
     public void identifyUser(String userId, Map<String, Object> traits) {
         if (!enabled || !initialized) return;
-        
+
         if (debugMode) {
             Log.d(TAG, "identifyUser called with userId: " + userId + ", traits: " + traits);
         }
@@ -63,7 +62,7 @@ public class GoogleAnalyticsProvider implements AnalyticsProvider {
     @Override
     public void setUserProperties(Map<String, Object> properties) {
         if (!enabled || !initialized) return;
-        
+
         if (debugMode) {
             Log.d(TAG, "setUserProperties called with properties: " + properties);
         }
@@ -72,17 +71,28 @@ public class GoogleAnalyticsProvider implements AnalyticsProvider {
     @Override
     public void logRevenue(double amount, String currency, String productId, int quantity, Map<String, Object> properties) {
         if (!enabled || !initialized) return;
-        
+
         if (debugMode) {
-            Log.d(TAG, "logRevenue called with amount: " + amount + ", currency: " + currency + 
-                  ", productId: " + productId + ", quantity: " + quantity + ", properties: " + properties);
+            Log.d(
+                TAG,
+                "logRevenue called with amount: " +
+                    amount +
+                    ", currency: " +
+                    currency +
+                    ", productId: " +
+                    productId +
+                    ", quantity: " +
+                    quantity +
+                    ", properties: " +
+                    properties
+            );
         }
     }
 
     @Override
     public void logScreenView(String screenName, Map<String, Object> properties) {
         if (!enabled || !initialized) return;
-        
+
         if (debugMode) {
             Log.d(TAG, "logScreenView called with screenName: " + screenName + ", properties: " + properties);
         }
@@ -91,7 +101,7 @@ public class GoogleAnalyticsProvider implements AnalyticsProvider {
     @Override
     public void setConsent(boolean granted) {
         if (!initialized) return;
-        
+
         this.enabled = granted;
         if (debugMode) {
             Log.d(TAG, "setConsent called with granted: " + granted);
@@ -101,7 +111,7 @@ public class GoogleAnalyticsProvider implements AnalyticsProvider {
     @Override
     public void reset() {
         if (!initialized) return;
-        
+
         if (debugMode) {
             Log.d(TAG, "reset called");
         }

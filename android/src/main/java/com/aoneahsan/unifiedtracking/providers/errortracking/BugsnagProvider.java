@@ -2,12 +2,10 @@ package com.aoneahsan.unifiedtracking.providers.errortracking;
 
 import android.content.Context;
 import android.util.Log;
-
-import com.getcapacitor.JSObject;
 import com.aoneahsan.unifiedtracking.providers.ErrorTrackingProvider;
 import com.bugsnag.android.Bugsnag;
 import com.bugsnag.android.Configuration;
-
+import com.getcapacitor.JSObject;
 import java.util.Map;
 
 /**
@@ -23,6 +21,7 @@ import java.util.Map;
  * Studio against the resolved SDK version.
  */
 public class BugsnagProvider implements ErrorTrackingProvider {
+
     private static final String TAG = "Bugsnag";
     private final Context context;
     private final JSObject config;
@@ -101,7 +100,7 @@ public class BugsnagProvider implements ErrorTrackingProvider {
             // map as metadata under the "context" section.
             if (errorContext != null && !errorContext.isEmpty()) {
                 final Map<String, Object> finalContext = errorContext;
-                Bugsnag.notify(error, event -> {
+                Bugsnag.notify(error, (event) -> {
                     try {
                         for (Map.Entry<String, Object> entry : finalContext.entrySet()) {
                             if (entry.getKey() == null || entry.getValue() == null) continue;

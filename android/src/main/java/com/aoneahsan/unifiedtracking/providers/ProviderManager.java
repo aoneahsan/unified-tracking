@@ -2,15 +2,14 @@ package com.aoneahsan.unifiedtracking.providers;
 
 import android.content.Context;
 import android.util.Log;
-
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class ProviderManager {
+
     private static final String TAG = "ProviderManager";
     private final Context context;
     private final List<AnalyticsProvider> analyticsProviders;
@@ -121,7 +120,7 @@ public class ProviderManager {
                 Log.e(TAG, "Failed to set consent for " + provider.getName(), e);
             }
         }
-        
+
         for (ErrorTrackingProvider provider : errorTrackingProviders) {
             try {
                 provider.setConsent(errorTracking);
@@ -139,7 +138,7 @@ public class ProviderManager {
                 Log.e(TAG, "Failed to reset " + provider.getName(), e);
             }
         }
-        
+
         for (ErrorTrackingProvider provider : errorTrackingProviders) {
             try {
                 provider.reset();
@@ -178,7 +177,7 @@ public class ProviderManager {
 
     public void setDebugMode(boolean enabled) {
         this.debugMode = enabled;
-        
+
         for (AnalyticsProvider provider : analyticsProviders) {
             try {
                 provider.setDebugMode(enabled);
@@ -186,7 +185,7 @@ public class ProviderManager {
                 Log.e(TAG, "Failed to set debug mode for " + provider.getName(), e);
             }
         }
-        
+
         for (ErrorTrackingProvider provider : errorTrackingProviders) {
             try {
                 provider.setDebugMode(enabled);

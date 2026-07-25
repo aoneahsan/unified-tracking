@@ -5,7 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [3.3.1] - 2026-07-25
+
+### 🐛 Fixed
+
+- **`unified-tracking-setup` CLI was broken in every 3.x release.** `bin/setup.js` is CommonJS, but `"type": "module"` makes Node parse a `.js` file as ESM, so the command died immediately with `ReferenceError: require is not defined in ES module scope` on every invocation. Renamed to `bin/setup.cjs` and repointed the `bin` map. **The command name `unified-tracking-setup` is unchanged**, so nothing a consumer types changes.
+- **`CHANGELOG.md` was missing from the published tarball.** npm auto-includes `README`/`LICENSE` but _not_ the changelog, and the `files` allowlist did not name it — so no installed copy of the package had any release history. Added to `files` (with `README.md` and `LICENSE` named explicitly alongside it).
+- **`funding` pointed at GitHub Sponsors**, which is not a supported channel. Now the standard support link.
+- **`yarn lint` could never pass.** The package carried both a `prettier` key in `package.json` (`@ionic/prettier-config`) and a `.prettierrc` registering `prettier-plugin-java`. The `package.json` key wins prettier's resolution order, so `.prettierrc` was dead config: the Java plugin never loaded and every `android/**/*.java` file failed with `No parser could be inferred`. Consolidated into a single `prettier.config.mjs` that extends the Ionic config and registers the plugin; the 13 Java sources are now formatted (import order and lambda parens only — no semantic change).
+
+### 🔧 Changed
+
+- **`sideEffects` declared honestly.** Provider modules self-register with the registry as an import-time side effect, so a blanket `false` would let a bundler drop a configured provider from a consumer's production build. Declared as an array scoping the side effect to `providers/**/*.provider.js`, which keeps tree-shaking for everything else.
+- **`exports` condition order corrected** to `types` before `import`, so TypeScript resolves the declarations for every subpath.
+- **Metadata brought to the house contract** — `repository` in object form with a `git+` URL, `homepage` pointing at the documentation site, a one-line `description` matching the README tagline, and `keywords` reduced from 34 to 12 real search terms.
+- **`README.md` renamed from `Readme.md`.** A `files` entry naming `README.md` resolves on macOS and misses on a case-sensitive filesystem.
+- **README rewritten to the canonical package pattern** — and corrected: it documented `import { UnifiedTracking } from 'unified-tracking/capacitor'`, a symbol that subpath does not export (it exports `registerCapacitorPlugin` and `UnifiedTrackingCapacitorPlugin`). It also now states the ESM-only constraint, the CDN/CSP requirement, and the boundary of the privacy controls.
+- **`typecheck` added as the canonical script name**; `type-check` kept as an alias.
+
+### 🗑️ Removed
+
+- **`IMPLEMENTATION_COMPLETE.md`, `RELEASE_READY.md`, `VALIDATION_COMPLETE.md`** — banner status files whose claims ("100% complete", "Native Android implementation (Java)" complete) contradicted this changelog's own statement that the native bridges are unverified scaffolding. The repository is public; inaccurate status banners are not documentation.
 
 ### 🚧 Native iOS/Android SDK bridges (on-branch, unverified — NOT yet published)
 

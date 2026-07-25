@@ -3,13 +3,11 @@ package com.aoneahsan.unifiedtracking.providers.analytics;
 import android.app.Application;
 import android.content.Context;
 import android.util.Log;
-
-import com.getcapacitor.JSObject;
 import com.aoneahsan.unifiedtracking.providers.AnalyticsProvider;
+import com.getcapacitor.JSObject;
 import com.segment.analytics.Analytics;
 import com.segment.analytics.Properties;
 import com.segment.analytics.Traits;
-
 import java.util.Map;
 
 /**
@@ -27,6 +25,7 @@ import java.util.Map;
  * in Android Studio against the resolved SDK version.
  */
 public class SegmentProvider implements AnalyticsProvider {
+
     private static final String TAG = "Segment";
     private final Context context;
     private final JSObject config;

@@ -1,0 +1,17 @@
+# Build output and dependencies
+dist/
+node_modules/
+.yarn/
+yarn.lock
+
+# Internal agent/maintainer records, not package source and not published.
+# These are hand-maintained (aligned tables, deliberate line breaks) and are excluded
+# from the format gate on purpose — reformatting them with the mdx parser is churn.
+CLAUDE.md
+AGENTS.md
+**/CLAUDE.md
+**/AGENTS.md
+*portfolio-info*.md
+
+# Example app has its own toolchain
+examples/
