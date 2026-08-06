@@ -3,7 +3,7 @@
 **Package Name**: `unified-tracking`
 **Version**: `3.3.0`
 **NPM**: `https://www.npmjs.com/package/unified-tracking`
-**Last Updated**: `2026-06-24`
+**Last Updated**: `2026-08-06`
 
 Unified analytics and error tracking infrastructure for React, web, and Capacitor apps with provider-based integrations, consent controls, React hooks, and cross-platform delivery targets.
 
@@ -14,25 +14,47 @@ Unified analytics and error tracking infrastructure for React, web, and Capacito
 - **Trackers:** `docs/project-finalization/00-tracker.json` (gapInventory + phases). Owner-only work in **`docs/MANUAL-TASKS.md`** (native build-verify, npm publish, docs deploy + DNS, search-engine submission).
 - **Verify gates (green 2026-06-24):** `yarn type-check`, `yarn build`, `yarn eslint` all exit 0. `yarn prettier --check` still fails only on `.java` native files (pre-existing parser gap).
 
-## Gitignore Hygiene (IRON-SOLID)
+## Global + workspace rules — pointers, never copies
 
-`.gitignore` stays current with the project structure — ignore only recoverable artifacts (build/`dist`/`www`/`node_modules`/logs/caches/IDE), never lose source. Custom rules always present: `*.ignore.*`, `project-record-ignore/`. This is a **PRIVATE** repo -> `.env`/secrets/keystores ARE tracked in git.
-Full rule + private/public protocol: `~/.claude/rules/project-config.md`.
-Gitignore Last Verified: 2026-06-24
+Fleet law lives in ONE place and auto-loads into every session from `~/.claude/rules/`. Restating it here is
+how a copy drifts and then contradicts its source — and it is charged to the context budget of every session
+opened in this project. **Never paste a global rule into this file. Add the pointer.**
 
-## Task Speed Over Docs (IRON-SOLID — BEHAVIORAL)
+| Concern | Where the law lives |
+|---|---|
+| RULE #0 skills gate · model workflow · the sub-agent ban | `~/.claude/CLAUDE.md` · `rules/skill-bindings.md` · `rules/subagent-orchestration.md` |
+| Understand before editing · where a decision gets recorded | `rules/project-understanding.md` |
+| Packages: nvm → npm (global) → yarn (local) · `ncu` upgrades · version blockers | `rules/package-management.md` · `rules/package-version-known-issues.md` |
+| Git: one commit per prompt · auto commit/push/deploy scope | `rules/git-workflow.md` |
+| `.gitignore` · `.env` · secrets · dev ports · docs layout · sitemap + feed | `rules/project-config.md` |
+| Gates · logger · clean build · **source maps off** · test policy | `rules/build-test-quality.md` |
+| Dev/preview servers · run-to-verify · one project at a time | `rules/dev-workflow.md` |
+| Zero-cost constraint | `rules/zero-cost.md` |
+| Data-fetch budget — every list read is limited | `rules/data-fetch-budget.md` |
+| UI floors · the one theme control · the platform admin panel | `rules/frontend-ui-standards.md` |
+| Share contract · push (OneSignal) · SEO + AEO | `rules/share-feature.md` · `rules/push-notifications.md` · `rules/seo-aeo-ranking.md` |
+| Capacitor plugins + native issues | `rules/capacitor-plugins-and-issues.md` |
+| Store listings · versioning · npm publish · rejection rules | `rules/publishing-compliance.md` · `~/.claude/policy/` |
+| Portfolio info + social content | `rules/portfolio-and-social.md` |
+| Docs brevity + fixed paths · manual tasks · feature trackers | `rules/manual-tasks.md` · `rules/feature-trackers.md` |
+| This file's own budget — ≤ 28,672 B, auto-loads every session | `rules/context-budget.md` |
 
-Finish the real task fast + correctly FIRST; docs/trackers/sync are a footnote (≤~20% of effort) — never let recording outpace the fix. HARD STOP when doc work outpaces the change → ship, then ONE line if anything. No new summary/status/completion files unless asked; edit/delete over add; delete stale docs. Full rule: `~/.claude/CLAUDE.md`. (Est. 2026-06-19)
+**This project's own rules and implementation records** — everything that is *not* fleet law — live in
+[`docs/PROJECT-RULES.md`](./docs/PROJECT-RULES.md).
 
-## Package Manager Hierarchy: nvm → npm (global) → yarn (local) (IRON-SOLID)
+**Project-specific values for those global rules:**
 
-Three tiers, each tool ONLY for its tier — for the best, most reproducible dev results:
+| Global rule | This project's value |
+|---|---|
+| `.gitignore` + `.env` | PRIVATE repo → `.env`/secrets ARE tracked in git; `*.ignore.*` and `project-record-ignore/` always ignored; native source tracked, build artifacts (`Pods/`, `.gradle/`, `build/`, `DerivedData/`) ignored. **Gitignore Last Verified: 2026-06-24** |
+| Packages | `yarn` for ALL local work — only `yarn.lock`. `ncu` last applied 2026-06-05 (detail in "Current Verified State" below) |
+| Source maps off | this package builds with **`tsc`** (NodeNext), so the enforcing flags are `tsconfig.json` → `"sourceMap": false`, `"inlineSourceMap": false`, `"declarationMap": false`. No `.map` file ships |
+| Gates | `yarn type-check` · `yarn build` · `yarn eslint` (no test suite — removed 2026-06-03; do NOT re-add) |
 
-- **`nvm`** → install/update Node.js (which bundles `npm`): `nvm install --lts`. Use nvm to get/update `npm` itself.
-- **`npm`** → ALL global packages: `npm install -g yarn` (install yarn globally if missing) + `npm install -g <pkg>` (every other global CLI).
-- **`yarn`** → ALL local project work: `yarn`, `yarn add <pkg>`, `yarn add -D <pkg>` inside the project.
+## Project rules — moved to docs/
 
-❌ NEVER use `npm`/`pnpm` for LOCAL installs. NEVER use `pnpm` at all. ✅ Only `yarn.lock` in the project — delete `package-lock.json` and `pnpm-lock.yaml`.
+- **CLAUDE.md + AGENTS.md Sync Rule (IRON-SOLID)** → [`docs/PROJECT-RULES.md`](./docs/PROJECT-RULES.md)
+- **Portfolio Info File — Weekly Update Rule** → [`docs/PROJECT-RULES.md`](./docs/PROJECT-RULES.md)
 
 ## Current Verified State
 
@@ -45,15 +67,6 @@ Three tiers, each tool ONLY for its tier — for the best, most reproducible dev
 - Tests: **automated test suite REMOVED 2026-06-03** (commit `4bddbd6` "remove cypress and all automated-testing infrastructure", per the global testing-removal policy). There is no Vitest/Jest suite to run anymore; the package is verified via typecheck + build + eslint. Do NOT re-add test packages.
 - Round 03 (3.3.0) completed the deferred polish: unified `flush()`, typed event listeners, Firebase/Amplitude now extend `BaseAnalyticsProvider` (M7), single SSR guard, public-surface `any`→`unknown` (L11), `getProviderManager` deprecated, and the `bin/setup.js` config-shape rework. Round 02 (3.2.0) fixed 2 CRITICAL + 8 HIGH + 11 MEDIUM (see `docs/features/polish-audit-release/round02-findings.md`).
 - STILL DEFERRED (separate effort): native iOS/Android SDK bridges — require a native toolchain (Xcode/Gradle) + real vendor SDK deps + device/simulator build verification not available in this environment. Tracking runs via the web layer (incl. the Capacitor WebView).
-
-## CLAUDE.md + AGENTS.md Sync Rule (IRON-SOLID)
-
-**Every important rule MUST exist in BOTH `CLAUDE.md` AND `AGENTS.md` at each level.**
-
-- When adding or updating a rule in one file, ALWAYS update the other
-- This applies to root and ALL nested files in every folder
-- Never add a rule to just `CLAUDE.md` or just `AGENTS.md` — always both
-- Create reasonable nested `CLAUDE.md` and `AGENTS.md` files in all important folders where rules will improve development results
 
 ## CLAUDE.md + AGENTS.md Update Frequency (IRON-SOLID)
 
@@ -114,19 +127,6 @@ Three tiers, each tool ONLY for its tier — for the best, most reproducible dev
 - Document known build or test issues honestly until fixed.
 - When providers, exports, or operational status change, update `Readme.md`, this file, and the portfolio file in the same pass.
 - Build: **tsc** (NodeNext module resolution; the orphan Rollup step + deps were removed in 3.2.0). Lint: **ESLint + Prettier**.
-
-## Portfolio Info File — Weekly Update Rule
-
-- Canonical portfolio info file: `/home/ahsan/Documents/ahsan-notebook/static/assets/personal/projects-info-as-portfolio-item/packages/UNIFIED-TRACKING_portfolio-info_<YYYY-MM-DD>.md`
-- Update at least once per week (and on any material change). Keep the last-updated date in the filename.
-- Keep a max-10-entry update history inside the file. On each refresh: prepend today's row, delete the previous dated file, write the new one.
-- Tracker: `/home/ahsan/Documents/01-code/docs/tracking/portfolio-info-files-update-tracker.json`
-- Last applied: 2026-06-05
-- Note: a now-stale in-repo copy (`UNIFIED-TRACKING_portfolio-info_2026-05-27.md`) predates the move to the canonical ahsan-notebook location; the ahsan-notebook file is authoritative.
-
-## Package Upgrades: Use `npm-check-updates`
-
-For dependency upgrades use `npx -y npm-check-updates -u && yarn install` (latest STABLE), NOT `yarn upgrade --latest`. Full rule in global `~/.claude/CLAUDE.md`. Last applied: 2026-06-05
 
 ## Nested Instruction Files
 
@@ -192,43 +192,4 @@ _URL source of truth: `01-code/projects/project-live-urls.json` (auto-generated 
 
 <!-- project-links:end -->
 
-## Source maps — disabled by default — RULE
-Never generate source maps for this project unless the owner (aoneahsan) explicitly requests them.
-Production / build / published output must ship WITHOUT source maps — no `.map` files and no
-`//# sourceMappingURL` in shipped assets.
-
-- **Vite**: `build.sourcemap: false` in `vite.config.*`.
-- **Rollup**: `output.sourcemap: false` on every output.
-- **Webpack**: production `devtool: false` (dev-only inline maps for local debugging are allowed).
-- **tsup**: `sourcemap: false`.
-- **tsconfig** (library / `tsc` builds): `"sourceMap": false`, `"inlineSourceMap": false`, `"declarationMap": false`.
-
-Dev-only inline source maps for local debugging are fine; never emit source maps in production / published
-output. Do NOT re-enable production source maps or delete these settings. Only the owner, by an explicit
-request, may turn production source maps on (e.g. a one-off Sentry upload).
-
-
-## Sub-agents & Skills — Main-Context-First (IRON-SOLID)
-Default/built-in sub-agents (`general-purpose`, `Explore`, `Plan`, `claude`, `fork`, …) do NOT have
-access to `/skills`, so delegating to them silently SKIPS the skills RULE #0 requires. Do all
-skill-relevant work in the **MAIN context**; use a sub-agent ONLY when a **custom** agent exists in
-`.claude/agents/` for that job; a default `Explore`/`Plan` agent is allowed ONLY for read-only,
-no-skill search/exploration. When a relevant skill is missing, **install/enable it** rather than
-proceeding skill-less. (Owner directive 2026-07-11; full text in `~/.claude/CLAUDE.md`.)
-
 <!-- RULE:main-context-model-workflow v2026-07-16 -->
-## Main-Context + Skills + Model Workflow (IRON-SOLID — CRITICAL)
-1. **NO default/built-in sub-agents** (`general-purpose`, `Explore`, `Plan`, `claude`, `fork`, …) for ANY work in
-   this project — they cannot invoke /skills, which RULE #0 makes mandatory. Do ALL work (planning, implementation,
-   review, exploration) in the MAIN context. A sub-agent is allowed ONLY when a CUSTOM agent exists in
-   `.claude/agents/` for that exact job.
-2. **Skills always:** before any task, scan the available-skills list and invoke EVERY relevant skill; if a needed
-   skill is missing, download/enable/install it (or use the nearest installed equivalent and say so) — never
-   proceed skill-less.
-3. **Model workflow:** PLAN and REVIEW on **Fable 5**; EXECUTE the approved plan on **Opus 4.8**. Plans in
-   `~/.claude/plans/`; multi-phase features keep a resumable tracker (`docs/features/<slug>/00-tracker.json`),
-   resumed rather than re-planned from zero.
-
-Global records (rules, policy, audit reports) live in the `ahsan-notebook` repo at
-`static/assets/claude-code/`; the `~/.claude/…` paths are symlinks into it. Full text: `~/.claude/CLAUDE.md`.
-(Owner directives 2026-07-11 / 2026-07-14; fleet-rolled 2026-07-16.)
