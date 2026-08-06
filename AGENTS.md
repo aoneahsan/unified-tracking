@@ -81,15 +81,6 @@ Web (browser) + Capacitor WebView (iOS/Android). Native-SDK delivery: planned, n
 - If any file is >3 days stale, update it BEFORE proceeding with other work
 - Every file must have a `Last Updated` date field
 
-## Claude Code Agents (MANDATORY - IRON-SOLID)
-
-**For EVERY prompt and task, Claude Code MUST use agents (Task tool) to deliver the best possible experience.**
-
-- Use **Explore agent** for codebase search, file discovery, understanding architecture
-- Use **Plan agent** for implementation planning, architecture decisions
-- Use **general-purpose agent** for complex multi-step tasks, parallel processing
-- Launch multiple agents in parallel when tasks are independent
-
 ## Agent Responsibilities
 
 | Agent           | Role                                                                     |

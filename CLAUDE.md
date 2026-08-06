@@ -77,17 +77,6 @@ opened in this project. **Never paste a global rule into this file. Add the poin
 - Stale instruction files directly degrade development quality
 - Every file must have a `Last Updated` date field
 
-## Claude Code Agents (MANDATORY - IRON-SOLID)
-
-**For EVERY prompt and task, Claude Code MUST use agents (Task tool) to deliver the best possible experience.**
-
-- Use **Explore agent** for codebase search, file discovery, understanding architecture
-- Use **Plan agent** for implementation planning, architecture decisions
-- Use **general-purpose agent** for complex multi-step tasks, parallel processing
-- Launch multiple agents in parallel when tasks are independent
-- Use Explore agent before making changes to unfamiliar code
-- Use Plan agent before implementing non-trivial features
-
 ## Implemented Feature Areas
 
 | Area                     | Scope                                                                                                                                             |
