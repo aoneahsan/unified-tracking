@@ -35,6 +35,7 @@ opened in this project. **Never paste a global rule into this file. Add the poin
 | Portfolio info + social content | `rules/portfolio-and-social.md` |
 | Docs brevity + fixed paths · manual tasks · feature trackers | `rules/manual-tasks.md` · `rules/feature-trackers.md` |
 | This file's own budget — ≤ 28,672 B, auto-loads every session | `rules/context-budget.md` |
+| **Context Budget Last Verified** | **2026-08-06** — CLAUDE.md 21,890 B / PENDING-TASKS.md 450 B; re-check due **2026-08-16**, cadence 10d (`rules/context-budget.md`) |
 
 **This project's own rules and implementation records** — everything that is *not* fleet law — live in
 [`docs/PROJECT-RULES.md`](./docs/PROJECT-RULES.md).
