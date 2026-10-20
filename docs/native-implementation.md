@@ -1,6 +1,6 @@
 # Native Implementation Status
 
-> **Honest status (read this first):** `unified-tracking` is **web-first**. All tracking is delivered by the web/JS layer, which runs in the browser **and inside the Capacitor WebView on iOS/Android** — so all providers work on devices through the WebView. The native (Swift/Kotlin) provider classes in `ios/` and `android/` are **scaffolding/stubs, not yet wired**. Do not rely on native-SDK delivery yet.
+> **Current status:** `unified-tracking` is **web-first**. Tracking is verified through the web/JS layer in browsers and inside the Capacitor WebView. Package `3.3.2` includes Swift and Android source, but native SDK delivery is unverified and unsupported until both platform builds and device checks pass.
 
 ## What exists today
 
@@ -29,5 +29,5 @@ Native SDK bridges (registering `ios`/`android` implementations and wiring each 
 
 ## See also
 
-- [`Readme.md`](../Readme.md) — provider matrix and the web delivery model.
+- [`README.md`](../README.md) — provider matrix and the web delivery model.
 - [`ios-static-framework-fix.md`](./ios-static-framework-fix.md) — iOS build note for the plugin scaffolding.

@@ -3,7 +3,7 @@
 The per-project dependency inventory required by the fleet packages rule. Keep it accurate on **every** add,
 remove or upgrade.
 
-**Last Updated:** 2026-07-25
+**Last Updated:** 2026-10-20
 
 ## package.json units
 

@@ -60,10 +60,17 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
-# Environment
-# PRIVATE repo — .env / secrets ARE tracked in git (owner's standing rule).
-# Real env files stay tracked; only generated/template noise stays ignored.
-# (.env.example / .env.sample / .env.template remain tracked as-is.)
+# Environment and credentials (this repository is public)
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+*.pem
+*.key
+*.p12
+*.pfx
+*service-account*.json
 
 # Temporary files
 tmp/
@@ -106,3 +113,4 @@ www/
 # Custom ignore rules (owner standard)
 *.ignore.*
 project-record-ignore/
+.claude/settings.local.json

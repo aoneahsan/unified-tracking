@@ -1567,7 +1567,7 @@ __metadata:
     react:
       optional: true
   bin:
-    unified-tracking-setup: ./bin/setup.js
+    unified-tracking-setup: ./bin/setup.cjs
   languageName: unknown
   linkType: soft
 

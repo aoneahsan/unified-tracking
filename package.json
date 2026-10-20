@@ -115,6 +115,7 @@
   "engines": {
     "node": ">=24.13.0"
   },
+  "packageManager": "yarn@4.17.1",
   "peerDependencies": {
     "@capacitor/core": "^7.4.3 || ^8.0.0",
     "react": ">=19.0.0"
